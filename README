@@ -1,8 +1,9 @@
 AudioQs ReadMe.
 
-Read lines 11 to 20 to quick start.
+Read lines 12 to 21 to quick start.
 
-This AddOn is intended for visually impaired WoW players.
+AudioQs is intended for visually impaired WoW players.
+AudioQs provides methods for writing complex audio prompts, with timings, delays and conditionals, prompt restarters and segment repeaters.
 
 It is not easy for most users to implement extensions onto this addon, because it has no user interface. 
 A programmer will need to understand the data structure of the extensions to be able to write prompts. An example is shown in the Extensions\BeastMastery.lua file.
