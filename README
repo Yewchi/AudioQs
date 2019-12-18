@@ -1,0 +1,32 @@
+AudioQs ReadMe.
+
+Read lines 11 to 20 to quick start.
+
+This AddOn is intended for visually impaired WoW players.
+
+It is not easy for most users to implement extensions onto this addon, because it has no user interface. 
+A programmer will need to understand the data structure of the extensions to be able to write prompts. An example is shown in the Extensions\BeastMastery.lua file.
+If you need specific extensions made, and you are visually impaired. You can make specific requests to me and I will get back to you asap. Please email me at zyewchi@gmail.com
+
+Examples:
+How to load an extension -- type these commands in chat:
+
+/aq load HealthMonitor
+will load the health monitor for healers extension into the current spec played.
+
+/aq load BeastMastery
+will load the beast mastery cooldowns and frenzy tracker into the current spec.
+
+Capital letters do not matter.
+
+Extensions are listed in the Extensions folder.
+
+Why not use Weak Auras instead?
+AudioQs is a hub for me to update blind-assist extensions as requested.
+
+Please use Weak Auras for simple prompts if you prefer; you are not blind and you are familiar with WeakAuras; or somebody assisting you is familiar with WeakAuras. A simple prompt can be made with one trigger and a PlaySound condition in a WeakAura
+
+AudioQs answers the problem of efficiency with complexity, but requires a dedicated LUA code writer, and AudioQs developer. These are hand-crafted for audio prompts. And have optimisations for situations where delays and timings are needed around PlaySound calls.
+If, and only if, a programmer is familiar with the AudioQs system, it should be less work to write complex audio prompts in this system, than to write custom-coded weak auras.
+
+That said, AudioQs is light-weight and can be extended to implement any complex prompting system, and some additional extras have been provied (/aq load killingblow).

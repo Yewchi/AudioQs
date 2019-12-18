@@ -1,0 +1,24 @@
+## Interface: 80205
+## Title: AudioQs
+## Notes: Audio alerts for health, cooldowns, charges and buffs
+## Author: Yewchi
+## Version: 1.1.3
+## SavedVariables: SV_Specializations
+AudioQs.lua
+Specialization.lua
+Prompts.lua
+GameStateInterface.lua
+Util.lua
+ExtensionsInterface.lua
+Extensions\Extras.lua
+Extensions\HealthMonitor.lua
+Extensions\GPS.lua
+Extensions\KillingBlow.lua
+Extensions\BeastMastery.lua
+Extensions\RestorationDruid.lua
+Extensions\Mistweaver.lua
+Extensions\HolyPaladin.lua
+Extensions\RestorationShaman.lua
+Extensions\ClassicDruid.lua
+Extensions\ClassicPriest.lua
+Extensions\ClassicPaladin.lua
