@@ -233,7 +233,6 @@ Frame_CustomEvents:SetScript("OnEvent",
 	function(_, event, ...)
 		if not FreshEventForFrame(event) then return end
 
-		AQ.ProcessCustomEventForPrompts(event, ...)
 		--print("Event starting ProcessCustomEventForPrompts() is "..event)
 		local success, err = pcall(AQ.ProcessCustomEventForPrompts, event, ...)
 		if not success then AQ.HandleError(err, "CustomEventsOnEvent()", "AQ.ProcessCustomEventForPrompts()") end
