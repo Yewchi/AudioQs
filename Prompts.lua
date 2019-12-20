@@ -17,6 +17,8 @@ AQ.PROMPTSEG_CONDITIONAL_REPEATER =						0xFFF3
 AQ.PROMPTSEG_CONDITIONAL_RESTART =						0xFFF4
 
 AQ.PROMPTSEG_SOUND_STOP =								0xEFF0
+
+AQ.STOP_SOUND_DISALLOWED =								false
 --
 ------ /Flags --
 
@@ -176,13 +178,19 @@ end
 local function StopAllSegmentsSounds(segmentsArray)
 	for n=SEGT_FIRST,#segmentsArray,1 do
 		local soundHandle = segmentsArray[n][PROMPTSEG_HANDLE]
-		if soundHandle ~= nil then
+		if type(soundHandle) == "number" then
 			StopSound(soundHandle)
 			segmentsArray[n][PROMPTSEG_HANDLE] = nil
 		end
 	end
 end
 
+-------------- SetSegmentSoundHandle()
+local function SetSegmentSoundHandle(segment, handle)
+	if segment[PROMPTSEG_HANDLE] ~= AQ.STOP_SOUND_DISALLOWED then
+		segment[PROMPTSEG_HANDLE] = handle
+	end
+end
 -------------- CheckStopSegments()
 local function CheckStopSegments(segmentsArray, prompt, allowContinuationOfPlay, forceStop)
 	if prompt[PROMPT_CURR_STAGE] < SEGT_FIRST then
@@ -318,7 +326,7 @@ function AQ.AttemptStartPrompt(id, runCheckPrompts)
 			thisSegmentsPrompt[PROMPT_TIMESTAMP] = GetTime()
 			thisSegmentsPrompt[PROMPT_CURR_STAGE] = startingSegment
 			 
-			thisSegments[startingSegment][PROMPTSEG_HANDLE] = PlaySoundGetHandle(thisSegments[startingSegment])
+			SetSegmentSoundHandle(thisSegments[startingSegment], PlaySoundGetHandle(thisSegments[startingSegment])) -- Play sound of this segment
 		else
 			CheckStopSegments(thisSegments, thisSegmentsPrompt, false)
 		end
@@ -387,7 +395,7 @@ PromptTicker = function()
 						if segmentSound == AQ.PROMPTSEG_SOUND_STOP then
 							StopAllSegmentsSounds(thisSegments)
 						else  -- TODO: elseif segmentSound ~= nil ??
-							nextSegment[PROMPTSEG_HANDLE] = PlaySoundGetHandle(nextSegment)
+							SetSegmentSoundHandle(nextSegment, PlaySoundGetHandle(nextSegment)) -- Play this segment sound
 						end
 						
 						promptsTable[promptsTableIndex][PROMPT_TIMESTAMP] = currTime
