@@ -13,7 +13,7 @@ gameState.KB_LockRefilter = 0
 local KILLING_BLOW_SOUND_FILE = AQ.SOUND_PATH_PREFIX..AQ.SOUNDS_ROOT.."tribal_kill.ogg"
 
 -- PLAYER KILLS ONLY - Change 'true' to 'false' to allow all killing blows to trigger sound
-local PVP_KILLS_ONLY = false
+local PVP_KILLS_ONLY = true
 
 AQ.KB_GENERIC_KILLED_SEARCH_KEY = (not AQ.WOW_CLASSIC and "You.+killed" or UnitName("player")..".-slain")
 local MAX_COMBATLOG_BUFFER_SEARCH = 30

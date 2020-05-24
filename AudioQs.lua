@@ -186,6 +186,7 @@ if AQ.DEBUG then print(AQ.audioQsSpecifier..AQ.debugSpecifier.."Turning off Audi
 		UnregisterEvents()
 	end
 end	
+
 if not AQ.WOW_CLASSIC then Frame_LoadOrSpecChange:RegisterEvent("PLAYER_SPECIALIZATION_CHANGED") end
 --Frame_LoadOrSpecChange:RegisterEvent("PLAYER_LOGIN") -- TODO: Was this just naive, or some weird interaction?
 Frame_LoadOrSpecChange:RegisterEvent("PLAYER_ENTERING_WORLD")

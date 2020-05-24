@@ -1,8 +1,8 @@
-## Interface: 80205
+## Interface: 80300
 ## Title: AudioQs
-## Notes: Audio alerts for health, cooldowns, charges and buffs
+## Notes: Custom audio prompts and blind assist.
 ## Author: Yewchi
-## Version: 1.1.3
+## Version: 1.1.5
 ## SavedVariables: SV_Specializations
 AudioQs.lua
 Specialization.lua
@@ -11,6 +11,7 @@ GameStateInterface.lua
 Util.lua
 ExtensionsInterface.lua
 Extensions\Extras.lua
+Extensions\ManaMonitor.lua
 Extensions\HealthMonitor.lua
 Extensions\GPS.lua
 Extensions\KillingBlow.lua

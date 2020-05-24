@@ -63,18 +63,12 @@ local extSegments = {
 			{nil,		AQ.SOUND_PATH_PREFIX..AQ.SOUNDS_ROOT.."Cooldowns/adaptation.ogg",		nil,	true }
 		}
 	},
-	["UNIT_POWER_UPDATE"] = {
-	}
 }
 --
 -- /Spell Tables and Rules
 
 --- Funcs --
 --
-function AQ.Extras_CheckMana()
-
-end
-
 GetName = function()
 	return extName
 end

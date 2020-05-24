@@ -515,7 +515,7 @@ end
 
 function AQ.HealthMonitor_CheckMode(event)
 	local instanceName, instanceType = GetInstanceInfo()
-		
+	
 	if AQ.GS.HM_initialized ~= true then
 		AQ.GS.HM_ALERT_UNIT_NUM = 1
 		AQ.GS.HM_ALERT_HP_PERCENTAGE = 2
@@ -698,6 +698,8 @@ end
 
 function AQ.HealthMonitor_CheckModePvP()
 	local instanceName, instanceType, _, _, _, _, _, instanceId = GetInstanceInfo()
+	
+if AQ.VERBOSE then print(AQ.audioQsSpecifier..AQ.debugSpecifier.."Checking PvP Mode. name =", instanceName, "; instanceType =", instanceType, "; winner =", GetBattlefieldWinner(), ";") end
     
     if AQ.GS.HM_instanceCompletedOrNotBg == true then
         if AQ.GS.HM_instanceId == instanceId then

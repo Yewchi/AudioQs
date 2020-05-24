@@ -23,6 +23,9 @@ local SpecAllowed
 local GPS_gpsSpecifier = "|cff55B589<GPS>|r "
 GPS_CompassButtonFrame = nil
 
+local GPS_CompassKeybindHandlerFrame = "AQ_GPS_COMPASS_KEYBIND_HANDLER"
+local GPS_CompassKeybindHandlerFrameBindingAction = "CLICK "..GPS_CompassKeybindHandlerFrame..":LeftButton"
+
 
 -- TODO - This implies an "unload" function is desirable when unloading extensions (to remove AQcompass macro).
 local extFuncs = {
@@ -38,10 +41,10 @@ local extFuncs = {
 		["Initialize"] = function() 
 			AQ.GS.GPS_PlayerAliveStatus = (UnitIsDeadOrGhost("player") and AQ.GS.GPS_PLAYER_DEAD or AQ.GS.GPS_PLAYER_LIVING) 
 
-			if GetBindingAction("ALT-CTRL-SHIFT-C") ~= "" then
+			if GetBindingAction("ALT-CTRL-SHIFT-C") ~= "" and GetBindingAction("ALT-CTRL-SHIFT-C") ~= GPS_CompassKeybindHandlerFrameBindingAction then
 				print(AQ.audioQsSpecifier..GPS_gpsSpecifier.."Default keybind not loaded because ALT-CTRL-SHIFT-C already bound.")
 			else -- Set keybind and button frame for compass (triggered via UPDATE_MACRO event)
-				GPS_CompassButtonFrame = CreateFrame("BUTTON", "AQ_GPS_COMPASS_KEYBIND_HANDLER")
+				GPS_CompassButtonFrame = CreateFrame("BUTTON", GPS_CompassKeybindHandlerFrame)
 				SetBindingClick("ALT-CTRL-SHIFT-C", GPS_CompassButtonFrame:GetName())
 				GPS_CompassButtonFrame:SetScript("OnClick", function() -- Raises event (allows a hook into the prompting system, for cleaner audio handling/stop sound functionality)
 					AQ.GS.GPS_GetFacingUnhandled = true -- Turned off in segment conditional if this caused the UPDATE_MACRO
