@@ -4,7 +4,7 @@
 local extName = "RestorationDruid"
 local extNameDetailed = "Restoration Druid"
 local extShortNames = "rd"
-local extSpecLimit = AQ.ANY_SPEC_ALLOWED -- TODO ExtensionsInterface needs update here
+local extSpecLimit = AUDIOQS.ANY_SPEC_ALLOWED -- TODO ExtensionsInterface needs update here
 
 -- Functions predeclared
 local GetName
@@ -34,22 +34,22 @@ local extFuncs = {
 --
 -- spells[spellId] = { "Spell Name", charges, cdDur, cdExpiration, unitId, spellType, badSpell}
 local extSpells = { 
-		[22812] = 	{ "Barkskin", 			0, 	0, 	0, 	"player", 	AQ.SPELL_TYPE_ABILITY}, -- TODO 'Bad spell' needs to be removed, too many spells need the tracking.
-		[102351] = 	{ "Cenarion Ward", 		0, 	0, 	0, 	"player", 	AQ.SPELL_TYPE_ABILITY},
-		[1850] = 	{ "Dash", 				0, 	0, 	0, 	"player", 	AQ.SPELL_TYPE_ABILITY},
-		[29166] = 	{ "Innervate", 			0, 	0, 	0, 	"player", 	AQ.SPELL_TYPE_ABILITY},
-		[102342] = 	{ "Ironbark", 			0, 	0, 	0, 	"player", 	AQ.SPELL_TYPE_ABILITY},
-		[102359] = 	{ "Mass Entanglement",	0,	0, 	0, 	"player", 	AQ.SPELL_TYPE_ABILITY},
-		[5211] = 	{ "Mighty Bash", 		0, 	0, 	0, 	"player", 	AQ.SPELL_TYPE_ABILITY},
-		[20484] = 	{ "Rebirth", 			0, 	0, 	0, 	"player", 	AQ.SPELL_TYPE_ABILITY},
-		[108238] = 	{ "Renewal", 			0, 	0, 	0, 	"player", 	AQ.SPELL_TYPE_ABILITY},
-		[18562] = 	{ "Swiftmend", 			0, 	0, 	0, 	"player", 	AQ.SPELL_TYPE_ABILITY},
-		[740] = 	{ "Traquility", 		0, 	0, 	0, 	"player", 	AQ.SPELL_TYPE_ABILITY},
-		[33891] = 	{ "Tree of Life", 		0, 	0, 	0, 	"player", 	AQ.SPELL_TYPE_ABILITY},
-		[132469] = 	{ "Typhoon", 			0, 	0, 	0, 	"player", 	AQ.SPELL_TYPE_ABILITY},
-		[102793] = 	{ "Ursol's Vortex",		0,	0,	0,	"player",	AQ.SPELL_TYPE_ABILITY},
-		[102401] = 	{ "Wild Charge", 		0, 	0, 	0, 	"player", 	AQ.SPELL_TYPE_ABILITY},
-		[48438] = 	{ "Wild Growth", 		0, 	0, 	0, 	"player", 	AQ.SPELL_TYPE_ABILITY}
+		[22812] = 	{ "Barkskin", 			0, 	0, 	0, 	"player", 	AUDIOQS.SPELL_TYPE_ABILITY}, -- TODO 'Bad spell' needs to be removed, too many spells need the tracking.
+		[102351] = 	{ "Cenarion Ward", 		0, 	0, 	0, 	"player", 	AUDIOQS.SPELL_TYPE_ABILITY},
+		[1850] = 	{ "Dash", 				0, 	0, 	0, 	"player", 	AUDIOQS.SPELL_TYPE_ABILITY},
+		[29166] = 	{ "Innervate", 			0, 	0, 	0, 	"player", 	AUDIOQS.SPELL_TYPE_ABILITY},
+		[102342] = 	{ "Ironbark", 			0, 	0, 	0, 	"player", 	AUDIOQS.SPELL_TYPE_ABILITY},
+		[102359] = 	{ "Mass Entanglement",	0,	0, 	0, 	"player", 	AUDIOQS.SPELL_TYPE_ABILITY},
+		[5211] = 	{ "Mighty Bash", 		0, 	0, 	0, 	"player", 	AUDIOQS.SPELL_TYPE_ABILITY},
+		[20484] = 	{ "Rebirth", 			0, 	0, 	0, 	"player", 	AUDIOQS.SPELL_TYPE_ABILITY},
+		[108238] = 	{ "Renewal", 			0, 	0, 	0, 	"player", 	AUDIOQS.SPELL_TYPE_ABILITY},
+		[18562] = 	{ "Swiftmend", 			0, 	0, 	0, 	"player", 	AUDIOQS.SPELL_TYPE_ABILITY},
+		[740] = 	{ "Traquility", 		0, 	0, 	0, 	"player", 	AUDIOQS.SPELL_TYPE_ABILITY},
+		[33891] = 	{ "Tree of Life", 		0, 	0, 	0, 	"player", 	AUDIOQS.SPELL_TYPE_ABILITY},
+		[132469] = 	{ "Typhoon", 			0, 	0, 	0, 	"player", 	AUDIOQS.SPELL_TYPE_ABILITY},
+		[102793] = 	{ "Ursol's Vortex",		0,	0,	0,	"player",	AUDIOQS.SPELL_TYPE_ABILITY},
+		[102401] = 	{ "Wild Charge", 		0, 	0, 	0, 	"player", 	AUDIOQS.SPELL_TYPE_ABILITY},
+		[48438] = 	{ "Wild Growth", 		0, 	0, 	0, 	"player", 	AUDIOQS.SPELL_TYPE_ABILITY}
 }
 
 -- events["EVENT_NAME"] = eventArgsArray (automatically generated)
@@ -62,161 +62,161 @@ local extSegments = {
 	[22812] = {
 		{
 			{
-				"return AQ.spells[22812][AQ.SPELL_EXPIRATION] == 0 and AQ.spellsSnapshot[22812][AQ.SPELL_EXPIRATION] > 0",
+				"return AUDIOQS.spells[22812][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[22812][AUDIOQS.SPELL_EXPIRATION] > 0",
 				false
 			},
-			{nil,		AQ.SOUND_PATH_PREFIX..AQ.SOUNDS_ROOT.."Cooldowns/barkskin.ogg",		nil,	true }
+			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/barkskin.ogg",		nil,	true }
 		}
 	},
 	[102351] = 	{
 		{
 			{
-				"return AQ.spells[102351][AQ.SPELL_EXPIRATION] == 0 and AQ.spellsSnapshot[102351][AQ.SPELL_EXPIRATION] > 0",
+				"return AUDIOQS.spells[102351][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[102351][AUDIOQS.SPELL_EXPIRATION] > 0",
 				false
 			},
-			{nil,		AQ.SOUND_PATH_PREFIX..AQ.SOUNDS_ROOT.."Cooldowns/cenarion_ward.ogg",		nil,	true }
+			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/cenarion_ward.ogg",		nil,	true }
 		}
 	},
 	[1850] = 	{
 		{
 			{
-				"return AQ.spells[1850][AQ.SPELL_EXPIRATION] == 0 and AQ.spellsSnapshot[1850][AQ.SPELL_EXPIRATION] > 0",
+				"return AUDIOQS.spells[1850][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[1850][AUDIOQS.SPELL_EXPIRATION] > 0",
 				false
 			},
-			{nil,		AQ.SOUND_PATH_PREFIX..AQ.SOUNDS_ROOT.."Cooldowns/dash.ogg",		nil,	true }
+			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/dash.ogg",		nil,	true }
 		}
 	},
 	[29166] = 	{
 		{
 			{
-				"return AQ.spells[29166][AQ.SPELL_EXPIRATION] == 0 and AQ.spellsSnapshot[29166][AQ.SPELL_EXPIRATION] > 0",
+				"return AUDIOQS.spells[29166][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[29166][AUDIOQS.SPELL_EXPIRATION] > 0",
 				false
 			},
-			{nil,		AQ.SOUND_PATH_PREFIX..AQ.SOUNDS_ROOT.."Cooldowns/innervate.ogg",		nil,	true }
+			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/innervate.ogg",		nil,	true }
 		}
 	},
 	[102342] = 	{
 		{
 			{
-				"return AQ.spells[102342][AQ.SPELL_EXPIRATION] == 0 and AQ.spellsSnapshot[102342][AQ.SPELL_EXPIRATION] > 0",
+				"return AUDIOQS.spells[102342][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[102342][AUDIOQS.SPELL_EXPIRATION] > 0",
 				false
 			},
-			{nil,		AQ.SOUND_PATH_PREFIX..AQ.SOUNDS_ROOT.."Cooldowns/ironbark.ogg",		nil,	true }
+			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/ironbark.ogg",		nil,	true }
 		}
 	},
 	[102359] = 	{
 		{
 			{
-				"return AQ.spells[102359][AQ.SPELL_EXPIRATION] == 0 and AQ.spellsSnapshot[102359][AQ.SPELL_EXPIRATION] > 0",
+				"return AUDIOQS.spells[102359][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[102359][AUDIOQS.SPELL_EXPIRATION] > 0",
 				false
 			},
-			{nil,		AQ.SOUND_PATH_PREFIX..AQ.SOUNDS_ROOT.."Cooldowns/mass_entanglement.ogg",		nil,	true }
+			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/mass_entanglement.ogg",		nil,	true }
 		}
 	},
 	[5211] = 	{
 		{
 			{
-				"return AQ.spells[5211][AQ.SPELL_EXPIRATION] == 0 and AQ.spellsSnapshot[5211][AQ.SPELL_EXPIRATION] > 0",
+				"return AUDIOQS.spells[5211][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[5211][AUDIOQS.SPELL_EXPIRATION] > 0",
 				false
 			},
-			{nil,		AQ.SOUND_PATH_PREFIX..AQ.SOUNDS_ROOT.."Cooldowns/mighty_bash.ogg",		nil,	true }
+			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/mighty_bash.ogg",		nil,	true }
 		}
 	},
 	[20484] = 	{
 		{
 			{
-				"return AQ.spells[20484][AQ.SPELL_EXPIRATION] == 0 and AQ.spellsSnapshot[20484][AQ.SPELL_EXPIRATION] > 0",
+				"return AUDIOQS.spells[20484][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[20484][AUDIOQS.SPELL_EXPIRATION] > 0",
 				false
 			},
-			{nil,		AQ.SOUND_PATH_PREFIX..AQ.SOUNDS_ROOT.."Cooldowns/rebirth.ogg",		nil,	true }
+			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/rebirth.ogg",		nil,	true }
 		}
 	},
 	[108238] = 	{
 		{
 			{
-				"return AQ.spells[108238][AQ.SPELL_EXPIRATION] == 0 and AQ.spellsSnapshot[108238][AQ.SPELL_EXPIRATION] > 0",
+				"return AUDIOQS.spells[108238][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[108238][AUDIOQS.SPELL_EXPIRATION] > 0",
 				false
 			},
-			{nil,		AQ.SOUND_PATH_PREFIX..AQ.SOUNDS_ROOT.."Cooldowns/renewal.ogg",		nil,	true }
+			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/renewal.ogg",		nil,	true }
 		}
 	},
 	[18562] = 	{
 		{
 			{
-				"if AQ. ChargeCooldownsAllowed~= nil and AQ.ChargeCooldownsAllowed then local charges = GetSpellCharges(18562) return (AQ.spells[18562][AQ.SPELL_EXPIRATION] == 0 and AQ.spellsSnapshot[18562][AQ.SPELL_EXPIRATION] > 0) or (charges ~= nil and charges > AQ.spellsSnapshot[18562][AQ.SPELL_CHARGES]) end return false",
+				"if AUDIOQS. ChargeCooldownsAllowed~= nil and AUDIOQS.ChargeCooldownsAllowed then local charges = GetSpellCharges(18562) return (AUDIOQS.spells[18562][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[18562][AUDIOQS.SPELL_EXPIRATION] > 0) or (charges ~= nil and charges > AUDIOQS.spellsSnapshot[18562][AUDIOQS.SPELL_CHARGES]) end return false",
 				false
 			},
-			{nil,		AQ.SOUND_PATH_PREFIX..AQ.SOUNDS_ROOT.."Cooldowns/swiftmend.ogg",		nil,	true }
+			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/swiftmend.ogg",		nil,	true }
 		}
 	},
 	[740] = 	{
 		{
 			{
-				"return AQ.spells[740][AQ.SPELL_EXPIRATION] == 0 and AQ.spellsSnapshot[740][AQ.SPELL_EXPIRATION] > 0",
+				"return AUDIOQS.spells[740][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[740][AUDIOQS.SPELL_EXPIRATION] > 0",
 				false
 			},
-			{nil,		AQ.SOUND_PATH_PREFIX..AQ.SOUNDS_ROOT.."Cooldowns/tranquility.ogg",		nil,	true }
+			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/tranquility.ogg",		nil,	true }
 		}
 	},	
 	[33891] = 	{
 		{
 			{
-				"return AQ.spells[33891][AQ.SPELL_EXPIRATION] == 0 and AQ.spellsSnapshot[33891][AQ.SPELL_EXPIRATION] > 0",
+				"return AUDIOQS.spells[33891][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[33891][AUDIOQS.SPELL_EXPIRATION] > 0",
 				false
 			},
-			{nil,		AQ.SOUND_PATH_PREFIX..AQ.SOUNDS_ROOT.."Cooldowns/tree_of_life.ogg",		nil,	true }
+			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/tree_of_life.ogg",		nil,	true }
 		}
 	},
 	[132469] = 	{
 		{
 			{
-				"return AQ.spells[132469][AQ.SPELL_EXPIRATION] == 0 and AQ.spellsSnapshot[132469][AQ.SPELL_EXPIRATION] > 0",
+				"return AUDIOQS.spells[132469][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[132469][AUDIOQS.SPELL_EXPIRATION] > 0",
 				false
 			},
-			{nil,		AQ.SOUND_PATH_PREFIX..AQ.SOUNDS_ROOT.."Cooldowns/typhoon.ogg",		nil,	true }
+			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/typhoon.ogg",		nil,	true }
 		}
 	},
 	[102793] = 	{
 		{
 			{
-				"return AQ.spells[102793][AQ.SPELL_EXPIRATION] == 0 and AQ.spellsSnapshot[102793][AQ.SPELL_EXPIRATION] > 0",
+				"return AUDIOQS.spells[102793][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[102793][AUDIOQS.SPELL_EXPIRATION] > 0",
 				false
 			},
-			{nil,		AQ.SOUND_PATH_PREFIX..AQ.SOUNDS_ROOT.."Cooldowns/ursols_vortex.ogg",		nil,	true }
+			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/ursols_vortex.ogg",		nil,	true }
 		}
 	},
 	[102401] = 	{
 		{
 			{
-				"return AQ.spells[102401][AQ.SPELL_EXPIRATION] == 0 and AQ.spellsSnapshot[102401][AQ.SPELL_EXPIRATION] > 0",
+				"return AUDIOQS.spells[102401][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[102401][AUDIOQS.SPELL_EXPIRATION] > 0",
 				false
 			},
-			{nil,		AQ.SOUND_PATH_PREFIX..AQ.SOUNDS_ROOT.."Cooldowns/wild_charge.ogg",		nil,	true }
+			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/wild_charge.ogg",		nil,	true }
 		}
 	},
 	[48438] = 	{
 		{
 			{
-				"return AQ.spells[48438][AQ.SPELL_EXPIRATION] == 0 and AQ.spellsSnapshot[48438][AQ.SPELL_EXPIRATION] > 0",
+				"return AUDIOQS.spells[48438][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[48438][AUDIOQS.SPELL_EXPIRATION] > 0",
 				false
 			},
-			{nil,		AQ.SOUND_PATH_PREFIX..AQ.SOUNDS_ROOT.."Cooldowns/wild_growth.ogg",		nil,	true }
+			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/wild_growth.ogg",		nil,	true }
 		}
 	},
 	["LOADING_SCREEN_DISABLED"] = { -- TODO Should be in an "essentials", hidden extension or in the AudioQs.lua main event handlers. Workaround for now.
 		{
 			{
-				"AQ.ChargeCooldownsAllowed = false return true",
+				"AUDIOQS.ChargeCooldownsAllowed = false return true",
 				false
 			},
 			{0.25, 	nil, nil, true},
-			{nil,	nil, nil, "AQ.ChargeCooldownsAllowed = true return true"}
+			{nil,	nil, nil, "AUDIOQS.ChargeCooldownsAllowed = true return true"}
 		}
 	},
 	["LOADING_SCREEN_ENABLED"] = { -- TODO Likewise ^^
 		{
 			{
-				"AQ.ChargeCooldownsAllowed = false return false",
+				"AUDIOQS.ChargeCooldownsAllowed = false return false",
 				false
 			},
 			{}
@@ -261,7 +261,7 @@ GetExtension = function()
 end
 
 SpecAllowed = function(specId)
-	if extSpecLimit == AQ.ANY_SPEC_ALLOWED or extSpecLimit == specId then
+	if extSpecLimit == AUDIOQS.ANY_SPEC_ALLOWED or extSpecLimit == specId then
 		return true
 	end
 	return false
@@ -270,4 +270,4 @@ end
 -- /Funcs --
 
 -- Register Extension:
-AQ.RegisterExtension(extName, extFuncs)
+AUDIOQS.RegisterExtension(extName, extFuncs)

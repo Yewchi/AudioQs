@@ -2,74 +2,77 @@
 -- Thanks to Slyckety and others for helping with test. Couldn't do this without the help!
 -- zyewchi@gmail.com
 
-AQ = {}
+AUDIOQS = {}
 
-AQ.DEBUG = false
-AQ.VERBOSE = AQ.DEBUG and true
+AUDIOQS.DEBUG = false
+AUDIOQS.VERBOSE = AUDIOQS.DEBUG and false
 
-AQ.WOW_CLASSIC = (select(4, GetBuildInfo()) < 20000) -- Can this be more broadly determined?
+AUDIOQS.WOW_CLASSIC = (select(4, GetBuildInfo()) < 20000) -- Can this be more broadly determined?
+AUDIOQS.WOW_SHADOWLANDS = (select(4, GetBuildInfo()) >= 90000) -- To be removed after expac rollover -- TODO CTRL+F WOW_SHADOWLANDS
+
+AUDIOQS.COMPAT_UNIT_HEALTH_FREQ = (AUDIOQS.WOW_SHADOWLANDS and "UNIT_HEALTH" or "UNIT_HEALTH_FREQUENT")
 
 --- Initialization --
 --
 ------- Filenames --
 --
-AQ.AUDIOQS_ROOT = 		"Interface/AddOns/AudioQs/"
-AQ.SOUNDS_ROOT = 		AQ.AUDIOQS_ROOT.."Sounds/"
+AUDIOQS.AUDIOQS_ROOT = 		"Interface/AddOns/AudioQs/"
+AUDIOQS.SOUNDS_ROOT = 		AUDIOQS.AUDIOQS_ROOT.."Sounds/"
 --
 ------ /Filenames --
 
 ------- Flags --
 --
-AQ.SPELL_TYPE_ABILITY = 								0xFFF0 -- Type of a spell which is to be checked
-AQ.SPELL_TYPE_AURA = 									0xFFF1
+AUDIOQS.SPELL_TYPE_ABILITY = 								0xFFF0 -- Type of a spell which is to be checked
+AUDIOQS.SPELL_TYPE_AURA = 									0xFFF1
 
-AQ.SPEC_NOT_IMPLEMENTED =								0xFFFF -- Nothing exists in AudioQs.lua WTF file
+AUDIOQS.SPEC_NOT_IMPLEMENTED =								0xFFFF -- Nothing exists in AudioQs.lua WTF file
 
-AQ.ANY_SPEC_ALLOWED =									0xFFF0 -- For loading Extensions
-AQ.ONE_SPEC_ALLOWED = 									0xFFF1
+AUDIOQS.ANY_SPEC_ALLOWED =									0xFFF0 -- For loading Extensions
+AUDIOQS.ONE_SPEC_ALLOWED = 									0xFFF1
 --
 ------ /Flags --
 
 ------- Table key references --
 --
-AQ.SPELL_SPELL_NAME = 1
-AQ.SPELL_CHARGES = 2
-AQ.SPELL_DURATION = 3
-AQ.SPELL_EXPIRATION = 4
-AQ.SPELL_UNIT_ID = 5
-AQ.SPELL_SPELL_TYPE = 6
+AUDIOQS.SPELL_SPELL_NAME = 1
+AUDIOQS.SPELL_CHARGES = 2
+AUDIOQS.SPELL_DURATION = 3
+AUDIOQS.SPELL_EXPIRATION = 4
+AUDIOQS.SPELL_UNIT_ID = 5
+AUDIOQS.SPELL_SPELL_TYPE = 6
 
-AQ.UNIT_AURA_NAME = 1
-AQ.UNIT_AURA_COUNT = 3
-AQ.UNIT_AURA_DEBUFF_TYPE = 4
-AQ.UNIT_AURA_DURATION = 5
-AQ.UNIT_AURA_EXPIRATION = 6
-AQ.UNIT_AURA_UNIT_ID = 7
-AQ.UNIT_AURA_SPELL_ID = 10
-AQ.UNIT_AURA_TIME_MOD = 15 -- always = 1. For prelim confirmation of a valid aura
+AUDIOQS.UNIT_AURA_NAME = 1
+AUDIOQS.UNIT_AURA_COUNT = 3
+AUDIOQS.UNIT_AURA_DEBUFF_TYPE = 4
+AUDIOQS.UNIT_AURA_DURATION = 5
+AUDIOQS.UNIT_AURA_EXPIRATION = 6
+AUDIOQS.UNIT_AURA_UNIT_ID = 7
+AUDIOQS.UNIT_AURA_SPELL_ID = 10
+AUDIOQS.UNIT_AURA_TIME_MOD = 15 -- always = 1. For prelim confirmation of a valid aura
 
-AQ.SPEC_INFO_NUM = 1
-AQ.SPEC_INFO_NAME = 2
-AQ.UNIT_CLASS_NUM = 3
+AUDIOQS.SPEC_INFO_NUM = 1
+AUDIOQS.SPEC_INFO_NAME = 2
+AUDIOQS.UNIT_CLASS_NUM = 3
 
-AQ.CLC_PLAYERLOCATION_NAME = 1
-AQ.CLC_PLAYERLOCATION_CLASS_ID = 3
+AUDIOQS.CLC_PLAYERLOCATION_NAME = 1
+AUDIOQS.CLC_PLAYERLOCATION_CLASS_ID = 3
 --
 ------ /Table key references --
 
 ------- Static vals --
 --
-AQ.PLAYER_GUID = UnitGUID("player")
-AQ.SPELLID_GCD = 61304
-AQ.HUSHMODE_OFF = 									0x0
-AQ.HUSHMODE_USER = 									0xFFF0
-AQ.HUSHMODE_LOADINGSCREEN = 						0xFFF1
+AUDIOQS.PLAYER_GUID = UnitGUID("player")
+AUDIOQS.SPELLID_GCD = 61304
+AUDIOQS.HUSHMODE_OFF = 									0x0
+AUDIOQS.HUSHMODE_USER = 									0xFFF0
+AUDIOQS.HUSHMODE_LOADINGSCREEN = 						0xFFF1
 --
 ------- /Static vals --
 
 ------- Return values --
 --
-AQ.SPELLS_SPELL_NOT_LISTED = 							0xFFF0
+AUDIOQS.SPELLS_SPELL_NOT_LISTED = 							0xFFF0
 --
 ------ /Return values --
 
@@ -79,7 +82,7 @@ local customEventFrameTimestamp = 0
 local customEventsRegisteredThisFrame = {}
 
 local specId = nil
-AQ.hushMode = AQ.HUSHMODE_OFF
+AUDIOQS.hushMode = AUDIOQS.HUSHMODE_OFF
 local prevHushMode
 --
 ------ /AddOn variables --
@@ -108,7 +111,7 @@ local function FreshEventForFrame(event)
 	return false
 end
 
-function AQ.ReregisterEvents()
+function AUDIOQS.ReregisterEvents()
 	UpdateSpecializationInfo(nil, nil, "reregister")
 end
 --
@@ -132,8 +135,8 @@ local function UnregisterEvents()
 	Frame_CombatLog:UnregisterAllEvents()
 	Frame_SpellUpdateCooldown:UnregisterAllEvents()
 	Frame_UnitAura:UnregisterAllEvents()
-	AQ.GSI_UnregisterCustomEvents(Frame_CustomEvents)
-if AQ.DEBUG then print(AQ.audioQsSpecifier..AQ.debugSpecifier.."Prompt tracking disabled.") end
+	AUDIOQS.GSI_UnregisterCustomEvents(Frame_CustomEvents)
+if AUDIOQS.DEBUG then print(AUDIOQS.audioQsSpecifier..AUDIOQS.debugSpecifier.."Prompt tracking disabled.") end
 end
 
 -------------- RegisterEvents()
@@ -149,19 +152,19 @@ local function RegisterEvents()
 	Frame_CombatLog:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
 	Frame_LoadingScreen:RegisterEvent("LOADING_SCREEN_ENABLED")
 	Frame_LoadingScreen:RegisterEvent("LOADING_SCREEN_DISABLED")
-	AQ.GSI_RegisterCustomEvents(Frame_CustomEvents)
-if AQ.DEBUG then print(AQ.audioQsSpecifier..AQ.debugSpecifier.."Prompt tracking enabled.") end
+	AUDIOQS.GSI_RegisterCustomEvents(Frame_CustomEvents)
+if AUDIOQS.DEBUG then print(AUDIOQS.audioQsSpecifier..AUDIOQS.debugSpecifier.."Prompt tracking enabled.") end
 end
 
 -------------- UpdateSpecializationInfo()
 UpdateSpecializationInfo = function(_, event, ...)
 	local args = {...}
 	
-	local newSpecId = AQ.GetSpec()
+	local newSpecId = AUDIOQS.GetSpec()
 	local eventsWereRegistered = AnyEventsRegistered()
 	
 	if args then
-		if args[1] == "reregister" and AQ.SpecHasPrompts(AQ.GetSpec()) then
+		if args[1] == "reregister" and AUDIOQS.SpecHasPrompts(AUDIOQS.GetSpec()) then
 			RegisterEvents()
 		end
 	end
@@ -171,38 +174,38 @@ UpdateSpecializationInfo = function(_, event, ...)
 	end
 	
 	specId = newSpecId
-	local specHasPrompts = AQ.SpecHasPrompts(newSpecId)
-if AQ.DEBUG then print(AQ.audioQsSpecifier..AQ.debugSpecifier.."Spec #"..newSpecId.." has "..(specHasPrompts == true and "" or "no ").."available prompts.") end
-	AQ.LoadSpecialization()
+	local specHasPrompts = AUDIOQS.SpecHasPrompts(newSpecId)
+if AUDIOQS.DEBUG then print(AUDIOQS.audioQsSpecifier..AUDIOQS.debugSpecifier.."Spec #"..newSpecId.." has "..(specHasPrompts == true and "" or "no ").."available prompts.") end
+	AUDIOQS.LoadSpecialization()
 	success = true
-	--local success, err = pcall(AQ.LoadSpecialization)
-	if not success then AQ.HandleError(err, "UpdateSpecializationInfo()", "AQ.LoadSpecialization()") end -- More robust coverage
+	--local success, err = pcall(AUDIOQS.LoadSpecialization)
+	if not success then AUDIOQS.HandleError(err, "UpdateSpecializationInfo()", "AUDIOQS.LoadSpecialization()") end -- More robust coverage
 	
 	if specHasPrompts then
-if AQ.DEBUG then print(AQ.audioQsSpecifier..AQ.debugSpecifier.."Loaded spec "..specId) end
+if AUDIOQS.DEBUG then print(AUDIOQS.audioQsSpecifier..AUDIOQS.debugSpecifier.."Loaded spec "..specId) end
 		RegisterEvents()
 	elseif eventsWereRegistered then
-if AQ.DEBUG then print(AQ.audioQsSpecifier..AQ.debugSpecifier.."Turning off AudioQs") end
+if AUDIOQS.DEBUG then print(AUDIOQS.audioQsSpecifier..AUDIOQS.debugSpecifier.."Turning off AudioQs") end
 		UnregisterEvents()
 	end
 end	
 
-if not AQ.WOW_CLASSIC then Frame_LoadOrSpecChange:RegisterEvent("PLAYER_SPECIALIZATION_CHANGED") end
+if not AUDIOQS.WOW_CLASSIC then Frame_LoadOrSpecChange:RegisterEvent("PLAYER_SPECIALIZATION_CHANGED") end
 --Frame_LoadOrSpecChange:RegisterEvent("PLAYER_LOGIN") -- TODO: Was this just naive, or some weird interaction?
 Frame_LoadOrSpecChange:RegisterEvent("PLAYER_ENTERING_WORLD")
 Frame_LoadOrSpecChange:SetScript("OnEvent", function(_, event, ...) UpdateSpecializationInfo(_, event, ...) end)
 
 Frame_CombatLog:SetScript("OnEvent",
 	function(_, _, ...)
-		local success, err = pcall(AQ.ProcessCombatLogForPrompts)
-		if not success then AQ.HandleError(err, "CombatLogOnEvent", "AQ.ProcessCombatLogForPrompts()") end
+		local success, err = pcall(AUDIOQS.ProcessCombatLogForPrompts)
+		if not success then AUDIOQS.HandleError(err, "CombatLogOnEvent", "AUDIOQS.ProcessCombatLogForPrompts()") end
 	end
 )
 
 Frame_SpellUpdateCooldown:SetScript("OnEvent",
 	function(_, _, ...)
-		local success, err = pcall(AQ.ProcessSpellCooldownsForPrompts)
-		if not success then AQ.HandleError(err, "SpellUpdateCooldownOnEvent()", "AQ.ProcessSpellCooldownsForPrompts()") end
+		local success, err = pcall(AUDIOQS.ProcessSpellCooldownsForPrompts)
+		if not success then AUDIOQS.HandleError(err, "SpellUpdateCooldownOnEvent()", "AUDIOQS.ProcessSpellCooldownsForPrompts()") end
 	end
 )
 
@@ -211,17 +214,17 @@ Frame_UnitAura:SetScript("OnEvent",
 	function(_, _, ...)
 		local unitId = ...
 		
-		if not AQ.UnitIsIncluded(unitId) then
+		if not AUDIOQS.UnitIsIncluded(unitId) then
 			return
 		end
 		if specId ~= nil then
 		-- Abstract into class file funcs
 			local aura
 			for n = 1, 40, 1 do
-				aura = AQ.LoadAura(unitId, n, "HELPFUL")
-				if aura[AQ.UNIT_AURA_SPELL_ID] ~= nil then 
-					local success, err = pcall(AQ.FindPromptsFromUnitAura, aura)
-					if not success then AQ.HandleError(err, "UnitAuraOnEvent()", "AQ.FindPromptsFromUnitAura()") break end
+				aura = AUDIOQS.LoadAura(unitId, n, "HELPFUL")
+				if aura[AUDIOQS.UNIT_AURA_SPELL_ID] ~= nil then 
+					local success, err = pcall(AUDIOQS.FindPromptsFromUnitAura, aura)
+					if not success then AUDIOQS.HandleError(err, "UnitAuraOnEvent()", "AUDIOQS.FindPromptsFromUnitAura()") break end
 				else
 					break 
 				end
@@ -235,20 +238,20 @@ Frame_CustomEvents:SetScript("OnEvent",
 		if not FreshEventForFrame(event) then return end
 
 		--print("Event starting ProcessCustomEventForPrompts() is "..event)
-		local success, err = pcall(AQ.ProcessCustomEventForPrompts, event, ...)
-		if not success then AQ.HandleError(err, "CustomEventsOnEvent()", "AQ.ProcessCustomEventForPrompts()") end
+		local success, err = pcall(AUDIOQS.ProcessCustomEventForPrompts, event, ...)
+		if not success then AUDIOQS.HandleError(err, "CustomEventsOnEvent()", "AUDIOQS.ProcessCustomEventForPrompts()") end
 	end
 )
 
 Frame_LoadingScreen:SetScript("OnEvent",
 	function(_, event, ...)
-		if AQ.hushMode ~= AQ.HUSHMODE_LOADINGSCREEN then
-			prevHushMode = AQ.hushMode
+		if AUDIOQS.hushMode ~= AUDIOQS.HUSHMODE_LOADINGSCREEN then
+			prevHushMode = AUDIOQS.hushMode
 		end
 		if event == "LOADING_SCREEN_ENABLED" then
-			AQ.hushMode = AQ.HUSHMODE_LOADINGSCREEN
+			AUDIOQS.hushMode = AUDIOQS.HUSHMODE_LOADINGSCREEN
 		elseif event == "LOADING_SCREEN_DISABLED" then
-			AQ.hushMode = prevHushMode
+			AUDIOQS.hushMode = prevHushMode
 		end
 	end
 )

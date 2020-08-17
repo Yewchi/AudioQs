@@ -4,16 +4,16 @@
 local extName = "ManaMonitor"
 local extNameDetailed = "Mana Monitor"
 local extShortNames = "mana"
-local extSpecLimit = AQ.ANY_SPEC_ALLOWED
+local extSpecLimit = AUDIOQS.ANY_SPEC_ALLOWED
 
 -- Extension Variables --
 --
-AQ.GS.POWER_TYPE_MANA = 0
+AUDIOQS.GS.POWER_TYPE_MANA = 0
  -- Six second prevention of repeated prompts 
  -- TODO nb. drinking mage food restores 10% mana every 2 seconds .'. drinking from below 10% and up will prompt "10", but not "20". Fix is checking for eating buff every UNIT_POWER_UPDATE... >8(
-AQ.GS.MANA_MONITOR_MIN_DELAY = 6.0
-AQ.GS.MANA_MONITOR_ANNOUNCING_SEG = nil
-AQ.GS.MANA_MONITOR_PREV_PROMPT_TIMESTAMP = 0
+AUDIOQS.GS.MANA_MONITOR_MIN_DELAY = 6.0
+AUDIOQS.GS.MANA_MONITOR_ANNOUNCING_SEG = nil
+AUDIOQS.GS.MANA_MONITOR_PREV_PROMPT_TIMESTAMP = 0
 
  -- Default 50-100%. Expressed as a integer %age for easy comparisons when determining if e.g. mana is decreasing to 20-49 (call 50), or increasing to 20-49 (call 20) .'. avoid using flags for this.
 local currentManaSegment = 50
@@ -42,7 +42,7 @@ local extFuncs = {
 		["GetSegments"] = function() return GetSegments() end,
 		["GetExtension"] = function() return GetExtension() end,
 		["SpecAllowed"] = function(specId) return SpecAllowed(specId) end,
-		["Initialize"] = function() AQ.ManaMonitor_UpdateManaSegment() end
+		["Initialize"] = function() AUDIOQS.ManaMonitor_UpdateManaSegment() end
 }
 
 --- Spell Tables and Prompts --
@@ -60,12 +60,12 @@ local extSegments = {
 	["UNIT_POWER_UPDATE"] = { 
 		{
 			{
-				"allowPrompts, AQ.GS.MANA_MONITOR_ANNOUNCING_SEG = AQ.ManaMonitor_UpdateManaSegment() if allowPrompts and AQ.GS.MANA_MONITOR_ANNOUNCING_SEG then AQ.GS.MANA_MONITOR_PREV_PROMPT_TIMESTAMP = GetTime() return true end",
+				"allowPrompts, AUDIOQS.GS.MANA_MONITOR_ANNOUNCING_SEG = AUDIOQS.ManaMonitor_UpdateManaSegment() if allowPrompts and AUDIOQS.GS.MANA_MONITOR_ANNOUNCING_SEG then AUDIOQS.GS.MANA_MONITOR_PREV_PROMPT_TIMESTAMP = GetTime() return true end",
 				false
 			},
 			{
 				0.0,
-				AQ.SOUND_FUNC_PREFIX.."local seg = AQ.GS.MANA_MONITOR_ANNOUNCING_SEG if seg ~= nil then return string.format('%smana_%s.ogg', AQ.SOUNDS_ROOT, AQ.GS.MANA_MONITOR_ANNOUNCING_SEG) end",
+				AUDIOQS.SOUND_FUNC_PREFIX.."local seg = AUDIOQS.GS.MANA_MONITOR_ANNOUNCING_SEG if seg ~= nil then return string.format('%smana_%s.ogg', AUDIOQS.SOUNDS_ROOT, AUDIOQS.GS.MANA_MONITOR_ANNOUNCING_SEG) end",
 				nil,
 				true
 			}
@@ -79,7 +79,7 @@ local extSegments = {
 --
 local function ManaSegmentCalloutInfo(desiredSegmentCallout)
 	local sameAsPrevious = (desiredSegmentCallout == previousSegmentCallout)
-	local promptAllowed = GetTime() > (AQ.GS.MANA_MONITOR_PREV_PROMPT_TIMESTAMP + (sameAsPrevious and AQ.GS.MANA_MONITOR_MIN_DELAY or 0))
+	local promptAllowed = GetTime() > (AUDIOQS.GS.MANA_MONITOR_PREV_PROMPT_TIMESTAMP + (sameAsPrevious and AUDIOQS.GS.MANA_MONITOR_MIN_DELAY or 0))
 	
 	previousSegmentCallout = desiredSegmentCallout
 	
@@ -87,9 +87,9 @@ local function ManaSegmentCalloutInfo(desiredSegmentCallout)
 end
 
 ------ Returns a flag if a prompt is intended.
--------- AQ.ManaMonitor_UpdateManaSegment()
-function AQ.ManaMonitor_UpdateManaSegment()
-	local playerMana = UnitPower("player", AQ.GS.POWER_TYPE_MANA) / UnitPowerMax("player", AQ.GS.POWER_TYPE_MANA) * 100
+-------- AUDIOQS.ManaMonitor_UpdateManaSegment()
+function AUDIOQS.ManaMonitor_UpdateManaSegment()
+	local playerMana = UnitPower("player", AUDIOQS.GS.POWER_TYPE_MANA) / UnitPowerMax("player", AUDIOQS.GS.POWER_TYPE_MANA) * 100
 	local manaDecreasing = playerMana < currentManaSegment
 	
 	if playerMana > 50 then -- 50 - 100
@@ -146,7 +146,7 @@ GetExtension = function()
 end
 
 SpecAllowed = function(specId)
-	if extSpecLimit == AQ.ANY_SPEC_ALLOWED or extSpecLimit == specId then
+	if extSpecLimit == AUDIOQS.ANY_SPEC_ALLOWED or extSpecLimit == specId then
 		return true
 	end
 	return false
@@ -155,4 +155,4 @@ end
 -- /Funcs --
 
 -- Register Extension:
-AQ.RegisterExtension(extName, extFuncs)
+AUDIOQS.RegisterExtension(extName, extFuncs)

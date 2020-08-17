@@ -4,7 +4,7 @@
 local extName = "Extras"
 local extNameDetailed = "Extras"
 local extShortNames = "ext"
-local extSpecLimit = AQ.ANY_SPEC_ALLOWED -- TODO ExtensionsInterface needs update here
+local extSpecLimit = AUDIOQS.ANY_SPEC_ALLOWED -- TODO ExtensionsInterface needs update here
 
 -- Functions predeclared
 local GetName
@@ -34,8 +34,8 @@ local extFuncs = {
 --
 -- spells[spellId] = { "Spell Name", charges, cdDur, cdExpiration, unitId, spellType}
 local extSpells = { 
-		[208683] = 	{ "Gladiator's Medallion", 		0, 	0, 	0, 	"player", 	AQ.SPELL_TYPE_ABILITY},
-		[152244] = 	{ "Adaptation",					0,	0,	0,	"player",	AQ.SPELL_TYPE_ABILITY}
+		[208683] = 	{ "Gladiator's Medallion", 		0, 	0, 	0, 	"player", 	AUDIOQS.SPELL_TYPE_ABILITY},
+		[152244] = 	{ "Adaptation",					0,	0,	0,	"player",	AUDIOQS.SPELL_TYPE_ABILITY}
 }
 
 -- events["EVENT_NAME"] = eventArgsArray (automatically generated)
@@ -48,19 +48,19 @@ local extSegments = {
 	[208683] = {
 		{
 			{
-				"return AQ.spells[208683][AQ.SPELL_EXPIRATION] == 0 and AQ.spellsSnapshot[208683][AQ.SPELL_EXPIRATION] > 0",
+				"return AUDIOQS.spells[208683][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[208683][AUDIOQS.SPELL_EXPIRATION] > 0",
 				false
 			},
-			{nil,		AQ.SOUND_PATH_PREFIX..AQ.SOUNDS_ROOT.."Cooldowns/medallion.ogg",		nil,	true }
+			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/medallion.ogg",		nil,	true }
 		}
 	},
 	[152244] = {
 		{
 			{
-				"return AQ.spells[152244][AQ.SPELL_EXPIRATION] == 0 and AQ.spellsSnapshot[152244][AQ.SPELL_EXPIRATION] > 0",
+				"return AUDIOQS.spells[152244][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[152244][AUDIOQS.SPELL_EXPIRATION] > 0",
 				false
 			},
-			{nil,		AQ.SOUND_PATH_PREFIX..AQ.SOUNDS_ROOT.."Cooldowns/adaptation.ogg",		nil,	true }
+			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/adaptation.ogg",		nil,	true }
 		}
 	},
 }
@@ -102,7 +102,7 @@ GetExtension = function()
 end
 
 SpecAllowed = function(specId)
-	if extSpecLimit == AQ.ANY_SPEC_ALLOWED or extSpecLimit == specId then
+	if extSpecLimit == AUDIOQS.ANY_SPEC_ALLOWED or extSpecLimit == specId then
 		return true
 	end
 	return false
@@ -111,4 +111,4 @@ end
 -- /Funcs --
 
 -- Register Extension:
-AQ.RegisterExtension(extName, extFuncs)
+AUDIOQS.RegisterExtension(extName, extFuncs)

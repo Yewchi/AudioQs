@@ -2,7 +2,7 @@
 ## Title: AudioQs
 ## Notes: Custom audio prompts and blind assist.
 ## Author: Yewchi
-## Version: 1.1.5
+## Version: 1.1.6
 ## SavedVariables: SV_Specializations
 AudioQs.lua
 Specialization.lua
@@ -11,6 +11,7 @@ GameStateInterface.lua
 Util.lua
 ExtensionsInterface.lua
 Extensions\Extras.lua
+Extensions\CrowdControl.lua
 Extensions\ManaMonitor.lua
 Extensions\HealthMonitor.lua
 Extensions\GPS.lua

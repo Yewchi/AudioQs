@@ -1,5 +1,5 @@
 --#ifdef WOW_CLASSIC
-if AQ.WOW_CLASSIC then
+if AUDIOQS.WOW_CLASSIC then
 -- All code written and maintained by Yewchi 
 -- zyewchi@gmail.com
 
@@ -36,8 +36,8 @@ local extFuncs = {
 --
 -- spells[spellId] = { "Spell Name", charges, cdDur, cdExpiration, unitId, spellType}
 local extSpells = {	
-	[740] = { 	"Tranquility", 				0, 	0, 	0, 	"player", 	AQ.SPELL_TYPE_ABILITY},
-	[20484] = { "Rebirth", 					0, 	0, 	0, 	"player", 	AQ.SPELL_TYPE_ABILITY}
+	[740] = { 	"Tranquility", 				0, 	0, 	0, 	"player", 	AUDIOQS.SPELL_TYPE_ABILITY},
+	[20484] = { "Rebirth", 					0, 	0, 	0, 	"player", 	AUDIOQS.SPELL_TYPE_ABILITY}
 }
 
 -- events["EVENT_NAME"] = eventArgsArray (automatically generated)
@@ -50,35 +50,35 @@ local extSegments = {
 	[740] = {
 		{
 			{
-				"return AQ.spells[740][AQ.SPELL_EXPIRATION] == 0 and AQ.spellsSnapshot[740][AQ.SPELL_EXPIRATION] > 0",
+				"return AUDIOQS.spells[740][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[740][AUDIOQS.SPELL_EXPIRATION] > 0",
 				false
 			},
-			{nil,		AQ.SOUND_PATH_PREFIX..AQ.SOUNDS_ROOT.."Cooldowns/tranquility.ogg",		nil,	true }
+			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/tranquility.ogg",		nil,	true }
 		}
 	},
 	[20484] = {
 		{
 			{
-				"return AQ.spells[20484][AQ.SPELL_EXPIRATION] == 0 and AQ.spellsSnapshot[20484][AQ.SPELL_EXPIRATION] > 0",
+				"return AUDIOQS.spells[20484][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[20484][AUDIOQS.SPELL_EXPIRATION] > 0",
 				false
 			},
-			{nil,		AQ.SOUND_PATH_PREFIX..AQ.SOUNDS_ROOT.."Cooldowns/rebirth.ogg",		nil,	true }
+			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/rebirth.ogg",		nil,	true }
 		}
 	},
 	["LOADING_SCREEN_DISABLED"] = { -- TODO Should be in an "essentials", hidden extension or in the AudioQs.lua main event handlers. Workaround for now.
 		{
 			{
-				"AQ.ChargeCooldownsAllowed = false return true",
+				"AUDIOQS.ChargeCooldownsAllowed = false return true",
 				false
 			},
 			{0.25, 	nil, nil, true},
-			{nil,	nil, nil, "AQ.ChargeCooldownsAllowed = true return true"}
+			{nil,	nil, nil, "AUDIOQS.ChargeCooldownsAllowed = true return true"}
 		}
 	},
 	["LOADING_SCREEN_ENABLED"] = { -- TODO Likewise ^^
 		{
 			{
-				"AQ.ChargeCooldownsAllowed = false return false",
+				"AUDIOQS.ChargeCooldownsAllowed = false return false",
 				false
 			},
 			{}
@@ -123,7 +123,7 @@ GetExtension = function()
 end
 
 SpecAllowed = function(specId)
-	if extSpecLimit == AQ.ANY_SPEC_ALLOWED or extSpecLimit == specId then
+	if extSpecLimit == AUDIOQS.ANY_SPEC_ALLOWED or extSpecLimit == specId then
 		return true
 	end
 	return false
@@ -132,6 +132,6 @@ end
 -- /Funcs --
 
 -- Register Extension:
-AQ.RegisterExtension(extName, extFuncs)
+AUDIOQS.RegisterExtension(extName, extFuncs)
 end
 --#endif

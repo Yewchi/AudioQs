@@ -10,10 +10,10 @@
 
 --- Flags --
 --
-AQ.SOUND_PATH = "path"
-AQ.SOUND_FUNC = "func"
-AQ.SOUND_PATH_PREFIX = "path::"
-AQ.SOUND_FUNC_PREFIX = "func::"
+AUDIOQS.SOUND_PATH = "path"
+AUDIOQS.SOUND_FUNC = "func"
+AUDIOQS.SOUND_PATH_PREFIX = "path::"
+AUDIOQS.SOUND_FUNC_PREFIX = "func::"
 --
 -- /Flags --
 
@@ -31,12 +31,12 @@ local BAD_SPELL_LIMITER_TIME = 0.08333
 --
 ------- /Static vals --
 
-AQ.spells = nil
-AQ.events = nil
-AQ.segments = nil
-AQ.spellsSnapshot = nil
+AUDIOQS.spells = nil
+AUDIOQS.events = nil
+AUDIOQS.segments = nil
+AUDIOQS.spellsSnapshot = nil
 
-AQ.GS = {} -- A table for custom segment stored values
+AUDIOQS.GS = {} -- A table for custom segment stored values
 
 local type = type
 local pairs = pairs
@@ -47,42 +47,42 @@ local spellsOnCooldown = {}
 
 -------- SaveSpellSnapshot()
 local function SaveSpellSnapshot(spellId)
-	if AQ.spellsSnapshot[spellId] == nil then AQ.spellsSnapshot[spellId] = {} end
+	if AUDIOQS.spellsSnapshot[spellId] == nil then AUDIOQS.spellsSnapshot[spellId] = {} end
 	
-	for n=1,#AQ.spells[spellId],1 do
-		AQ.spellsSnapshot[spellId][n] = AQ.spells[spellId][n]
+	for n=1,#AUDIOQS.spells[spellId],1 do
+		AUDIOQS.spellsSnapshot[spellId][n] = AUDIOQS.spells[spellId][n]
 	end
 end
 
 -- Overlap? Track that spell on pet, track same spell on player??
 local function AmmendSpells(spellsAmmending)
 	for spellId,spellData in pairs(spellsAmmending) do
-		AQ.spells[spellId] = spellData
+		AUDIOQS.spells[spellId] = spellData
 	end
 end
 
 local function AmmendEvents(eventsAmmending)
 	for eventId,arr in pairs(eventsAmmending) do
-		if AQ.events[eventId] == nil then
-			AQ.events[eventId] = {}
+		if AUDIOQS.events[eventId] == nil then
+			AUDIOQS.events[eventId] = {}
 		end
 		
-		local sizeEventIdArray = #(AQ.events[eventId])
+		local sizeEventIdArray = #(AUDIOQS.events[eventId])
 		for i,eventData in ipairs(arr) do
-			AQ.events[eventId][sizeEventIdArray + i] = eventData
+			AUDIOQS.events[eventId][sizeEventIdArray + i] = eventData
 		end
 	end
 end
 
 local function AmmendSegments(segmentsAmmending)
 	for segmentId,arr in pairs(segmentsAmmending) do
-		if AQ.segments[segmentId] == nil then
-			AQ.segments[segmentId] = {}
+		if AUDIOQS.segments[segmentId] == nil then
+			AUDIOQS.segments[segmentId] = {}
 		end
 		
-		local sizeSegmentIdArray = #(AQ.segments[segmentId])
+		local sizeSegmentIdArray = #(AUDIOQS.segments[segmentId])
 		for i,segmentsTbl in ipairs(arr) do
-			AQ.segments[segmentId][sizeSegmentIdArray + i] = segmentsTbl
+			AUDIOQS.segments[segmentId][sizeSegmentIdArray + i] = segmentsTbl
 		end
 	end
 end
@@ -123,8 +123,8 @@ local function FunctionEval(cond)
 	end
 	local success, result = pcall(f)
 	if not success then 
-if AQ.VERBOSE then print("Error in conditional string: '", (type(cond) == "string" and cond or result), "'") end 
-		AQ.LogError({code=AQ.ERR_CUSTOM_FUNCTION_RUNTIME}, "FunctionEval()", "", (type(cond) == "string" and cond or result) )
+if AUDIOQS.VERBOSE then print("Error in conditional string: '", (type(cond) == "string" and cond or result), "'") end 
+		AUDIOQS.LogError({code=AUDIOQS.ERR_CUSTOM_FUNCTION_RUNTIME}, "FunctionEval()", "", (type(cond) == "string" and cond or result) )
 		result = nil
 	end
 	
@@ -193,7 +193,7 @@ local function FrameInitOrUpdateExpiration(spellId, cdExpiration)
 					local thisSpellId = thisSpellOnCooldown[ON_COOLDOWN_SPELLID]
 					local thisCdExpiration = thisSpellOnCooldown[ON_COOLDOWN_CDEXPIRATION]
 					if currTime > thisCdExpiration then
-						AQ.ProcessSpell(thisSpellId, currTime) -- Will kill frame for us. -- TODO Potential enless loop for errors
+						AUDIOQS.ProcessSpell(thisSpellId, currTime) -- Will kill frame for us. -- TODO Potential enless loop for errors
 						if n <= #spellsOnCooldown and thisSpellId == spellsOnCooldown[n][ON_COOLDOWN_SPELLID] then
 								n = n + 1
 						end
@@ -206,8 +206,8 @@ local function FrameInitOrUpdateExpiration(spellId, cdExpiration)
 	end
 end
 
--------- AQ.GSI_RemoveExtension()
-function AQ.GSI_RemoveExtension(specId, extName)
+-------- AUDIOQS.GSI_RemoveExtension()
+function AUDIOQS.GSI_RemoveExtension(specId, extName)
 	if SV_Specializations[specId][extName] == nil then 
 		return false
 	else
@@ -216,15 +216,15 @@ function AQ.GSI_RemoveExtension(specId, extName)
 	end
 end
 
--------- AQ.GSI_ResetAudioQs
-function AQ.GSI_ResetAudioQs()
+-------- AUDIOQS.GSI_ResetAudioQs
+function AUDIOQS.GSI_ResetAudioQs()
 	SV_Specializations = {}
 end
 
--------- AQ.GSI_EvaluateLength()
-function AQ.GSI_EvaluateLength(prompt, promptIndex)
+-------- AUDIOQS.GSI_EvaluateLength()
+function AUDIOQS.GSI_EvaluateLength(prompt, promptIndex)
 	if prompt == nil or promptIndex == nil then 
-		error({code=AQ.ERR_INVALID_ARGS, func="AQ.GSI_EvaluateSound(prompt="..AQ.Printable(prompt)..", promptIndex="..AQ.Printable(promptIndex)..")"})
+		error({code=AUDIOQS.ERR_INVALID_ARGS, func="AUDIOQS.GSI_EvaluateSound(prompt="..AUDIOQS.Printable(prompt)..", promptIndex="..AUDIOQS.Printable(promptIndex)..")"})
 	end
 	local length = prompt[promptIndex]
 	
@@ -245,14 +245,14 @@ function AQ.GSI_EvaluateLength(prompt, promptIndex)
 	elseif t == "nil" then
 		return 0.0
 	else
-		error({code=AQ.ERR_INVALID_CONDITIONAL_RESULT, func="GSI_EvaluateLength(length = "..(length == nil and "nil" or length).." type:"..type(length)..")"})
+		error({code=AUDIOQS.ERR_INVALID_CONDITIONAL_RESULT, func="GSI_EvaluateLength(length = "..(length == nil and "nil" or length).." type:"..type(length)..")"})
 	end
 end
 
--------- AQ.GSI_EvaluateSound()
-function AQ.GSI_EvaluateSound(prompt, promptIndex) -- TODO Memoize soundPaths[(sounds_root_cut)"folder/folder/.../filename"(extension cut)] = "full/file/path.ogg"
+-------- AUDIOQS.GSI_EvaluateSound()
+function AUDIOQS.GSI_EvaluateSound(prompt, promptIndex) -- TODO Memoize soundPaths[(sounds_root_cut)"folder/folder/.../filename"(extension cut)] = "full/file/path.ogg"
 	if prompt == nil or promptIndex == nil then 
-		error({code=AQ.ERR_INVALID_ARGS, func="AQ.GSI_EvaluateSound(prompt="..AQ.Printable(prompt)..", promptIndex="..AQ.Printable(promptIndex)..")"})
+		error({code=AUDIOQS.ERR_INVALID_ARGS, func="AUDIOQS.GSI_EvaluateSound(prompt="..AUDIOQS.Printable(prompt)..", promptIndex="..AUDIOQS.Printable(promptIndex)..")"})
 	end
 	local sound = prompt[promptIndex]
 
@@ -262,13 +262,13 @@ function AQ.GSI_EvaluateSound(prompt, promptIndex) -- TODO Memoize soundPaths[(s
 	elseif t == "number" then
 		return sound
 	elseif t == "string" then 
-		local split = AQ.SplitString(sound, "::")
+		local split = AUDIOQS.SplitString(sound, "::")
 		if #split == 1 then
 			return sound
 		elseif #split == 2 then		
-			if split[1] == AQ.SOUND_PATH and split[2] ~= nil then
+			if split[1] == AUDIOQS.SOUND_PATH and split[2] ~= nil then
 				return split[2]
-			elseif split[1] == AQ.SOUND_FUNC and split[2] ~= nil then
+			elseif split[1] == AUDIOQS.SOUND_FUNC and split[2] ~= nil then
 				local eval, func = FunctionEval(split[2])
 				prompt[promptIndex] = func 
 				return eval
@@ -278,10 +278,10 @@ function AQ.GSI_EvaluateSound(prompt, promptIndex) -- TODO Memoize soundPaths[(s
 	return nil
 end
 
--------- AQ.GSI_EvaluateConditional()
-function AQ.GSI_EvaluateConditional(prompt, promptIndex)
+-------- AUDIOQS.GSI_EvaluateConditional()
+function AUDIOQS.GSI_EvaluateConditional(prompt, promptIndex)
 	if prompt == nil or promptIndex == nil then
-		error({code=AQ.ERR_INVALID_ARGS, func="AQ.GSI_EvaluateConditional(prompt="..AQ.Printable(prompt)..", promptIndex="..AQ.Printable(promptIndex)..")"})
+		error({code=AUDIOQS.ERR_INVALID_ARGS, func="AUDIOQS.GSI_EvaluateConditional(prompt="..AUDIOQS.Printable(prompt)..", promptIndex="..AUDIOQS.Printable(promptIndex)..")"})
 	end
 	local conditional = prompt[promptIndex]
 
@@ -295,33 +295,33 @@ function AQ.GSI_EvaluateConditional(prompt, promptIndex)
 	return conditional == true
 end
 
--------- AQ.GSI_UpdateSpellTable()
-function AQ.GSI_UpdateSpellTable(spellId, cdDur, cdExpiration)
-	if AQ.spells[spellId] == nil then
-		error({code=AQ.ERR_UNKNOWN_SPELL_AS_ARGUMENT, func="AQ.GSI_UpdateSpellTable() spellId="..(spellId~=nil and spellId or "nil").." cdDur="..(cdDur~=nil and cdDur or "nil").." cdExpiration="..(cdExpiration~=nil and cdExpiration or "nil")})
+-------- AUDIOQS.GSI_UpdateSpellTable()
+function AUDIOQS.GSI_UpdateSpellTable(spellId, cdDur, cdExpiration)
+	if AUDIOQS.spells[spellId] == nil then
+		error({code=AUDIOQS.ERR_UNKNOWN_SPELL_AS_ARGUMENT, func="AUDIOQS.GSI_UpdateSpellTable() spellId="..(spellId~=nil and spellId or "nil").." cdDur="..(cdDur~=nil and cdDur or "nil").." cdExpiration="..(cdExpiration~=nil and cdExpiration or "nil")})
 	end
-	local thisSpell = AQ.spells[spellId]
+	local thisSpell = AUDIOQS.spells[spellId]
 	
 	if cdDur == nil or cdExpiration == nil then
-if AQ.DEBUG then if cdDur~=cdExpiration then print(AQ.audioQsSpecifier..AQ.debugSpecifier.."GSI_UpdateSpellTable(): - "..(cdDur == nil and "cdDur" or "cdExpiration").." was sole nil passed.") end end
+if AUDIOQS.DEBUG then if cdDur~=cdExpiration then print(AUDIOQS.audioQsSpecifier..AUDIOQS.debugSpecifier.."GSI_UpdateSpellTable(): - "..(cdDur == nil and "cdDur" or "cdExpiration").." was sole nil passed.") end end
 		local start, dur = GetSpellCooldown(spellId)
 		cdDur = dur
 		cdExpiration = start + dur
 	end
 	
-	if (thisSpell[AQ.SPELL_SPELL_TYPE] == AQ.SPELL_TYPE_AURA and thisSpell[AQ.SPELL_EXPIRATION] ~= cdExpiration) or
-			(thisSpell[AQ.SPELL_SPELL_TYPE] == AQ.SPELL_TYPE_ABILITY and (thisSpell[AQ.SPELL_CHARGES] ~= GetSpellCharges(spellId) or thisSpell[AQ.SPELL_EXPIRATION] ~= cdExpiration)) then
+	if (thisSpell[AUDIOQS.SPELL_SPELL_TYPE] == AUDIOQS.SPELL_TYPE_AURA and thisSpell[AUDIOQS.SPELL_EXPIRATION] ~= cdExpiration) or
+			(thisSpell[AUDIOQS.SPELL_SPELL_TYPE] == AUDIOQS.SPELL_TYPE_ABILITY and (thisSpell[AUDIOQS.SPELL_CHARGES] ~= GetSpellCharges(spellId) or thisSpell[AUDIOQS.SPELL_EXPIRATION] ~= cdExpiration)) then
 		SaveSpellSnapshot(spellId)
-		thisSpell[AQ.SPELL_CHARGES] = GetSpellCharges(spellId)
-		local isChargeSpell = thisSpell[AQ.SpellCharges] ~= nil
+		thisSpell[AUDIOQS.SPELL_CHARGES] = GetSpellCharges(spellId)
+		local isChargeSpell = thisSpell[AUDIOQS.SpellCharges] ~= nil
 		
-		if not (cdDur > 0 and AQ.IsEqualToGcd(cdDur)) then
-			thisSpell[AQ.SPELL_DURATION] = cdDur
-			thisSpell[AQ.SPELL_EXPIRATION] = cdExpiration
+		if not (cdDur > 0 and AUDIOQS.IsEqualToGcd(cdDur)) then
+			thisSpell[AUDIOQS.SPELL_DURATION] = cdDur
+			thisSpell[AUDIOQS.SPELL_EXPIRATION] = cdExpiration
 			
 			FrameInitOrUpdateExpiration(spellId, cdExpiration)
 			
-			if isChargeSpell and thisSpell[AQ.SPELL_CHARGES] == AQ.spellsSnapshot[spellId][AQ.SPELL_CHARGES] then -- TODO Let the charge send the AttemptStartPrompt() instead. Also, trash code. Should be higher-level determined.
+			if isChargeSpell and thisSpell[AUDIOQS.SPELL_CHARGES] == AUDIOQS.spellsSnapshot[spellId][AUDIOQS.SPELL_CHARGES] then -- TODO Let the charge send the AttemptStartPrompt() instead. Also, trash code. Should be higher-level determined.
 				return false
 			end
 		end
@@ -331,102 +331,90 @@ if AQ.DEBUG then if cdDur~=cdExpiration then print(AQ.audioQsSpecifier..AQ.debug
 	return false
 end
 
--------- AQ.GSI_UpdateAllSpellTables()
-function AQ.GSI_UpdateAllSpellTables(init)
-	for spellId,spell in pairs(AQ.spells) do
+-------- AUDIOQS.GSI_UpdateAllSpellTables()
+function AUDIOQS.GSI_UpdateAllSpellTables(init)
+	for spellId,spell in pairs(AUDIOQS.spells) do
 		local cdStart, cdDur = GetSpellCooldown(spellId)
 		local cdExpiration = cdStart + cdDur
 		
-		AQ.GSI_UpdateSpellTable(spellId, cdDur, cdExpiration)
+		AUDIOQS.GSI_UpdateSpellTable(spellId, cdDur, cdExpiration)
 		if init then 
 			SaveSpellSnapshot(spellId)
 		end
 	end
 end
 
--------- AQ.GSI_UpdateEventTable(event)
-function AQ.GSI_UpdateEventTable(event, ...)
-	if AQ.events[event] == nil then
-		error({code=AQ.ERR_UNKNOWN_EVENT_AS_ARGUMENT, func="AQ.GSI_UpdateEventTable(event="..(event~=nil and event or "nil")..")"})
+-------- AUDIOQS.GSI_UpdateEventTable(event)
+function AUDIOQS.GSI_UpdateEventTable(event, ...)
+	if AUDIOQS.events[event] == nil then
+		error({code=AUDIOQS.ERR_UNKNOWN_EVENT_AS_ARGUMENT, func="AUDIOQS.GSI_UpdateEventTable(event="..(event~=nil and event or "nil")..")"})
 	end
 	
 	local args = {...}
 	if ... ~= nil then
 		for n=1,#args,1 do
-			AQ.events[event][n] = args[n]
+			AUDIOQS.events[event][n] = args[n]
 		end
 	end
 end
 
--------- AQ.GSI_GetSpell()
-function AQ.GSI_GetSpell(spellId)
-	return AQ.spells[spellId]
+-------- AUDIOQS.GSI_GetSpell()
+function AUDIOQS.GSI_GetSpell(spellId)
+	return AUDIOQS.spells[spellId]
 end
 
--------- AQ.GSI_GetSpellsTable()
-function AQ.GSI_GetSpellsTable()
-	return AQ.spells
+-------- AUDIOQS.GSI_GetSpellsTable()
+function AUDIOQS.GSI_GetSpellsTable()
+	return AUDIOQS.spells
 end
 
--------- AQ.GSI_GetSegmentsTable()
-function AQ.GSI_GetSegmentsTable()
-	return AQ.segments
+-------- AUDIOQS.GSI_GetSegmentsTable()
+function AUDIOQS.GSI_GetSegmentsTable()
+	return AUDIOQS.segments
 end
 
--------- AQ.GSI_GetSpellsSnapshotTable()
-function AQ.GSI_GetSpellsSnapshotTable()
-	return AQ.spellsSnapshot
+-------- AUDIOQS.GSI_GetSpellsSnapshotTable()
+function AUDIOQS.GSI_GetSpellsSnapshotTable()
+	return AUDIOQS.spellsSnapshot
 end
 
--------- AQ.GetAuraInfo() -- I don't want stuff like this under the "GSI_" prefix, because it does not pertain to performing operations on the AudioQ GameState data. It only performs the operation of retreival for a particular peice of information straight from the blizAPI. Having it in the GSI file is only a consequence of not having a more intricate function string parser.
-function AQ.GetAuraInfo(unitId, spellId, spellType)
-	for n=1,40,1 do
-		local auraSpellId = select(AQ.UNIT_AURA_SPELL_ID, UnitAura(unitId, n, spellType))
-		if auraSpellId == nil then 
-			return nil
-		elseif auraSpellId == spellId then
-			return UnitAura(unitId, n, spellType)
-		end
-	end
+-------- AUDIOQS.GSI_AuraIsIncluded()
+function AUDIOQS.GSI_AuraIsIncluded(spellId)
+	return false ~= (AUDIOQS.spells ~= nil and AUDIOQS.spells[spellId] and AUDIOQS.spells[spellId][AUDIOQS.SPELL_SPELL_TYPE] == AUDIOQS.SPELL_TYPE_AURA or false)
 end
 
--------- AQ.GSI_AuraIsIncluded()
-function AQ.GSI_AuraIsIncluded(spellId)
-	return false ~= (AQ.spells ~= nil and AQ.spells[spellId] and AQ.spells[spellId][AQ.SPELL_SPELL_TYPE] == AQ.SPELL_TYPE_AURA or false)
+-------- AUDIOQS.GSI_SpellIsIncluded()
+function AUDIOQS.GSI_SpellIsIncluded(spellId)
+	return AUDIOQS.spells[spellId] ~= nil and #AUDIOQS.spells[spellId] > 0
 end
 
--------- AQ.GSI_SpellIsIncluded()
-function AQ.GSI_SpellIsIncluded(spellId)
-	return AQ.spells[spellId] ~= nil and #AQ.spells[spellId] > 0
+-------- AUDIOQS.GSI_SpecHasPrompts()
+function AUDIOQS.GSI_SpecHasPrompts(specIdToCheck)
+	return false ~= (SV_Specializations ~= nil and SV_Specializations[specIdToCheck] and not AUDIOQS.TableEmpty(SV_Specializations[specIdToCheck]) or false)
 end
 
--------- AQ.GSI_SpecHasPrompts()
-function AQ.GSI_SpecHasPrompts(specIdToCheck)
-	return false ~= (SV_Specializations ~= nil and SV_Specializations[specIdToCheck] and not AQ.TableEmpty(SV_Specializations[specIdToCheck]) or false)
-end
-
--------- AQ.GSI_RegisterCustomEvents()
-function AQ.GSI_RegisterCustomEvents(frame)
-if AQ.VERBOSE then print(AQ.audioQsSpecifier..AQ.debugSpecifier.."Registering custom AQ.events:") end
-	for event,_ in pairs(AQ.events) do
+-------- AUDIOQS.GSI_RegisterCustomEvents()
+function AUDIOQS.GSI_RegisterCustomEvents(frame)
+if AUDIOQS.VERBOSE then print(AUDIOQS.audioQsSpecifier..AUDIOQS.debugSpecifier.."Registering custom AUDIOQS.events:") end
+	for event,_ in pairs(AUDIOQS.events) do
 		frame:RegisterEvent(event)
-if AQ.VERBOSE then print(AQ.audioQsSpecifier..AQ.debugSpecifier.."- "..event) end
+if AUDIOQS.VERBOSE then print(AUDIOQS.audioQsSpecifier..AUDIOQS.debugSpecifier.."- "..event) end
 	end
 end
 
--------- AQ.GSI_UnregisterCustomEvents()
-function AQ.GSI_UnregisterCustomEvents(frame)
+-------- AUDIOQS.GSI_UnregisterCustomEvents()
+function AUDIOQS.GSI_UnregisterCustomEvents(frame)
 	frame:UnregisterAllEvents()
 end
 
--------- AQ.GSI_EventIsIncluded()
-function AQ.GSI_EventIsIncluded(eventToCheck)
-	return AQ.events[eventToCheck] ~= nil
+-------- AUDIOQS.GSI_EventIsIncluded()
+function AUDIOQS.GSI_EventIsIncluded(eventToCheck)
+	return AUDIOQS.events[eventToCheck] ~= nil
 end
 
--------- AQ.GSI_LoadSpecTables(specId)
-function AQ.GSI_LoadSpecTables(specId, funcsForLoading)
-	AQ.spellsSnapshot = {}
+-------- AUDIOQS.GSI_LoadSpecTables(specId)
+function AUDIOQS.GSI_LoadSpecTables(specId, funcsForLoading)
+	AUDIOQS.spellsSnapshot = {}
 	
 	if SV_Specializations == nil and funcsForLoading == nil then
 	-- Nothing to load
@@ -436,22 +424,22 @@ function AQ.GSI_LoadSpecTables(specId, funcsForLoading)
 		InitializeAndLoadExtension(specId, funcsForLoading)
 	end
 	
-	if SV_Specializations[specId] ~= nil and not AQ.TableEmpty(SV_Specializations[specId]) then
-		if AQ.spells == nil then AQ.spells = {} else wipe(AQ.spells) end
-		if AQ.events == nil then AQ.events = {} else wipe(AQ.events) end
-		if AQ.segments == nil then AQ.segments = {} else wipe(AQ.segments) end
+	if SV_Specializations[specId] ~= nil and not AUDIOQS.TableEmpty(SV_Specializations[specId]) then
+		if AUDIOQS.spells == nil then AUDIOQS.spells = {} else wipe(AUDIOQS.spells) end
+		if AUDIOQS.events == nil then AUDIOQS.events = {} else wipe(AUDIOQS.events) end
+		if AUDIOQS.segments == nil then AUDIOQS.segments = {} else wipe(AUDIOQS.segments) end
 		for extName,_ in pairs(SV_Specializations[specId]) do
-			local thisExtFuncs = AQ.GetExtensionFuncs(extName)
-if AQ.DEBUG then print(AQ.audioQsSpecifier..AQ.debugSpecifier.."  Loading EXT: "..extName) end
+			local thisExtFuncs = AUDIOQS.GetExtensionFuncs(extName)
+if AUDIOQS.DEBUG then print(AUDIOQS.audioQsSpecifier..AUDIOQS.debugSpecifier.."  Loading EXT: "..extName) end
 			AmmendTables(thisExtFuncs["GetSpells"](), thisExtFuncs["GetEvents"](), thisExtFuncs["GetSegments"]())
 			thisExtFuncs["Initialize"]()
 		end
 		
-		RemoveUntrackedSpells(AQ.spells)
+		RemoveUntrackedSpells(AUDIOQS.spells)
 		return true
 	end
 	do -- Spec has no loaded Extensions
-		AQ.WipePrompts()
+		AUDIOQS.WipePrompts()
 		RemoveAllTrackedSpells()
 	end
 	return false

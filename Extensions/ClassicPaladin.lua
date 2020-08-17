@@ -1,5 +1,5 @@
 --#ifdef WOW_CLASSIC
-if AQ.WOW_CLASSIC then
+if AUDIOQS.WOW_CLASSIC then
 -- All code written and maintained by Yewchi 
 -- zyewchi@gmail.com
 
@@ -36,15 +36,15 @@ local extFuncs = {
 --
 -- spells[spellId] = { "Spell Name", charges, cdDur, cdExpiration, unitId, spellType}
 local extSpells = {	
-	[642] = { 	"Divine Shield", 			0, 	0, 	0, 	"player", 	AQ.SPELL_TYPE_ABILITY},
-	[853] = { 	"Hammer of Justice", 		0, 	0, 	0, 	"player", 	AQ.SPELL_TYPE_ABILITY},
-	[20473] = { "Holy Shock", 				0, 	0, 	0, 	"player", 	AQ.SPELL_TYPE_ABILITY},
-	[1022] = { 	"Blessing of Protection", 	0, 	0, 	0, 	"player", 	AQ.SPELL_TYPE_ABILITY},
-	[633] = { 	"Lay on Hands", 			0, 	0, 	0, 	"player", 	AQ.SPELL_TYPE_ABILITY},
-	--[20925] = { "Holy Shield", 			0, 	0, 	0, 	"player", 	AQ.SPELL_TYPE_ABILITY},
-	[498] = { 	"Divine Protection", 		0, 	0, 	0, 	"player", 	AQ.SPELL_TYPE_ABILITY},
-	[2812] = { 	"Holy Wrath", 				0, 	0, 	0, 	"player", 	AQ.SPELL_TYPE_ABILITY},
-	[2878] = { 	"Turn Undead", 				0, 	0, 	0, 	"player", 	AQ.SPELL_TYPE_ABILITY}
+	[642] = { 	"Divine Shield", 			0, 	0, 	0, 	"player", 	AUDIOQS.SPELL_TYPE_ABILITY},
+	[853] = { 	"Hammer of Justice", 		0, 	0, 	0, 	"player", 	AUDIOQS.SPELL_TYPE_ABILITY},
+	[20473] = { "Holy Shock", 				0, 	0, 	0, 	"player", 	AUDIOQS.SPELL_TYPE_ABILITY},
+	[1022] = { 	"Blessing of Protection", 	0, 	0, 	0, 	"player", 	AUDIOQS.SPELL_TYPE_ABILITY},
+	[633] = { 	"Lay on Hands", 			0, 	0, 	0, 	"player", 	AUDIOQS.SPELL_TYPE_ABILITY},
+	--[20925] = { "Holy Shield", 			0, 	0, 	0, 	"player", 	AUDIOQS.SPELL_TYPE_ABILITY},
+	[498] = { 	"Divine Protection", 		0, 	0, 	0, 	"player", 	AUDIOQS.SPELL_TYPE_ABILITY},
+	[2812] = { 	"Holy Wrath", 				0, 	0, 	0, 	"player", 	AUDIOQS.SPELL_TYPE_ABILITY},
+	[2878] = { 	"Turn Undead", 				0, 	0, 	0, 	"player", 	AUDIOQS.SPELL_TYPE_ABILITY}
 }
 
 -- events["EVENT_NAME"] = eventArgsArray (automatically generated)
@@ -57,98 +57,98 @@ local extSegments = {
 	[642] = {
 		{
 			{
-				"return AQ.spells[642][AQ.SPELL_EXPIRATION] == 0 and AQ.spellsSnapshot[642][AQ.SPELL_EXPIRATION] > 0",
+				"return AUDIOQS.spells[642][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[642][AUDIOQS.SPELL_EXPIRATION] > 0",
 				false
 			},
-			{nil,		AQ.SOUND_PATH_PREFIX..AQ.SOUNDS_ROOT.."Cooldowns/divine_shield.ogg",		nil,	true }
+			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/divine_shield.ogg",		nil,	true }
 		}
 	},
 	[853] = {
 		{
 			{
-				"return AQ.spells[853][AQ.SPELL_EXPIRATION] == 0 and AQ.spellsSnapshot[853][AQ.SPELL_EXPIRATION] > 0",
+				"return AUDIOQS.spells[853][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[853][AUDIOQS.SPELL_EXPIRATION] > 0",
 				false
 			},
-			{nil,		AQ.SOUND_PATH_PREFIX..AQ.SOUNDS_ROOT.."Cooldowns/hammer_of_justice.ogg",		nil,	true }
+			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/hammer_of_justice.ogg",		nil,	true }
 		}
 	},
 	[20473] = {
 		{
 			{
-				"return AQ.spells[20473][AQ.SPELL_EXPIRATION] == 0 and AQ.spellsSnapshot[20473][AQ.SPELL_EXPIRATION] > 0",
+				"return AUDIOQS.spells[20473][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[20473][AUDIOQS.SPELL_EXPIRATION] > 0",
 				false
 			},
-			{nil,		AQ.SOUND_PATH_PREFIX..AQ.SOUNDS_ROOT.."Cooldowns/holy_shock.ogg",		nil,	true }
+			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/holy_shock.ogg",		nil,	true }
 		}
 	},
 	[1022] = {
 		{
 			{
-				"return AQ.spells[1022][AQ.SPELL_EXPIRATION] == 0 and AQ.spellsSnapshot[1022][AQ.SPELL_EXPIRATION] > 0",
+				"return AUDIOQS.spells[1022][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[1022][AUDIOQS.SPELL_EXPIRATION] > 0",
 				false
 			},
-			{nil,		AQ.SOUND_PATH_PREFIX..AQ.SOUNDS_ROOT.."Cooldowns/blessing_of_protection.ogg",		nil,	true }
+			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/blessing_of_protection.ogg",		nil,	true }
 		}
 	},
 	[633] = {
 		{
 			{
-				"return AQ.spells[633][AQ.SPELL_EXPIRATION] == 0 and AQ.spellsSnapshot[633][AQ.SPELL_EXPIRATION] > 0",
+				"return AUDIOQS.spells[633][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[633][AUDIOQS.SPELL_EXPIRATION] > 0",
 				false
 			},
-			{nil,		AQ.SOUND_PATH_PREFIX..AQ.SOUNDS_ROOT.."Cooldowns/lay_on_hands.ogg",		nil,	true }
+			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/lay_on_hands.ogg",		nil,	true }
 		}
 	},
 	--[[[20925] = {
 		{
 			{
-				"return AQ.spells[20925][AQ.SPELL_EXPIRATION] == 0 and AQ.spellsSnapshot[20925][AQ.SPELL_EXPIRATION] > 0",
+				"return AUDIOQS.spells[20925][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[20925][AUDIOQS.SPELL_EXPIRATION] > 0",
 				false
 			},
-			{nil,		AQ.SOUND_PATH_PREFIX..AQ.SOUNDS_ROOT.."Cooldowns/holy_shield.ogg",		nil,	true }
+			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/holy_shield.ogg",		nil,	true }
 		}
 	},--]]
 	[498] = {
 		{
 			{
-				"return AQ.spells[498][AQ.SPELL_EXPIRATION] == 0 and AQ.spellsSnapshot[498][AQ.SPELL_EXPIRATION] > 0",
+				"return AUDIOQS.spells[498][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[498][AUDIOQS.SPELL_EXPIRATION] > 0",
 				false
 			},
-			{nil,		AQ.SOUND_PATH_PREFIX..AQ.SOUNDS_ROOT.."Cooldowns/divine_protection.ogg",		nil,	true }
+			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/divine_protection.ogg",		nil,	true }
 		}
 	},
 	[2812] = {
 		{
 			{
-				"return AQ.spells[2812][AQ.SPELL_EXPIRATION] == 0 and AQ.spellsSnapshot[2812][AQ.SPELL_EXPIRATION] > 0",
+				"return AUDIOQS.spells[2812][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[2812][AUDIOQS.SPELL_EXPIRATION] > 0",
 				false
 			},
-			{nil,		AQ.SOUND_PATH_PREFIX..AQ.SOUNDS_ROOT.."Cooldowns/holy_wrath.ogg",		nil,	true }
+			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/holy_wrath.ogg",		nil,	true }
 		}
 	},
 	[2878] = {
 		{
 			{
-				"return AQ.spells[2878][AQ.SPELL_EXPIRATION] == 0 and AQ.spellsSnapshot[2878][AQ.SPELL_EXPIRATION] > 0",
+				"return AUDIOQS.spells[2878][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[2878][AUDIOQS.SPELL_EXPIRATION] > 0",
 				false
 			},
-			{nil,		AQ.SOUND_PATH_PREFIX..AQ.SOUNDS_ROOT.."Cooldowns/turn_undead.ogg",		nil,	true }
+			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/turn_undead.ogg",		nil,	true }
 		}
 	},
 	["LOADING_SCREEN_DISABLED"] = { -- TODO Should be in an "essentials", hidden extension or in the AudioQs.lua main event handlers. Workaround for now.
 		{
 			{
-				"AQ.ChargeCooldownsAllowed = false return true",
+				"AUDIOQS.ChargeCooldownsAllowed = false return true",
 				false
 			},
 			{0.25, 	nil, nil, true},
-			{nil,	nil, nil, "AQ.ChargeCooldownsAllowed = true return true"}
+			{nil,	nil, nil, "AUDIOQS.ChargeCooldownsAllowed = true return true"}
 		}
 	},
 	["LOADING_SCREEN_ENABLED"] = { -- TODO Likewise ^^
 		{
 			{
-				"AQ.ChargeCooldownsAllowed = false return false",
+				"AUDIOQS.ChargeCooldownsAllowed = false return false",
 				false
 			},
 			{}
@@ -193,7 +193,7 @@ GetExtension = function()
 end
 
 SpecAllowed = function(specId)
-	if extSpecLimit == AQ.ANY_SPEC_ALLOWED or extSpecLimit == specId then
+	if extSpecLimit == AUDIOQS.ANY_SPEC_ALLOWED or extSpecLimit == specId then
 		return true
 	end
 	return false
@@ -202,6 +202,6 @@ end
 -- /Funcs --
 
 -- Register Extension:
-AQ.RegisterExtension(extName, extFuncs)
+AUDIOQS.RegisterExtension(extName, extFuncs)
 end
 --#endif

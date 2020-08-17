@@ -4,18 +4,18 @@
 local extName = "KillingBlow"
 local extNameDetailed = "Killing Blow"
 local extShortNames = "kb"
-local extSpecLimit = AQ.ANY_SPEC_ALLOWED -- TODO ExtensionsInterface needs update here
+local extSpecLimit = AUDIOQS.ANY_SPEC_ALLOWED -- TODO ExtensionsInterface needs update here
 
-local gameState = AQ.GS
+local gameState = AUDIOQS.GS
 gameState.KB_LockRefilter = 0
 
 -- SOUND FILE -- Change this filename to add your own sound. Drop your file in World of Warcraft/{_retail|_clasic}/Interface/AddOns/AudioQs/Sounds/your_file.ogg
-local KILLING_BLOW_SOUND_FILE = AQ.SOUND_PATH_PREFIX..AQ.SOUNDS_ROOT.."tribal_kill.ogg"
+local KILLING_BLOW_SOUND_FILE = AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."tribal_kill.ogg"
 
 -- PLAYER KILLS ONLY - Change 'true' to 'false' to allow all killing blows to trigger sound
 local PVP_KILLS_ONLY = true
 
-AQ.KB_GENERIC_KILLED_SEARCH_KEY = (not AQ.WOW_CLASSIC and "You.+killed" or UnitName("player")..".-slain")
+AUDIOQS.KB_GENERIC_KILLED_SEARCH_KEY = (not AUDIOQS.WOW_CLASSIC and "You.+killed" or UnitName("player")..".-slain")
 local MAX_COMBATLOG_BUFFER_SEARCH = 30
 
 mostPreviousKillTimestamp = 0
@@ -54,85 +54,85 @@ local extSpells = {
 -- events["EVENT_NAME"] = eventArgsArray (automatically generated)
 local extEvents = {
 		--["PLAYER_TARGET_CHANGED"] = {},
-		["UNIT_HEALTH_FREQUENT"] = {},
+		[AUDIOQS.COMPAT_UNIT_HEALTH_FREQ] = {}, -- WOW_SHADOWLANDS
 		["LOADING_SCREEN_DISABLED"] = {}
 }
 
 local extSegments = {
-	--[[["PLAYER_TARGET_CHANGED"] = {
+	--[[["PLAYER_TARGET_CHANGED"] = { -- for deletion
 		{
 			{
-				"AQ.GS.KM_newTargetPTC = UnitGUID('target') if AQ.GS.KB_currentTargetGuid ~= AQ.GS.KM_newTargetPTC then if not AQ.GS.KB_LockRefilter then Blizzard_CombatLog_Refilter() end return true end",
+				"AUDIOQS.GS.KM_newTargetPTC = UnitGUID('target') if AUDIOQS.GS.KB_currentTargetGuid ~= AUDIOQS.GS.KM_newTargetPTC then if not AUDIOQS.GS.KB_LockRefilter then Blizzard_CombatLog_Refilter() end return true end",
 				false
 			},
 			{
 				0.17, 
 				nil, 
 				nil, 
-				AQ.PROMPTSEG_CONDITIONAL_CONTINUATION 
+				AUDIOQS.PROMPTSEG_CONDITIONAL_CONTINUATION 
 			},
 			{
 				nil, 
 				KILLING_BLOW_SOUND_FILE, 
 				nil, 
-				"return AQ.KB_CheckLostTargetForPlayerKills(AQ.GS.KM_newTargetPTC)"
+				"return AUDIOQS.KB_CheckLostTargetForPlayerKills(AUDIOQS.GS.KM_newTargetPTC)"
 			}
 		}
 	},]]
-	--[[["UNIT_HEALTH_FREQUENT"] = {
+	--[[[AUDIOQS.COMPAT_UNIT_HEALTH_FREQ] = { -- for deletion
 		{
 			{
-				"AQ.GS.KM_newTargetCLE = UnitGUID('target') local cL = AQ.LoadCombatLog() local e = cL[2] if e == 'UNIT_DIED' or e == 'PARTY_KILL' then if not AQ.GS.KB_LockRefilter then Blizzard_CombatLog_Refilter() end return true end local dmgType = e:match('(.+)_DAMAGE') if dmgType ~= nil and dmgType ~= 'ENVIRONMENTAL' and (dmgType == 'SWING' and cL[13] or cL[16]) > 0 then if not AQ.GS.KB_LockRefilter then Blizzard_CombatLog_Refilter() end return true end print('Rejecting '..cL[2])",
+				"AUDIOQS.GS.KM_newTargetCLE = UnitGUID('target') local cL = AUDIOQS.LoadCombatLog() local e = cL[2] if e == 'UNIT_DIED' or e == 'PARTY_KILL' then if not AUDIOQS.GS.KB_LockRefilter then Blizzard_CombatLog_Refilter() end return true end local dmgType = e:match('(.+)_DAMAGE') if dmgType ~= nil and dmgType ~= 'ENVIRONMENTAL' and (dmgType == 'SWING' and cL[13] or cL[16]) > 0 then if not AUDIOQS.GS.KB_LockRefilter then Blizzard_CombatLog_Refilter() end return true end print('Rejecting '..cL[2])",
 				false
 			},
 			{
 				0.17, 
 				nil, 
 				nil, 
-				AQ.PROMPTSEG_CONDITIONAL_CONTINUATION 
+				AUDIOQS.PROMPTSEG_CONDITIONAL_CONTINUATION 
 			},
 			{
 				nil, 
 				KILLING_BLOW_SOUND_FILE, 
 				nil, 
-				"return AQ.KB_CheckLostTargetForPlayerKills(AQ.GS.KM_newTargetCLE)"
+				"return AUDIOQS.KB_CheckLostTargetForPlayerKills(AUDIOQS.GS.KM_newTargetCLE)"
 			}
 		}
 	},]]
-	["UNIT_HEALTH_FREQUENT"] = {
+	[AUDIOQS.COMPAT_UNIT_HEALTH_FREQ] = { -- WOW_SHADOWLANDS
 		{
 			{ -- Start on UHF, stop if we didn't get a UHF in the time we were waiting for completion of the prompt (.'. does not miss kill after killing-blows without a following UHF)
-				"if AQ.GS.KB_LockRefilter > 0 then if AQ.GS.KB_LockRefilter < 5 then AQ.GS.KB_LockRefilter = 30 AQ.KB_Refilter() end return false end AQ.GS.KB_LockRefilter = 30 AQ.KB_Refilter() return true",
-				"return AQ.GS.KB_LockRefilter <= 0"
+				"if AUDIOQS.GS.KB_LockRefilter > 0 then if AUDIOQS.GS.KB_LockRefilter < 5 then AUDIOQS.GS.KB_LockRefilter = 30 AUDIOQS.KB_Refilter() end return false end AUDIOQS.GS.KB_LockRefilter = 30 AUDIOQS.KB_Refilter() return true",
+				"return AUDIOQS.GS.KB_LockRefilter <= 0"
 			},
 			{
 				0.15,
 				nil,
 				nil,
-				AQ.PROMPTSEG_CONDITIONAL_CONTINUATION
+				AUDIOQS.PROMPTSEG_CONDITIONAL_CONTINUATION
 			},
 			{
 				0.0,
 				KILLING_BLOW_SOUND_FILE,
-				AQ.STOP_SOUND_DISALLOWED,
-				"AQ.GS.KB_LockRefilter = AQ.GS.KB_LockRefilter - 1 local foundKill = AQ.KB_CheckLostTargetForPlayerKills(UnitGUID('target')) AQ.KB_Refilter() return foundKill"
+				AUDIOQS.STOP_SOUND_DISALLOWED,
+				"AUDIOQS.GS.KB_LockRefilter = AUDIOQS.GS.KB_LockRefilter - 1 local foundKill = AUDIOQS.KB_CheckLostTargetForPlayerKills(UnitGUID('target')) AUDIOQS.KB_Refilter() return foundKill"
 			},
 			{
 				0.0,
 				nil,
 				nil,
-				AQ.PROMPTSEG_CONDITIONAL_RESTART
+				AUDIOQS.PROMPTSEG_CONDITIONAL_RESTART
 			}
 		}
 	},
 	["LOADING_SCREEN_DISABLED"] = { -- TODO Should be in an "essentials", hidden extension or in the AudioQs.lua main event handlers. Workaround for now.
 		{
 			{
-				"AQ.KB_LockRefilter = 0xFFFF AQ.KB_Refilter() return true",
+				"AUDIOQS.KB_LockRefilter = 0xFFFF AUDIOQS.KB_Refilter() return true",
 				false
 			},
-			{5.0, 	nil, nil, AQ.PROMPTSEG_CONDITIONAL_CONTINUATION},
-			{nil,	nil, nil, "local e = COMBATLOG.historyBuffer.elements for i=1,#e,1 do local m = e[i].message if m:find(AQ.KB_GENERIC_KILLED_SEARCH_KEY) then local thisKilledGuid = m:match('.-Hunit.-Hunit:(.-):') AQ.KB_RotationalInsert(thisKilledGuid) end end AQ.KB_LockRefilter = 0 return true"}
+			{5.0, 	nil, nil, AUDIOQS.PROMPTSEG_CONDITIONAL_CONTINUATION},
+			{nil,	nil, nil, "local e = COMBATLOG.historyBuffer.elements for i=1,#e,1 do local m = e[i].message if m:find(AUDIOQS.KB_GENERIC_KILLED_SEARCH_KEY) then local thisKilledGuid = m:match('.-Hunit.-Hunit:(.-):') AUDIOQS.KB_RotationalInsert(thisKilledGuid) end end AUDIOQS.KB_LockRefilter = 0 return true"}
 		}
 	}
 }
@@ -141,19 +141,19 @@ local extSegments = {
 
 --- Funcs --
 --
-function AQ.KB_RotationalInsert(Guid)
+function AUDIOQS.KB_RotationalInsert(Guid)
 	table.insert(lastTenKilledGuid, 1, Guid)
 	lastTenKilledGuid[11] = nil
 end
 
-function AQ.KB_Refilter()
+function AUDIOQS.KB_Refilter()
 	Blizzard_CombatLog_Refilter()
-	if AQ.WOW_CLASSIC then
-		AQ.KB_clcRefilterTimestamp = time()
+	if AUDIOQS.WOW_CLASSIC then
+		AUDIOQS.KB_clcRefilterTimestamp = time()
 	end
 end
 
-function AQ.KB_CheckLostTargetForPlayerKills(thisGuid)
+function AUDIOQS.KB_CheckLostTargetForPlayerKills(thisGuid)
 	gameState.KB_currentTargetGuid = thisGuid
 	local buffer = COMBATLOG.historyBuffer.elements
 	local bufferSize = #buffer
@@ -176,8 +176,8 @@ function AQ.KB_CheckLostTargetForPlayerKills(thisGuid)
 			return false
 		end
 		
-		--print("found ", thisMessage:find(AQ.KB_GENERIC_KILLED_SEARCH_KEY))
-		if thisMessage:find(AQ.KB_GENERIC_KILLED_SEARCH_KEY) then
+		--print("found ", thisMessage:find(AUDIOQS.KB_GENERIC_KILLED_SEARCH_KEY))
+		if thisMessage:find(AUDIOQS.KB_GENERIC_KILLED_SEARCH_KEY) then
 			local thisKilledGuid = thisMessage:match(".-Hunit.-Hunit:(.-):")
 			--print(thisKilledGuid)
 		
@@ -192,7 +192,7 @@ function AQ.KB_CheckLostTargetForPlayerKills(thisGuid)
 				if not previouslyRecorded then
 					if thisTimestamp >= mostPreviousKillTimestamp or (mostPreviousKillTimestamp - thisTimestamp) > 2 then -- Newer kill, or most previous kill was yesterday on the clock
 						mostPreviousKillTimestamp = thisTimestamp
-						AQ.KB_RotationalInsert(thisKilledGuid)
+						AUDIOQS.KB_RotationalInsert(thisKilledGuid)
 						return true
 					end
 				end
@@ -234,7 +234,7 @@ GetExtension = function()
 end
 
 SpecAllowed = function(specId)
-	if extSpecLimit == AQ.ANY_SPEC_ALLOWED or extSpecLimit == specId then
+	if extSpecLimit == AUDIOQS.ANY_SPEC_ALLOWED or extSpecLimit == specId then
 		return true
 	end
 	return false
@@ -243,4 +243,4 @@ end
 -- /Funcs --
 
 -- Register Extension:
-AQ.RegisterExtension(extName, extFuncs)
+AUDIOQS.RegisterExtension(extName, extFuncs)

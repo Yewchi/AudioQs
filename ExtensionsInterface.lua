@@ -5,18 +5,18 @@
 
 local extensionFuncs = {}
 
-function AQ.RegisterExtension(extName, funcs)
+function AUDIOQS.RegisterExtension(extName, funcs)
 	if type(extName) ~= "string" or type(funcs) ~= "table" then
-		AQ.HandleError({code=AQ.ERR_INVALID_ARGS, func="AQ.RegisterExtension(extName = "..(extName == nil and "nil" or extName)..", funcs = t_"..type(funcs)..")"})
+		AUDIOQS.HandleError({code=AUDIOQS.ERR_INVALID_ARGS, func="AUDIOQS.RegisterExtension(extName = "..(extName == nil and "nil" or extName)..", funcs = t_"..type(funcs)..")"})
 		return
 	end
 	
 	extensionFuncs[extName:lower()] = funcs
 end
 
-function AQ.GetExtensionFuncs(extName)
+function AUDIOQS.GetExtensionFuncs(extName)
 	if extName == nil then
-if AQ.DEBUG then print(AQ.audioQsSpecifier..AQ.debugSpecifier.."nil passed as extension name to GetExtensionFuncs()") end
+if AUDIOQS.DEBUG then print(AUDIOQS.audioQsSpecifier..AUDIOQS.debugSpecifier.."nil passed as extension name to GetExtensionFuncs()") end
 		return nil
 	end
 	
@@ -28,7 +28,7 @@ if AQ.DEBUG then print(AQ.audioQsSpecifier..AQ.debugSpecifier.."nil passed as ex
 	return extensionFuncs[extNameToLower]
 end
 
-function AQ.GetRegisteredExtensionNames()
+function AUDIOQS.GetRegisteredExtensionNames()
 	local name_arr = {}
 	local i = 1
 	for extName,_ in pairs(extensionFuncs) do
@@ -38,5 +38,5 @@ function AQ.GetRegisteredExtensionNames()
 	return name_arr
 end
 
-function AQ.SpecAllowed(specToCheck, specsAllowed)
+function AUDIOQS.SpecAllowed(specToCheck, specsAllowed)
 end
