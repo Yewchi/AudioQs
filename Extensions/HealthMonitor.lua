@@ -251,7 +251,7 @@ local extSegments = {
 				"if AUDIOQS.HealthMonitor_ModeIs(AUDIOQS.GS.INSTANCE_BG) then AUDIOQS.HealthMonitor_UpdateHealthSnapshot() else AUDIOQS.HealthMonitor_CheckMode('GROUP_ROSTER_UPDATE') end return false",
 				false
 			},
-			{nil, nil, nil, nil}
+			{1.0, nil, nil, "AUDIOQS.HealthMonitor_UpdateHealthSnapshot()"} -- This is just a manual 1 second later update to ensure that odd behaviour is caught, like a cutscene of a different area starting in the middle of combat, or an NPC scenario ends by removing all units, and no UNIT_HEALTH to follow.
 		},
 		{
 			{
@@ -490,12 +490,12 @@ function AUDIOQS.HealthMonitor_UpdateHealthSnapshot()
 	if AUDIOQS.HealthMonitor_ModeIs(AUDIOQS.GS.INSTANCE_BG) then
 		for n=1,3,1 do
 			local thisUnit = (n == 3 and "target" or (n == 2 and "focus" or (n == 1 and "player")))
-			if UnitIsDeadOrGhost("player") or 
-			(thisUnit == "target" and (UnitIsUnit(thisUnit, "player") or UnitIsUnit(thisUnit, "focus"))) 
-			or (thisUnit == "focus" and UnitIsUnit(thisUnit, "player")) 
-			or UnitIsEnemy("player", thisUnit) then
-				SetGenericHpVals(thisUnit, true) -- Set to off. If some rules are true about multiple targets: 1st rule: player is only ever '1', which overrides 2nd rule: Focus is only ever '2'
-			else
+			if UnitIsDeadOrGhost("player") -- Do not update this unitId if the player is dead, or a more strongly defined unitId exists for the unit, or it is an enemy.
+					or ( thisUnit == "target" and ( UnitIsUnit(thisUnit, "player") or UnitIsUnit(thisUnit, "focus") ) ) 
+					or ( thisUnit == "focus" and UnitIsUnit(thisUnit, "player") ) 
+					or UnitIsEnemy("player", thisUnit) then
+				SetGenericHpVals(thisUnit, true) -- Set to off. 
+			else -- Update a unit that is in alive state
 				SetGenericHpVals(thisUnit)
 			end
 		end
@@ -560,11 +560,11 @@ function AUDIOQS.HealthMonitor_CheckMode(event)
 			AUDIOQS.HealthMonitor_CheckModePvP()
 		end
     elseif AUDIOQS.GS.HM_instanceType ~= instanceType or event == "GROUP_ROSTER_UPDATE" or (IsInRaid() and AUDIOQS.HealthMonitor_ModeIs(AUDIOQS.GS.INSTANCE_PARTY) or (not IsInRaid() and AUDIOQS.HealthMonitor_ModeIs(AUDIOQS.GS.INSTANCE_RAID))) then
-        AUDIOQS.GS.HM_instanceType = instanceType
+		AUDIOQS.GS.HM_instanceType = instanceType
         
         AUDIOQS.GS.HM_numInGroup = (GetNumGroupMembers() > 0 and GetNumGroupMembers() or 1)
         
-        if IsInRaid() then 		-- Raid mode (PvE)
+        if IsInRaid() then -- Raid mode (PvE)
 			local j = 1
             for n = 1, 40, 1 do
                 local thisId = string.format("raid%s", n)
@@ -597,7 +597,7 @@ function AUDIOQS.HealthMonitor_CheckMode(event)
                 
                 AUDIOQS.GS.HM_mode = AUDIOQS.GS.INSTANCE_RAID
             end
-        elseif not IsInRaid() and not AUDIOQS.HealthMonitor_ModeIs(AUDIOQS.GS.INSTANCE_PARTY) then   -- Party and World Mode (PvE)   
+        elseif not IsInRaid() and not AUDIOQS.HealthMonitor_ModeIs(AUDIOQS.GS.INSTANCE_PARTY) then -- Party and World Mode (PvE)   
             AUDIOQS.GS.HM_unitIds = {"player", "party1", "party2", "party3", "party4"}
 			
 			AUDIOQS.GS.HM_playersCalling["player"] = false

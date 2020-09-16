@@ -100,6 +100,7 @@ local CombatLogGetCurrentEventInfo = CombatLogGetCurrentEventInfo
 ----- /Fast Funcs --
 
 SLASH_AQ1 = "/aq"
+SLASH_AQ2 = "/audioqs"
 
 local Frame_OnLoadMessages = CreateFrame("Frame", "On Load Messages")
 Frame_OnLoadMessages:RegisterEvent("PLAYER_ENTERING_WORLD")

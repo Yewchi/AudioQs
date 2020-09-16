@@ -38,6 +38,7 @@ local extFuncs = {
 local extSpells = {	
 	[2944] = { 	"Devouring Plague", 0, 	0, 	0, 	"player", 	AUDIOQS.SPELL_TYPE_ABILITY},
 	[586] = { 	"Fade", 			0, 	0, 	0, 	"player", 	AUDIOQS.SPELL_TYPE_ABILITY},
+	[6346] = {	"Fear Ward", 		0,	0,	0,	"player",	AUDIOQS.SPELL_TYPE_ABILITY},
 	[8122] = { 	"Psychic Scream", 	0, 	0, 	0, 	"player", 	AUDIOQS.SPELL_TYPE_ABILITY},
 	[724] = { 	"Lightwell", 		0, 	0, 	0, 	"player", 	AUDIOQS.SPELL_TYPE_ABILITY},
 	[13908] = { "Desperate Prayer", 0, 	0, 	0, 	"player", 	AUDIOQS.SPELL_TYPE_ABILITY},
@@ -68,6 +69,15 @@ local extSegments = {
 				false
 			},
 			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/fade.ogg",		nil,	true }
+		}
+	},
+	[6346] = {
+		{
+			{
+				"return AUDIOQS.spells[6346][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[6346][AUDIOQS.SPELL_EXPIRATION] > 0",
+				false
+			},
+			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/fear_ward.ogg",		nil,	true }
 		}
 	},
 	[8122] = {

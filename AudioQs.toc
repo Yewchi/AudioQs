@@ -20,6 +20,7 @@ Extensions\BeastMastery.lua
 Extensions\RestorationDruid.lua
 Extensions\Mistweaver.lua
 Extensions\HolyPaladin.lua
+Extensions\HolyPriest.lua
 Extensions\RestorationShaman.lua
 Extensions\ClassicDruid.lua
 Extensions\ClassicPriest.lua

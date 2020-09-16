@@ -5,7 +5,7 @@
 AUDIOQS = {}
 
 AUDIOQS.DEBUG = false
-AUDIOQS.VERBOSE = AUDIOQS.DEBUG and false
+AUDIOQS.VERBOSE = AUDIOQS.DEBUG and true
 
 AUDIOQS.WOW_CLASSIC = (select(4, GetBuildInfo()) < 20000) -- Can this be more broadly determined?
 AUDIOQS.WOW_SHADOWLANDS = (select(4, GetBuildInfo()) >= 90000) -- To be removed after expac rollover -- TODO CTRL+F WOW_SHADOWLANDS
@@ -168,7 +168,7 @@ UpdateSpecializationInfo = function(_, event, ...)
 			RegisterEvents()
 		end
 	end
-	
+
 	if specId == newSpecId then
 		return
 	end
@@ -176,9 +176,7 @@ UpdateSpecializationInfo = function(_, event, ...)
 	specId = newSpecId
 	local specHasPrompts = AUDIOQS.SpecHasPrompts(newSpecId)
 if AUDIOQS.DEBUG then print(AUDIOQS.audioQsSpecifier..AUDIOQS.debugSpecifier.."Spec #"..newSpecId.." has "..(specHasPrompts == true and "" or "no ").."available prompts.") end
-	AUDIOQS.LoadSpecialization()
-	success = true
-	--local success, err = pcall(AUDIOQS.LoadSpecialization)
+	local success, err = pcall(AUDIOQS.LoadSpecialization)
 	if not success then AUDIOQS.HandleError(err, "UpdateSpecializationInfo()", "AUDIOQS.LoadSpecialization()") end -- More robust coverage
 	
 	if specHasPrompts then
