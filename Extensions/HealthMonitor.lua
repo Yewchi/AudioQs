@@ -539,7 +539,7 @@ function AUDIOQS.HealthMonitor_CheckMode(event)
 		AUDIOQS.GS.HM_mode = nil
 		AUDIOQS.GS.HM_instanceType = nil
 		
-		thisSpecDispels = SPEC_DISPEL_TYPES[AUDIOQS.GetSpec()]
+		thisSpecDispels = SPEC_DISPEL_TYPES[AUDIOQS.GetSpecId()]
 		
 		for n=1,AUDIOQS.GS.HM_ALERT_MAX_ALERTS,1 do
 			table.insert(AUDIOQS.GS.HM_alertPriority, {nil, 100, 0xFFFF})
@@ -549,7 +549,7 @@ function AUDIOQS.HealthMonitor_CheckMode(event)
 	end
 	
 	if event == "PLAYER_SPECIALIZATION_CHANGED" then 
-		thisSpecDispels = SPEC_DISPEL_TYPES[AUDIOQS.GetSpec()]
+		thisSpecDispels = SPEC_DISPEL_TYPES[AUDIOQS.GetSpecId()]
 	end
     
     if (instanceType == "pvp" or instanceType == "arena") then 

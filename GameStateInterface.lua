@@ -27,7 +27,7 @@ local ON_COOLDOWN_CDEXPIRATION = 2
 ------- Static vals --
 --
 local BAD_SPELL_LIMITER_TIME = 0.08333
-
+local FOURTY_NINE_DAYS = 2^22 -- 19/11/2020 Dispels use a charge counter to provide the functionality of keeping a dispel off-cd when it does not remove a debuff. The start time of the charge counter is 2^22 + 100,655. Probably something to do with 22 bits of precision in a 32-bit float (or something like that). When casting dispels, the bottom values on this adjust by larger-than-cooldown, sub 100 numbers, indiciating the bottom of this value could store the flag of the state of the dispel, which they've set up in an extended spell-type.
 --
 ------- /Static vals --
 
@@ -309,10 +309,17 @@ if AUDIOQS.DEBUG then if cdDur~=cdExpiration then print(AUDIOQS.audioQsSpecifier
 		cdExpiration = start + dur
 	end
 	
+	local thisSpellCharges, _, fourtyNineCheck = GetSpellCharges(spellId)
+	
+	if ((fourtyNineCheck or 0) > FOURTY_NINE_DAYS and thisSpellCharges == 1 and cdExpiration > 0) then -- If a dispel has 1 charge, it is never on cd (but GetSpellCooldown may indicate cd expires after 8s if cast on undispelable target)
+		cdExpiration = 0
+		cdDur = 0
+	end
+	
 	if (thisSpell[AUDIOQS.SPELL_SPELL_TYPE] == AUDIOQS.SPELL_TYPE_AURA and thisSpell[AUDIOQS.SPELL_EXPIRATION] ~= cdExpiration) or
-			(thisSpell[AUDIOQS.SPELL_SPELL_TYPE] == AUDIOQS.SPELL_TYPE_ABILITY and (thisSpell[AUDIOQS.SPELL_CHARGES] ~= GetSpellCharges(spellId) or thisSpell[AUDIOQS.SPELL_EXPIRATION] ~= cdExpiration)) then
+			(thisSpell[AUDIOQS.SPELL_SPELL_TYPE] == AUDIOQS.SPELL_TYPE_ABILITY and (thisSpell[AUDIOQS.SPELL_CHARGES] ~= thisSpellCharges or thisSpell[AUDIOQS.SPELL_EXPIRATION] ~= cdExpiration)) then
 		SaveSpellSnapshot(spellId)
-		thisSpell[AUDIOQS.SPELL_CHARGES] = GetSpellCharges(spellId)
+		thisSpell[AUDIOQS.SPELL_CHARGES] = thisSpellCharges
 		local isChargeSpell = thisSpell[AUDIOQS.SpellCharges] ~= nil
 		
 		if not (cdDur > 0 and AUDIOQS.IsEqualToGcd(cdDur)) then

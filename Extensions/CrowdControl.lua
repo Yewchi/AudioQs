@@ -196,6 +196,7 @@ function AUDIOQS.CrowdControl_CheckLocUpdate()
 	while (i <= thisNumLoc)
 	do
 		thisLocTable = CC_GetLossOfControlTable(i)
+		if thisLocTable.startTime == nil then AUDIOQS.TablePrint(thisLocTable); PlaySoundFile("Interface/Addons/AudioQs/Sound/pulse_1_dropoped.ogg") end
 		local key = string.format("%s-%s", thisLocTable.startTime, thisLocTable.spellID)
 		if not AUDIOQS.GS.CC_activeLoc[key] then
 			AUDIOQS.GS.CC_activeLoc[key] = thisLocTable

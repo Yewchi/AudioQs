@@ -1,8 +1,8 @@
-## Interface: 80300
+## Interface: 90002
 ## Title: AudioQs
 ## Notes: Custom audio prompts and blind assist.
 ## Author: Yewchi
-## Version: 1.1.6
+## Version: 1.2.1
 ## SavedVariables: SV_Specializations
 AudioQs.lua
 Specialization.lua
@@ -22,6 +22,7 @@ Extensions\Mistweaver.lua
 Extensions\HolyPaladin.lua
 Extensions\HolyPriest.lua
 Extensions\RestorationShaman.lua
+Extensions\Covenants.lua
 Extensions\ClassicDruid.lua
 Extensions\ClassicPriest.lua
 Extensions\ClassicPaladin.lua

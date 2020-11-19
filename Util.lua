@@ -112,7 +112,7 @@ SlashCmdList["AQ"] = function(msg)
 	if args ~= nil then 
  		----- INSTALL -----
 		if (args[1] == "load" or args[1] == "install") and args[2] ~= nil then
-			local mySpecInfo = {AUDIOQS.GetSpec()}
+			local mySpecInfo = {AUDIOQS.GetSpecId()}
 			local mySpec = mySpecInfo[AUDIOQS.SPEC_INFO_NUM]
 			local funcs = AUDIOQS.GetExtensionFuncs(args[2])
 			
@@ -137,7 +137,7 @@ SlashCmdList["AQ"] = function(msg)
 			end
 		----- REMOVE -----
 		elseif (args[1] == "remove" or args[1] == "uninstall" or args[1] == "unload") and args[2] ~= nil then
-			local mySpecInfo = {AUDIOQS.GetSpec()}
+			local mySpecInfo = {AUDIOQS.GetSpecId()}
 			local mySpec = mySpecInfo[AUDIOQS.SPEC_INFO_NUM]
 			local extName = args[2]
 			local funcs = AUDIOQS.GetExtensionFuncs(extName)
@@ -246,13 +246,17 @@ end
 function AUDIOQS.Print(formatString, ...)
 end
 
-function AUDIOQS.GetSpec()
+function AUDIOQS.GetSpecId()
 	if AUDIOQS.WOW_CLASSIC then
 		local class = {C_PlayerInfo.GetClass(PlayerLocation:CreateFromUnit("player"))}
 		return class[AUDIOQS.CLC_PLAYERLOCATION_CLASS_ID], class[AUDIOQS.CLC_PLAYERLOCATION_NAME]
 	else
 		return GetSpecializationInfo(GetSpecialization())
 	end
+end
+
+function AUDIOQS.GetClassId()
+	return select(3, UnitClass("player"))
 end
 
 function AUDIOQS.GetGcdDur()

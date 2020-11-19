@@ -34,23 +34,28 @@ local extFuncs = {
 --
 -- spells[spellId] = { "Spell Name", charges, cdDur, cdExpiration, unitId, spellType}
 local extSpells = { 
+		[115098] = 	{ "Chi Wave", 						0, 	0, 	0, 	"player", 	AUDIOQS.SPELL_TYPE_ABILITY},
+		[123986] = 	{ "Chi Burst", 						0, 	0, 	0, 	"player", 	AUDIOQS.SPELL_TYPE_ABILITY},
 		[122278] = 	{ "Dampen Harm", 					0, 	0, 	0, 	"player", 	AUDIOQS.SPELL_TYPE_ABILITY},
 		[115310] = 	{ "Revival", 						0, 	0, 	0, 	"player", 	AUDIOQS.SPELL_TYPE_ABILITY},
 --		[115450] = 	{ "Detox", 							0, 	0, 	0, 	"player", 	AUDIOQS.SPELL_TYPE_ABILITY},
 		[191837] = 	{ "Essence Font", 					0, 	0, 	0, 	"player", 	AUDIOQS.SPELL_TYPE_ABILITY},
 		[243435] = 	{ "Fortifying Brew", 				0, 	0, 	0, 	"player", 	AUDIOQS.SPELL_TYPE_ABILITY},
+		[233759] = 	{ "Grapple Weapon", 				0, 	0, 	0, 	"player", 	AUDIOQS.SPELL_TYPE_ABILITY},
+		[205234] = 	{ "Healing Sphere", 				0, 	0, 	0, 	"player", 	AUDIOQS.SPELL_TYPE_ABILITY},
+		[122281] = 	{ "Healing Elixir", 				0, 	0, 	0, 	"player", 	AUDIOQS.SPELL_TYPE_ABILITY},
 		[119381] = 	{ "Leg Sweep", 						0, 	0, 	0, 	"player", 	AUDIOQS.SPELL_TYPE_ABILITY},
 		[116849] = 	{ "Life Cocoon", 					0, 	0, 	0, 	"player", 	AUDIOQS.SPELL_TYPE_ABILITY},
+		[197908] = 	{ "Mana Tea",	 					0, 	0, 	0, 	"player", 	AUDIOQS.SPELL_TYPE_ABILITY},
 		[115078] = 	{ "Paralysis", 						0, 	0, 	0, 	"player", 	AUDIOQS.SPELL_TYPE_ABILITY},
 --		[115151] = 	{ "Renewing Mist", 					0, 	0, 	0, 	"player", 	AUDIOQS.SPELL_TYPE_ABILITY},
-		[115310] = 	{ "Revival",		 				0, 	0, 	0, 	"player", 	AUDIOQS.SPELL_TYPE_ABILITY},
 		[116844] = 	{ "Ring of Peace", 					0, 	0, 	0, 	"player", 	AUDIOQS.SPELL_TYPE_ABILITY},
+		[198898] = 	{ "Song of Chi-Ji", 				0, 	0, 	0, 	"player", 	AUDIOQS.SPELL_TYPE_ABILITY},
+		[116841] = 	{ "Tiger's Lust", 					0, 	0, 	0, 	"player", 	AUDIOQS.SPELL_TYPE_ABILITY},
 		[116680] = 	{ "Thunder Focus Tea", 				0, 	0, 	0, 	"player", 	AUDIOQS.SPELL_TYPE_ABILITY},
 		[119996] = 	{ "Transcendence: Transfer", 		0, 	0, 	0, 	"player", 	AUDIOQS.SPELL_TYPE_ABILITY},
 		[198664] = 	{ "Invoke Chi-Ji, the Red Crane",	0,	0, 	0, 	"player", 	AUDIOQS.SPELL_TYPE_ABILITY}, -- TODO Invoke Xuen, at least, shares a CD with Red-Crane, and it is detected in WindWlkr.
-		[233759] = 	{ "Grapple Weapon", 				0, 	0, 	0, 	"player", 	AUDIOQS.SPELL_TYPE_ABILITY},
-		[197908] = 	{ "Mana Tea",	 					0, 	0, 	0, 	"player", 	AUDIOQS.SPELL_TYPE_ABILITY},
-		[122281] = 	{ "Healing Elixir", 				0, 	0, 	0, 	"player", 	AUDIOQS.SPELL_TYPE_ABILITY}
+		[209584] = 	{ "Zen Focus Tea", 					0, 	0, 	0, 	"player", 	AUDIOQS.SPELL_TYPE_ABILITY},
 }
 
 -- events["EVENT_NAME"] = eventArgsArray (automatically generated)
@@ -60,13 +65,31 @@ local extEvents = {
 }
 
 local extSegments = {
+	[115098] = {
+		{
+			{
+				"return AUDIOQS.spells[115098][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[115098][AUDIOQS.SPELL_EXPIRATION] > 0",
+				false
+			},
+			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Monk/chi_wave.ogg",		nil,	true }
+		}
+	},
+	[123986] = {
+		{
+			{
+				"return AUDIOQS.spells[123986][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[123986][AUDIOQS.SPELL_EXPIRATION] > 0",
+				false
+			},
+			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Monk/chi_burst.ogg",		nil,	true }
+		}
+	},
 	[122278] = {
 		{
 			{
 				"return AUDIOQS.spells[122278][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[122278][AUDIOQS.SPELL_EXPIRATION] > 0",
 				false
 			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/dampen_harm.ogg",		nil,	true }
+			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Monk/dampen_harm.ogg",		nil,	true }
 		}
 	},
 	[115310] = {
@@ -75,7 +98,7 @@ local extSegments = {
 				"return AUDIOQS.spells[115310][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[115310][AUDIOQS.SPELL_EXPIRATION] > 0",
 				false
 			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/revival.ogg",		nil,	true }
+			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Monk/revival.ogg",		nil,	true }
 		}
 	},
 --[[[115450] = { -- Detox
@@ -84,7 +107,7 @@ local extSegments = {
 				"return AUDIOQS.spells[115450][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[115450][AUDIOQS.SPELL_EXPIRATION] > 0",
 				false
 			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/detox.ogg",		nil,	true }
+			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Monk/detox.ogg",		nil,	true }
 		}
 	},]]--
 	[191837] = {
@@ -93,7 +116,7 @@ local extSegments = {
 				"return AUDIOQS.spells[191837][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[191837][AUDIOQS.SPELL_EXPIRATION] > 0",
 				false
 			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/essence_font.ogg",		nil,	true }
+			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Monk/essence_font.ogg",		nil,	true }
 		}
 	},
 	[243435] = {
@@ -102,7 +125,16 @@ local extSegments = {
 				"return AUDIOQS.spells[243435][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[243435][AUDIOQS.SPELL_EXPIRATION] > 0",
 				false
 			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/fortifying_brew.ogg",		nil,	true }
+			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Monk/fortifying_brew.ogg",		nil,	true }
+		}
+	},
+	[205234] = {
+		{
+			{
+				"if AUDIOQS.ChargeCooldownsAllowed ~= nil and AUDIOQS.ChargeCooldownsAllowed then local charges = GetSpellCharges(205234) return (AUDIOQS.spells[205234][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[205234][AUDIOQS.SPELL_EXPIRATION] > 0) or (charges ~= nil and charges > AUDIOQS.spellsSnapshot[205234][AUDIOQS.SPELL_CHARGES]) end return false",
+				false
+			},
+			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Monk/healing_sphere.ogg",		nil,	true }
 		}
 	},
 	[119381] = {
@@ -111,7 +143,7 @@ local extSegments = {
 				"return AUDIOQS.spells[119381][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[119381][AUDIOQS.SPELL_EXPIRATION] > 0",
 				false
 			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/leg_sweep.ogg",		nil,	true }
+			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Monk/leg_sweep.ogg",		nil,	true }
 		}
 	},
 	[116849] = {
@@ -120,7 +152,7 @@ local extSegments = {
 				"return AUDIOQS.spells[116849][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[116849][AUDIOQS.SPELL_EXPIRATION] > 0",
 				false
 			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/life_cocoon.ogg",		nil,	true }
+			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Monk/life_cocoon.ogg",		nil,	true }
 		}
 	},
 	[115078] = {
@@ -129,7 +161,7 @@ local extSegments = {
 				"return AUDIOQS.spells[115078][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[115078][AUDIOQS.SPELL_EXPIRATION] > 0",
 				false
 			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/paralysis.ogg",		nil,	true }
+			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Monk/paralysis.ogg",		nil,	true }
 		}
 	},
 --[[[115151] = { -- Renewing Mist
@@ -138,7 +170,7 @@ local extSegments = {
 				"return AUDIOQS.spells[115151][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[115151][AUDIOQS.SPELL_EXPIRATION] > 0",
 				false
 			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/renewing_mist.ogg",		nil,	true }
+			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Monk/renewing_mist.ogg",		nil,	true }
 		}
 	},]]--
 	[115310] = {
@@ -147,7 +179,7 @@ local extSegments = {
 				"return AUDIOQS.spells[115310][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[115310][AUDIOQS.SPELL_EXPIRATION] > 0",
 				false
 			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/revival.ogg",		nil,	true }
+			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Monk/revival.ogg",		nil,	true }
 		}
 	},
 	[116844] = {
@@ -156,7 +188,7 @@ local extSegments = {
 				"return AUDIOQS.spells[116844][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[116844][AUDIOQS.SPELL_EXPIRATION] > 0",
 				false
 			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/ring_of_peace.ogg",		nil,	true }
+			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Monk/ring_of_peace.ogg",		nil,	true }
 		}
 	},
 	[116680] = {
@@ -165,7 +197,25 @@ local extSegments = {
 				"return AUDIOQS.spells[116680][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[116680][AUDIOQS.SPELL_EXPIRATION] > 0",
 				false
 			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/focus_tea.ogg",		nil,	true }
+			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Monk/focus_tea.ogg",		nil,	true }
+		}
+	},
+	[198898] = { -- Song of Chi-Ji
+		{
+			{
+				"return AUDIOQS.spells[198898][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[198898][AUDIOQS.SPELL_EXPIRATION] > 0",
+				false
+			},
+			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Monk/song_of_chi_ji.ogg",		nil,	true }
+		}
+	},
+	[116841] = { -- Tiger's Lust
+		{
+			{
+				"return AUDIOQS.spells[116841][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[116841][AUDIOQS.SPELL_EXPIRATION] > 0",
+				false
+			},
+			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Monk/tigers_lust.ogg",		nil,	true }
 		}
 	},
 	[119996] = { -- Transcendence: Transfer
@@ -174,7 +224,7 @@ local extSegments = {
 				"return AUDIOQS.spells[119996][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[119996][AUDIOQS.SPELL_EXPIRATION] > 0",
 				false
 			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/transcendence.ogg",		nil,	true }
+			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Monk/transcendence.ogg",		nil,	true }
 		}
 	},
 	[198664] = {
@@ -183,7 +233,7 @@ local extSegments = {
 				"return IsSpellKnown(198664) and AUDIOQS.spells[198664][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[198664][AUDIOQS.SPELL_EXPIRATION] > 0",
 				false
 			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/red_crane.ogg",		nil,	true }
+			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Monk/red_crane.ogg",		nil,	true }
 		}
 	},
 	[233759] = {
@@ -192,7 +242,7 @@ local extSegments = {
 				"return AUDIOQS.spells[233759][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[233759][AUDIOQS.SPELL_EXPIRATION] > 0",
 				false
 			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/grapple_weapon.ogg",		nil,	true }
+			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Monk/grapple_weapon.ogg",		nil,	true }
 		}
 	},
 	[197908] = {
@@ -201,7 +251,7 @@ local extSegments = {
 				"return AUDIOQS.spells[197908][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[197908][AUDIOQS.SPELL_EXPIRATION] > 0",
 				false
 			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/mana_tea.ogg",		nil,	true }
+			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Monk/mana_tea.ogg",		nil,	true }
 		}
 	},
 	[122281] = {
@@ -210,7 +260,16 @@ local extSegments = {
 				"if AUDIOQS.ChargeCooldownsAllowed ~= nil and AUDIOQS.ChargeCooldownsAllowed then local charges = GetSpellCharges(122281) return (AUDIOQS.spells[122281][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[122281][AUDIOQS.SPELL_EXPIRATION] > 0) or (charges ~= nil and charges > AUDIOQS.spellsSnapshot[122281][AUDIOQS.SPELL_CHARGES]) end return false",
 				false
 			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/healing_elixir.ogg",		nil,	true }
+			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Monk/healing_elixir.ogg",		nil,	true }
+		}
+	},
+	[209584] = {
+		{
+			{
+				"return AUDIOQS.spells[209584][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[209584][AUDIOQS.SPELL_EXPIRATION] > 0",
+				false
+			},
+			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Monk/zen_focus_tea.ogg",		nil,	true }
 		}
 	},
 	["LOADING_SCREEN_DISABLED"] = { -- TODO Should be in an "essentials", hidden extension or in the AudioQs.lua main event handlers. Workaround for now.

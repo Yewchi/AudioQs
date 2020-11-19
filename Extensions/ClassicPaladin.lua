@@ -114,7 +114,7 @@ local extSegments = {
 				"return AUDIOQS.spells[498][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[498][AUDIOQS.SPELL_EXPIRATION] > 0",
 				false
 			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/divine_protection.ogg",		nil,	true }
+			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Paladin/divine_protection.ogg",		nil,	true }
 		}
 	},
 	[2812] = {
@@ -123,7 +123,7 @@ local extSegments = {
 				"return AUDIOQS.spells[2812][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[2812][AUDIOQS.SPELL_EXPIRATION] > 0",
 				false
 			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/holy_wrath.ogg",		nil,	true }
+			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Paladin/holy_wrath.ogg",		nil,	true }
 		}
 	},
 	[2878] = {
@@ -132,7 +132,7 @@ local extSegments = {
 				"return AUDIOQS.spells[2878][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[2878][AUDIOQS.SPELL_EXPIRATION] > 0",
 				false
 			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/turn_undead.ogg",		nil,	true }
+			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Paladin/turn_undead.ogg",		nil,	true }
 		}
 	},
 	["LOADING_SCREEN_DISABLED"] = { -- TODO Should be in an "essentials", hidden extension or in the AudioQs.lua main event handlers. Workaround for now.

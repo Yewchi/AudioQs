@@ -47,21 +47,21 @@ local extFuncs = {
 --
 -- spells[spellId] = { "Spell Name", charges, cdDur, cdExpiration, unitId, spellType}
 local extSpells = { 
-		[217200] = { "Barbed Shot", 			2, 	0, 	0, 	"player", 		AUDIOQS.SPELL_TYPE_ABILITY}, -- TODO If two prompts use the same spellId, spellName, unitId and spellType, they should be tracked as one spell as a single entry in the GSI data. Requires checking for similarities before adding.
-		[272790] = { "Frenzy", 					0, 	0, 	0, 	"pet", 			AUDIOQS.SPELL_TYPE_AURA},
-		[53209] = { "Chimaera Shot", 			0, 	0, 	0, 	"player", 		AUDIOQS.SPELL_TYPE_ABILITY},
-		[131894] = { "A Murder Of Crows", 		0, 	0, 	0, 	"player", 		AUDIOQS.SPELL_TYPE_ABILITY},
-		[19574] = { "Bestial Wrath", 			0, 	0, 	0, 	"player", 		AUDIOQS.SPELL_TYPE_ABILITY},
-		[193530] = { "Aspect of the Wild", 		0, 	0, 	0, 	"player", 		AUDIOQS.SPELL_TYPE_ABILITY},
-		[186265] = { "Aspect of the Turtle", 	0, 	0, 	0, 	"player", 		AUDIOQS.SPELL_TYPE_ABILITY},
-		[186257] = { "Aspect of the Cheetah", 	0, 	0, 	0, 	"player", 		AUDIOQS.SPELL_TYPE_ABILITY},
-		[109304] = { "Exhilaration", 			0, 	0, 	0, 	"player", 		AUDIOQS.SPELL_TYPE_ABILITY},
-		[1543] = { "Flare", 					0, 	0, 	0, 	"player", 		AUDIOQS.SPELL_TYPE_ABILITY},
-		[187698] = { "Tar Trap", 				0, 	0, 	0, 	"player", 		AUDIOQS.SPELL_TYPE_ABILITY},
-		[187650] = { "Freezing Trap", 			0, 	0, 	0, 	"player", 		AUDIOQS.SPELL_TYPE_ABILITY},
-		[147362] = { "Counter Shot", 			0, 	0, 	0, 	"player", 		AUDIOQS.SPELL_TYPE_ABILITY},
-		[19577] = { "Intimidation", 			0, 	0, 	0, 	"player", 		AUDIOQS.SPELL_TYPE_ABILITY},
-		[34477] = { "Misdirection", 			0, 	0, 	0, 	"player", 		AUDIOQS.SPELL_TYPE_ABILITY}
+		[217200] = 	{ "Barbed Shot", 			2, 	0, 	0, 	"player", 		AUDIOQS.SPELL_TYPE_ABILITY}, -- TODO If two prompts use the same spellId, spellName, unitId and spellType, they should be tracked as one spell as a single entry in the GSI data. Requires checking for similarities before adding.
+		[272790] = 	{ "Frenzy", 				0, 	0, 	0, 	"pet", 			AUDIOQS.SPELL_TYPE_AURA},
+		[53209] = 	{ "Chimaera Shot", 			0, 	0, 	0, 	"player", 		AUDIOQS.SPELL_TYPE_ABILITY},
+		[131894] = 	{ "A Murder Of Crows", 		0, 	0, 	0, 	"player", 		AUDIOQS.SPELL_TYPE_ABILITY},
+		[19574] = 	{ "Bestial Wrath", 			0, 	0, 	0, 	"player", 		AUDIOQS.SPELL_TYPE_ABILITY},
+		[193530] = 	{ "Aspect of the Wild", 	0, 	0, 	0, 	"player", 		AUDIOQS.SPELL_TYPE_ABILITY},
+		[186265] = 	{ "Aspect of the Turtle", 	0, 	0, 	0, 	"player", 		AUDIOQS.SPELL_TYPE_ABILITY},
+		[186257] = 	{ "Aspect of the Cheetah", 	0, 	0, 	0, 	"player", 		AUDIOQS.SPELL_TYPE_ABILITY},
+		[109304] = 	{ "Exhilaration", 			0, 	0, 	0, 	"player", 		AUDIOQS.SPELL_TYPE_ABILITY},
+		[1543] = 	{ "Flare", 					0, 	0, 	0, 	"player", 		AUDIOQS.SPELL_TYPE_ABILITY},
+		[187698] = 	{ "Tar Trap", 				0, 	0, 	0, 	"player", 		AUDIOQS.SPELL_TYPE_ABILITY},
+		[187650] = 	{ "Freezing Trap", 			0, 	0, 	0, 	"player", 		AUDIOQS.SPELL_TYPE_ABILITY},
+		[147362] = 	{ "Counter Shot", 			0, 	0, 	0, 	"player", 		AUDIOQS.SPELL_TYPE_ABILITY},
+		[19577] = 	{ "Intimidation", 			0, 	0, 	0, 	"player", 		AUDIOQS.SPELL_TYPE_ABILITY},
+		[34477] = 	{ "Misdirection", 			0, 	0, 	0, 	"player", 		AUDIOQS.SPELL_TYPE_ABILITY}
 }
 
 -- events["EVENT_NAME"] = eventArgsArray (automatically generated)
@@ -105,7 +105,7 @@ local extSegments = {
 				"return AUDIOQS.spells[53209][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[53209][AUDIOQS.SPELL_EXPIRATION] > 0",
 				false
 			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/chimaera_shot.ogg",		nil,	true }
+			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Hunter/chimaera_shot.ogg",		nil,	true }
 		}
 	},
 	[131894] = {
@@ -128,7 +128,7 @@ local extSegments = {
 			},
 			{"AUDIOQS.GS.BM_crowsLostTime = AUDIOQS.spells[131894][AUDIOQS.SPELL_EXPIRATION] - GetTime() return 0.0",		nil,		nil,	true },
 			{"return AUDIOQS.GS.BM_crowsLostTime", nil, nil, true}, -- Convenient, doesn't require if crowsLostTime == nil check.
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/a_murder_of_crows.ogg",		nil,	true }
+			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Hunter/a_murder_of_crows.ogg",		nil,	true }
 		},
 	},
 	[19574] = {
@@ -137,7 +137,7 @@ local extSegments = {
 				"return AUDIOQS.spells[19574][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[19574][AUDIOQS.SPELL_EXPIRATION] > 0",
 				false
 			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/bestial_wrath.ogg",		nil,	true }
+			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Hunter/bestial_wrath.ogg",		nil,	true }
 		}
 	},
 	[193530] = {
@@ -146,7 +146,7 @@ local extSegments = {
 				"return AUDIOQS.spells[193530][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[193530][AUDIOQS.SPELL_EXPIRATION] > 0",
 				false
 			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/aspect_of_the_wild.ogg",		nil,	true }
+			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Hunter/aspect_of_the_wild.ogg",		nil,	true }
 		}
 	},
 	[186265] = {
@@ -155,7 +155,7 @@ local extSegments = {
 				"return AUDIOQS.spells[186265][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[186265][AUDIOQS.SPELL_EXPIRATION] > 0",
 				false
 			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/aspect_of_the_turtle.ogg",		nil,	true }
+			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Hunter/aspect_of_the_turtle.ogg",		nil,	true }
 		}
 	},
 	[186257] = {
@@ -164,7 +164,7 @@ local extSegments = {
 				"return AUDIOQS.spells[186257][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[186257][AUDIOQS.SPELL_EXPIRATION] > 0",
 				false
 			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/aspect_of_the_cheetah.ogg",		nil,	true }
+			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Hunter/aspect_of_the_cheetah.ogg",		nil,	true }
 		}
 	},
 	[109304] = {
@@ -173,7 +173,7 @@ local extSegments = {
 				"return AUDIOQS.spells[109304][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[109304][AUDIOQS.SPELL_EXPIRATION] > 0",
 				false
 			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/exhileration.ogg",		nil,	true }
+			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Hunter/exhileration.ogg",		nil,	true }
 		}
 	},
 	[1543] = {
@@ -182,7 +182,7 @@ local extSegments = {
 				"return AUDIOQS.spells[1543][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[1543][AUDIOQS.SPELL_EXPIRATION] > 0",
 				false
 			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/flare.ogg",		nil,	true }
+			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Hunter/flare.ogg",		nil,	true }
 		}
 	},
 	[187698] = {
@@ -191,7 +191,7 @@ local extSegments = {
 				"return AUDIOQS.spells[187698][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[187698][AUDIOQS.SPELL_EXPIRATION] > 0",
 				false
 			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/tar_trap.ogg",		nil,	true }
+			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Hunter/tar_trap.ogg",		nil,	true }
 		}
 	},
 	[187650] = {
@@ -200,7 +200,7 @@ local extSegments = {
 				"return AUDIOQS.spells[187650][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[187650][AUDIOQS.SPELL_EXPIRATION] > 0",
 				false
 			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/freezing_trap.ogg",		nil,	true }
+			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Hunter/freezing_trap.ogg",		nil,	true }
 		}
 	},
 	[147362] = {
@@ -209,7 +209,7 @@ local extSegments = {
 				"return AUDIOQS.spells[147362][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[147362][AUDIOQS.SPELL_EXPIRATION] > 0",
 				false
 			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/counter_shot.ogg",		nil,	true }
+			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Hunter/counter_shot.ogg",		nil,	true }
 		}
 	},
 	[19577] = {
@@ -218,7 +218,7 @@ local extSegments = {
 				"return AUDIOQS.spells[19577][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[19577][AUDIOQS.SPELL_EXPIRATION] > 0",
 				false
 			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/intimidation.ogg",		nil,	true }
+			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Hunter/intimidation.ogg",		nil,	true }
 		}
 	},
 	[34477] = {
@@ -227,7 +227,7 @@ local extSegments = {
 				"return AUDIOQS.spells[34477][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[34477][AUDIOQS.SPELL_EXPIRATION] > 0",
 				false
 			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/misdirection.ogg",		nil,	true }
+			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Hunter/misdirection.ogg",		nil,	true }
 		}
 	},
 }

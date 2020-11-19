@@ -34,13 +34,16 @@ local extFuncs = {
 --
 -- spells[spellId] = { "Spell Name", charges, cdDur, cdExpiration, unitId, spellType}
 local extSpells = { 
+		[121536] = 	{ "Angelic Feather", 			0, 	0, 	0, 	"player", 	AUDIOQS.SPELL_TYPE_ABILITY},
 		[200183] = 	{ "Apotheosis", 				0, 	0, 	0, 	"player", 	AUDIOQS.SPELL_TYPE_ABILITY},
 		[204883] = 	{ "Circle of Healing", 			0, 	0, 	0, 	"player", 	AUDIOQS.SPELL_TYPE_ABILITY},
+		[19236] = 	{ "Desperate Prayer", 			0, 	0, 	0, 	"player", 	AUDIOQS.SPELL_TYPE_ABILITY},
 		[64843] = 	{ "Divine Hymn", 				0, 	0, 	0, 	"player", 	AUDIOQS.SPELL_TYPE_ABILITY},
 		[110744] = 	{ "Divine Star", 				0, 	0, 	0, 	"player", 	AUDIOQS.SPELL_TYPE_ABILITY},
 		[586] = 	{ "Fade", 						0, 	0, 	0, 	"player", 	AUDIOQS.SPELL_TYPE_ABILITY},
-		[47788] = 	{ "Guardian Spirit", 			0, 	0, 	0, 	"player", 	AUDIOQS.SPELL_TYPE_ABILITY},
 		[213602] = 	{ "Greater Fade", 				0, 	0, 	0, 	"player", 	AUDIOQS.SPELL_TYPE_ABILITY},
+		[289666] = 	{ "Greater Heal", 				0, 	0, 	0, 	"player", 	AUDIOQS.SPELL_TYPE_ABILITY},
+		[47788] = 	{ "Guardian Spirit", 			0, 	0, 	0, 	"player", 	AUDIOQS.SPELL_TYPE_ABILITY},
 		[120517] = 	{ "Halo", 						0, 	0, 	0, 	"player", 	AUDIOQS.SPELL_TYPE_ABILITY},
 		[213610] = 	{ "Holy Ward", 					0, 	0, 	0, 	"player", 	AUDIOQS.SPELL_TYPE_ABILITY},
 		[88625] = 	{ "Holy Word: Chastise", 		0, 	0, 	0, 	"player", 	AUDIOQS.SPELL_TYPE_ABILITY},
@@ -48,13 +51,15 @@ local extSpells = {
 		[265202] = 	{ "Holy Word: Salvation",		0, 	0, 	0, 	"player", 	AUDIOQS.SPELL_TYPE_ABILITY},
 		[34861] = 	{ "Holy Word: Sanctify",		0, 	0, 	0, 	"player", 	AUDIOQS.SPELL_TYPE_ABILITY},
 		[2050] = 	{ "Holy Word: Serenity", 		0, 	0, 	0, 	"player", 	AUDIOQS.SPELL_TYPE_ABILITY},
-		[32375] = 	{ "Mass Dispel", 				0, 	0, 	0, 	"player", 	AUDIOQS.SPELL_TYPE_ABILITY},
 		[73325] = 	{ "Leap of Faith", 				0, 	0, 	0, 	"player", 	AUDIOQS.SPELL_TYPE_ABILITY},
 		[32375] = 	{ "Mass Dispel", 				0, 	0, 	0, 	"player", 	AUDIOQS.SPELL_TYPE_ABILITY},
+		[32375] = 	{ "Mass Dispel", 				0, 	0, 	0, 	"player", 	AUDIOQS.SPELL_TYPE_ABILITY},
+		[10060] = 	{ "Power Infusion", 			0, 	0, 	0, 	"player", 	AUDIOQS.SPELL_TYPE_ABILITY},
 		[33076] = 	{ "Prayer Of Mending", 			0, 	0, 	0, 	"player", 	AUDIOQS.SPELL_TYPE_ABILITY},
 		[8122] = 	{ "Psychic Scream", 			0, 	0, 	0, 	"player", 	AUDIOQS.SPELL_TYPE_ABILITY},
 		[527] = 	{ "Purify", 					0, 	0, 	0, 	"player", 	AUDIOQS.SPELL_TYPE_ABILITY},
 		[197268] = 	{ "Ray of Hope", 				0, 	0, 	0, 	"player", 	AUDIOQS.SPELL_TYPE_ABILITY},
+		[32379] = 	{ "Shadow Word: Death", 		0, 	0, 	0, 	"player", 	AUDIOQS.SPELL_TYPE_ABILITY},
 		[204263] = 	{ "Shining Force", 				0, 	0, 	0, 	"player", 	AUDIOQS.SPELL_TYPE_ABILITY},
 		[64901] = 	{ "Symbol of Hope", 			0, 	0, 	0, 	"player", 	AUDIOQS.SPELL_TYPE_ABILITY},
 }
@@ -67,13 +72,22 @@ local extEvents = {
 }
 
 local extSegments = {
+	[121536] = {
+		{
+			{
+				"if AUDIOQS.ChargeCooldownsAllowed ~= nil and AUDIOQS.ChargeCooldownsAllowed then local charges = GetSpellCharges(121536) return (AUDIOQS.spells[121536][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[121536][AUDIOQS.SPELL_EXPIRATION] > 0) or (charges ~= nil and charges > AUDIOQS.spellsSnapshot[121536][AUDIOQS.SPELL_CHARGES]) end return false",
+				false
+			},
+			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Priest/angelic_feather.ogg",		nil,	true }
+		}
+	},
 	[200183] = {
 		{
 			{
 				"return AUDIOQS.spells[200183][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[200183][AUDIOQS.SPELL_EXPIRATION] > 0",
 				false
 			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/apotheosis.ogg",		nil,	true }
+			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Priest/apotheosis.ogg",		nil,	true }
 		}
 	},
 	[204883] = {
@@ -82,7 +96,16 @@ local extSegments = {
 				"return AUDIOQS.spells[204883][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[204883][AUDIOQS.SPELL_EXPIRATION] > 0",
 				false
 			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/circle_of_healing.ogg",		nil,	true }
+			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Priest/circle_of_healing.ogg",		nil,	true }
+		}
+	},
+	[19236] = {
+		{
+			{
+				"return AUDIOQS.spells[19236][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[19236][AUDIOQS.SPELL_EXPIRATION] > 0",
+				false
+			},
+			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Priest/desperate_prayer.ogg",		nil,	true }
 		}
 	},
 	[64843] = {
@@ -91,7 +114,7 @@ local extSegments = {
 				"return AUDIOQS.spells[64843][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[64843][AUDIOQS.SPELL_EXPIRATION] > 0",
 				false
 			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/divine_hymn.ogg",		nil,	true }
+			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Priest/divine_hymn.ogg",		nil,	true }
 		}
 	},
 	[110744] = {
@@ -100,7 +123,7 @@ local extSegments = {
 				"return AUDIOQS.spells[110744][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[110744][AUDIOQS.SPELL_EXPIRATION] > 0",
 				false
 			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/divine_star.ogg",		nil,	true }
+			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Priest/divine_star.ogg",		nil,	true }
 		}
 	},
 	[586] = {
@@ -109,16 +132,7 @@ local extSegments = {
 				"return AUDIOQS.spells[586][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[586][AUDIOQS.SPELL_EXPIRATION] > 0",
 				false
 			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/fade.ogg",		nil,	true }
-		}
-	},
-	[47788] = {
-		{
-			{
-				"return AUDIOQS.spells[47788][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[47788][AUDIOQS.SPELL_EXPIRATION] > 0",
-				false
-			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/guardian_spirit.ogg",		nil,	true }
+			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Priest/fade.ogg",		nil,	true }
 		}
 	},
 	[213602] = {
@@ -127,7 +141,25 @@ local extSegments = {
 				"return AUDIOQS.spells[213602][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[213602][AUDIOQS.SPELL_EXPIRATION] > 0",
 				false
 			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/greater_fade.ogg",		nil,	true }
+			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Priest/greater_fade.ogg",		nil,	true }
+		}
+	},
+	[289666] = {
+		{
+			{
+				"return AUDIOQS.spells[289666][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[289666][AUDIOQS.SPELL_EXPIRATION] > 0",
+				false
+			},
+			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Priest/greater_heal.ogg",		nil,	true }
+		}
+	},
+	[47788] = {
+		{
+			{
+				"return AUDIOQS.spells[47788][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[47788][AUDIOQS.SPELL_EXPIRATION] > 0",
+				false
+			},
+			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Priest/guardian_spirit.ogg",		nil,	true }
 		}
 	},
 	[120517] = {
@@ -136,7 +168,7 @@ local extSegments = {
 				"return AUDIOQS.spells[120517][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[120517][AUDIOQS.SPELL_EXPIRATION] > 0",
 				false
 			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/halo.ogg",		nil,	true }
+			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Priest/halo.ogg",		nil,	true }
 		}
 	},
 	[213610] = {
@@ -145,7 +177,7 @@ local extSegments = {
 				"return AUDIOQS.spells[213610][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[213610][AUDIOQS.SPELL_EXPIRATION] > 0",
 				false
 			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/holy_ward.ogg",		nil,	true }
+			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Priest/holy_ward.ogg",		nil,	true }
 		}
 	},
 	[88625] = {
@@ -154,7 +186,7 @@ local extSegments = {
 				"return AUDIOQS.spells[88625][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[88625][AUDIOQS.SPELL_EXPIRATION] > 0",
 				false
 			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/chastise.ogg",		nil,	true }
+			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Priest/chastise.ogg",		nil,	true }
 		}
 	},
 	[289657] = {
@@ -163,7 +195,7 @@ local extSegments = {
 				"return AUDIOQS.spells[289657][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[289657][AUDIOQS.SPELL_EXPIRATION] > 0",
 				false
 			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/concentration.ogg",		nil,	true }
+			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Priest/concentration.ogg",		nil,	true }
 		}
 	},
 	[265202] = {
@@ -172,7 +204,7 @@ local extSegments = {
 				"return AUDIOQS.spells[265202][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[265202][AUDIOQS.SPELL_EXPIRATION] > 0",
 				false
 			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/salvation.ogg",		nil,	true }
+			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Priest/salvation.ogg",		nil,	true }
 		}
 	},
 	[34861] = {
@@ -181,7 +213,7 @@ local extSegments = {
 				"return AUDIOQS.spells[34861][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[34861][AUDIOQS.SPELL_EXPIRATION] > 0",
 				false
 			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/sanctify.ogg",		nil,	true }
+			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Priest/sanctify.ogg",		nil,	true }
 		}
 	},
 	[2050] = {
@@ -190,7 +222,7 @@ local extSegments = {
 				"return AUDIOQS.spells[2050][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[2050][AUDIOQS.SPELL_EXPIRATION] > 0",
 				false
 			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/serenity.ogg",		nil,	true }
+			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Priest/serenity.ogg",		nil,	true }
 		}
 	},
 	[73325] = {
@@ -199,7 +231,7 @@ local extSegments = {
 				"return AUDIOQS.spells[73325][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[73325][AUDIOQS.SPELL_EXPIRATION] > 0",
 				false
 			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/leap_of_faith.ogg",		nil,	true }
+			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Priest/leap_of_faith.ogg",		nil,	true }
 		}
 	},
 	[32375] = {
@@ -208,7 +240,16 @@ local extSegments = {
 				"return AUDIOQS.spells[32375][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[32375][AUDIOQS.SPELL_EXPIRATION] > 0",
 				false
 			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/mass_dispel.ogg",		nil,	true }
+			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Priest/mass_dispel.ogg",		nil,	true }
+		}
+	},
+	[10060] = {
+		{
+			{
+				"return AUDIOQS.spells[10060][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[10060][AUDIOQS.SPELL_EXPIRATION] > 0",
+				false
+			},
+			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Priest/power_infusion.ogg",		nil,	true }
 		}
 	},
 	[33076] = {
@@ -217,7 +258,7 @@ local extSegments = {
 				"return AUDIOQS.spells[33076][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[33076][AUDIOQS.SPELL_EXPIRATION] > 0",
 				false
 			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/prayer_of_mending.ogg",		nil,	true }
+			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Priest/prayer_of_mending.ogg",		nil,	true }
 		}
 	},
 	[8122] = {
@@ -226,7 +267,7 @@ local extSegments = {
 				"return AUDIOQS.spells[8122][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[8122][AUDIOQS.SPELL_EXPIRATION] > 0",
 				false
 			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/psychic_scream.ogg",		nil,	true }
+			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Priest/psychic_scream.ogg",		nil,	true }
 		}
 	},
 	[527] = {
@@ -235,7 +276,7 @@ local extSegments = {
 				"return AUDIOQS.spells[527][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[527][AUDIOQS.SPELL_EXPIRATION] > 0",
 				false
 			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/purify.ogg",		nil,	true }
+			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Priest/purify.ogg",		nil,	true }
 		}
 	},
 	[197268] = {
@@ -244,7 +285,16 @@ local extSegments = {
 				"return AUDIOQS.spells[197268][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[197268][AUDIOQS.SPELL_EXPIRATION] > 0",
 				false
 			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/ray_of_hope.ogg",		nil,	true }
+			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Priest/ray_of_hope.ogg",		nil,	true }
+		}
+	},
+	[32379] = {
+		{
+			{
+				"return AUDIOQS.spells[32379][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[32379][AUDIOQS.SPELL_EXPIRATION] > 0",
+				false
+			},
+			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Priest/shadow_word_death.ogg",		nil,	true }
 		}
 	},
 	[204263] = {
@@ -253,7 +303,7 @@ local extSegments = {
 				"return AUDIOQS.spells[204263][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[204263][AUDIOQS.SPELL_EXPIRATION] > 0",
 				false
 			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/shining_force.ogg",		nil,	true }
+			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Priest/shining_force.ogg",		nil,	true }
 		}
 	},
 	[64901] = {
@@ -262,7 +312,7 @@ local extSegments = {
 				"return AUDIOQS.spells[64901][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[64901][AUDIOQS.SPELL_EXPIRATION] > 0",
 				false
 			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/symbol_of_hope.ogg",		nil,	true }
+			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Priest/symbol_of_hope.ogg",		nil,	true }
 		}
 	},
 	["LOADING_SCREEN_DISABLED"] = { -- TODO Should be in an "essentials", hidden extension or in the AudioQs.lua main event handlers. Workaround for now.

@@ -8,7 +8,6 @@
 -- TODO Cooldown tracking is 1-part safe, extendible code, 2-parts garbage-can-fire and redundant checks.
 
 local AURA_ALWAYS_IS_VALUE = 1 -- using value #15: timeMod
-
 --- Initialization --
 --
 ------- Table key reference --
@@ -86,7 +85,9 @@ function AUDIOQS.ProcessSpell(spellId, currTime) -- TODO Poorly named
 	local charges = GetSpellCharges(spellId)
 	local foundChange = false
 	
-	if(charges ~= nil and charges ~= AUDIOQS.spells[spellId][AUDIOQS.SPELL_CHARGES]) then -- TODO Hacky
+	--print(fourtyNine, (fourtyNine and cdStart.." "..cdDur or ""))
+	
+	if (charges ~= nil and charges ~= AUDIOQS.spells[spellId][AUDIOQS.SPELL_CHARGES]) then -- TODO Hacky
 		if AUDIOQS.GSI_UpdateSpellTable(spellId, cdDur, cdStart+cdDur) then 
 			AUDIOQS.AttemptStartPrompt(spellId)
 			return true
@@ -160,7 +161,7 @@ end
 
 -------- AUDIOQS.LoadSpecialization()
 function AUDIOQS.LoadSpecialization()
-	local specId = AUDIOQS.GetSpec()
+	local specId = AUDIOQS.GetSpecId()
 if AUDIOQS.DEBUG then print(AUDIOQS.audioQsSpecifier..AUDIOQS.debugSpecifier.."Attempting LoadSpecTables("..specId..").") end
 	if AUDIOQS.GSI_LoadSpecTables(specId) then
 if AUDIOQS.DEBUG then print(AUDIOQS.audioQsSpecifier..AUDIOQS.debugSpecifier.."  Loaded specialization tables.") end

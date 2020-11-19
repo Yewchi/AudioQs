@@ -41,6 +41,7 @@ AUDIOQS.SPELL_DURATION = 3
 AUDIOQS.SPELL_EXPIRATION = 4
 AUDIOQS.SPELL_UNIT_ID = 5
 AUDIOQS.SPELL_SPELL_TYPE = 6
+AUDIOQS.SPELL_TYPE_SPELL_ID = 7
 
 AUDIOQS.UNIT_AURA_NAME = 1
 AUDIOQS.UNIT_AURA_COUNT = 3
@@ -160,11 +161,11 @@ end
 UpdateSpecializationInfo = function(_, event, ...)
 	local args = {...}
 	
-	local newSpecId = AUDIOQS.GetSpec()
+	local newSpecId = AUDIOQS.GetSpecId()
 	local eventsWereRegistered = AnyEventsRegistered()
 	
 	if args then
-		if args[1] == "reregister" and AUDIOQS.SpecHasPrompts(AUDIOQS.GetSpec()) then
+		if args[1] == "reregister" and AUDIOQS.SpecHasPrompts(AUDIOQS.GetSpecId()) then
 			RegisterEvents()
 		end
 	end
