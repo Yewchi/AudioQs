@@ -170,7 +170,6 @@ local function CC_GetLossOfControlTable(index)
 		return C_LossOfControl.GetActiveLossOfControlData(index)
 	else
 		local locType, spellID, _, _, startTime, _, dur, lockoutSchool = C_LossOfControl.GetEventInfo(index) -- "ID" in API
-		
 		return CC_CreateLoc(locType, spellID, startTime, dur, lockoutSchool)
 	end
 end
@@ -196,7 +195,10 @@ function AUDIOQS.CrowdControl_CheckLocUpdate()
 	while (i <= thisNumLoc)
 	do
 		thisLocTable = CC_GetLossOfControlTable(i)
-		if thisLocTable.startTime == nil then AUDIOQS.TablePrint(thisLocTable); PlaySoundFile("Interface/Addons/AudioQs/Sound/pulse_1_dropoped.ogg") end
+		if thisLocTable.startTime == nil then  -- This logic is true when standing in a "LoC pool": rather than on a timer, applied until the player is not within it's AoE, 
+			thisLocTable.startTime = GetTime()
+			thisLocTable.duration = 8
+		end
 		local key = string.format("%s-%s", thisLocTable.startTime, thisLocTable.spellID)
 		if not AUDIOQS.GS.CC_activeLoc[key] then
 			AUDIOQS.GS.CC_activeLoc[key] = thisLocTable

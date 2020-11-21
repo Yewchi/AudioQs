@@ -431,11 +431,13 @@ function AUDIOQS.GSI_LoadSpecTables(specId, funcsForLoading)
 		InitializeAndLoadExtension(specId, funcsForLoading)
 	end
 	
-	if SV_Specializations[specId] ~= nil and not AUDIOQS.TableEmpty(SV_Specializations[specId]) then
+	if SV_Specializations[specId] ~= nil and not AUDIOQS.TableEmpty(SV_Specializations[specId]) then -- switch spec, or first load of spec
 		if AUDIOQS.spells == nil then AUDIOQS.spells = {} else wipe(AUDIOQS.spells) end
 		if AUDIOQS.events == nil then AUDIOQS.events = {} else wipe(AUDIOQS.events) end
 		if AUDIOQS.segments == nil then AUDIOQS.segments = {} else wipe(AUDIOQS.segments) end
-		for extName,_ in pairs(SV_Specializations[specId]) do
+		
+		-- Load Extensions
+		for extName,_ in pairs(SV_Specializations[specId]) do 
 			local thisExtFuncs = AUDIOQS.GetExtensionFuncs(extName)
 if AUDIOQS.DEBUG then print(AUDIOQS.audioQsSpecifier..AUDIOQS.debugSpecifier.."  Loading EXT: "..extName) end
 			AmmendTables(thisExtFuncs["GetSpells"](), thisExtFuncs["GetEvents"](), thisExtFuncs["GetSegments"]())
