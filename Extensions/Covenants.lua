@@ -1,8 +1,6 @@
 -- All code written and maintained by Yewchi 
 -- zyewchi@gmail.com
 
--------------------------------- TODO -- THIS MAY Y2K UPON RECEIVING COVENENANT?? DONT KNOW LOL ROAD 2 SERVER FIRST 60
-
 local extName = "Covenants"
 local extNameDetailed = "Covenants"
 local extShortNames = "cov"
@@ -77,12 +75,13 @@ local extSegments = {
 	}
 }
 
-
 do -- check chosen covenant. TODO Is this primitive? Rushed the design and just stepping into solution
 	--- Data for garbage collection --
-	local COVENANT_ABILITY_SPELL_ID = 1
-	local COVENANT_ABILITY_SPELL_NAME = 2
-	local COVENANT_ABILITY_FILE_NAME = 3 -- TODO Dork over to this behaviour for covenants. Only repeats the question of why spell cd prompt data still isn't mostly auto-generated, with just overrides for special functionality.
+	
+	-- NOTE TO ANYONE READING CODE -- I hope this code burns in the hottest fire of hell. Everything's working fine but it's the least extensible most redundant crap I could imagine. Honestly.. I have some gearing up to do.
+	local COVENANT_ABILITY_SPELL_NAME = 1
+	local COVENANT_ABILITY_FILE_NAME = 2 -- TODO Dork over to this behaviour for covenants. Only repeats the question of why spell cd prompt data still isn't mostly auto-generated, with just overrides for special functionality.
+	local COVENANT_ABILITY_SPELL_ID = 3
 
 	local basicCovenantAbilityInfo = {
 		[324739] = { "Summon Steward", 	"summon_steward"}, 
@@ -91,52 +90,93 @@ do -- check chosen covenant. TODO Is this primitive? Rushed the design and just 
 		[310143] = { "Soulshape",		"soulshape"}
 	}
 
+	
 	local basicCovenantAbilityToClassAbilityInfo = {
 		[324739] = {
-			[2] 	= {	304971, "Divine Toll",				"divine_toll"},
-			[3] 	= {	308491, "Resonating Arrow",			"resonating_arrow"},
-			[5] 	= {	325013,	"Boon of the Ascended",		"boon_of_the_ascended"},
-			[7] 	= {	324386,	"Vesper Totem",				"vesper_totem"},
-			[10] 	= {	310454,	"Weapons of Order",			"weapons_of_order"},
-			[11] 	= {	326434,	"Kindred Spirits",			"kindred_spirits"},
+			[2] 	= { "Divine Toll",				"divine_toll", 				304971},
+			[3] 	= {	"Resonating Arrow",			"resonating_arrow", 		308491},
+			[5] 	= {	"Boon of the Ascended",		"boon_of_the_ascended", 	325013},
+			[7] 	= {	"Vesper Totem",				"vesper_totem",				324386},
+			[10] 	= {	"Weapons of Order",			"weapons_of_order",			310454},
+			[11] 	= {	"Kindred Spirits",			"kindred_spirits",			326434},
 		},
 		[300728] = {
-			[2] 	= {	316958,	"Ashen Hallow",				"ashen_hallow"},
-			[3] 	= {	324149,	"Flayed Show",				"flayed_shot"},
-			[5] 	= { 323673,	"Mindgames",				"mindgames"},
-			[7] 	= {	320674,	"Chain Harvest",			"chain_harvest"},
-			[10] 	= {	326860,	"Fallen Order",				"fallen_order"},
-			[11] 	= {	323546,	"Ravenous Frenzy",			"ravenous_frenzy"},
+			[2] 	= {	"Ashen Hallow",				"ashen_hallow",				316958},
+			[3] 	= {	"Flayed Show",				"flayed_shot",				324149},
+			[5] 	= { "Mindgames",				"mindgames",				323673},
+			[7] 	= {	"Chain Harvest",			"chain_harvest",			320674},
+			[10] 	= {	"Fallen Order",				"fallen_order",				326860},
+			[11] 	= {	"Ravenous Frenzy",			"ravenous_frenzy",			323546},
 		},
 		[331180] = {
-			[2] 	= {	328204,	"Vanquisher's Hammer",		"vanquishers_hammer"},
-			[3] 	= {	325028,	"Death Chakram",			"death_chakram"},
-			[5] 	= {	324724,	"Unholy Nova",				"unholy_nova"},
-			[7] 	= {	326059,	"Primordial Wave",			"primordial_wave"},
-			[10] 	= {	325216,	"Bonedust Brew",			"bonebust_brew"},
-			[11] 	= {	325727,	"Adaptive Swarm",			"adaptive_swarm"},
+			[2] 	= {	"Vanquisher's Hammer",		"vanquishers_hammer",		328204},
+			[3] 	= {	"Death Chakram",			"death_chakram",			325028},
+			[5] 	= {	"Unholy Nova",				"unholy_nova",				324724},
+			[7] 	= {	"Primordial Wave",			"primordial_wave",			326059},
+			[10] 	= {	"Bonedust Brew",			"bonebust_brew",			325216},
+			[11] 	= {	"Adaptive Swarm",			"adaptive_swarm",			325727},
 		},
 		[310143] = {
-			[2] 	= {	328278,	"Blessing of the Seasons",	"blessing_of_the_seasons"},
-			[3] 	= {	328231,	"Wild Spirits",				"wild_spirits"},
-			[5] 	= {	327661,	"Fae Guardians",			"fae_guardians"},
-			[7] 	= {	328923,	"Fae Transfusion",			"fae_transfusion"},
-			[10] 	= {	327104,	"Faeline Stomp",			"faeline_stomp"},
-			[11] 	= {	323764,	"Convoke the Spirits",		"convoke_the_spirits"},
+			[2] 	= {	"Blessing of the Seasons",	"blessing_of_the_seasons",	328278},
+			[3] 	= {	"Wild Spirits",				"wild_spirits",				328231},
+			[5] 	= {	"Fae Guardians",			"fae_guardians",			327661},
+			[7] 	= {	"Fae Transfusion",			"fae_transfusion",			328923},
+			[10] 	= {	"Faeline Stomp",			"faeline_stomp",			327104},
+			[11] 	= {	"Convoke the Spirits",		"convoke_the_spirits",		323764},
 		}
+	}
+	
+	local classToClassCovenantAbilitiesInfo = {
+		[2] = { 
+			{ 	"Divine Toll",				"divine_toll", 				304971},
+			{	"Ashen Hallow",				"ashen_hallow",				316958},
+			{	"Vanquisher's Hammer",		"vanquishers_hammer",		328204},
+			{	"Blessing of the Seasons",	"blessing_of_the_seasons",	328278} 
+		},
+		[3] = {
+			{	"Resonating Arrow",			"resonating_arrow", 		308491},
+			{	"Death Chakram",			"death_chakram",			325028},
+			{	"Death Chakram",			"death_chakram",			325028},
+			{	"Wild Spirits",				"wild_spirits",				328231}
+		},
+		[5] = {
+			{	"Boon of the Ascended",		"boon_of_the_ascended", 	325013},
+			{ 	"Mindgames",				"mindgames",				323673},
+			{	"Unholy Nova",				"unholy_nova",				324724},
+			{	"Fae Guardians",			"fae_guardians",			327661}
+		},
+		[7] = {
+			{	"Vesper Totem",				"vesper_totem",				324386},
+			{	"Chain Harvest",			"chain_harvest",			320674},
+			{	"Primordial Wave",			"primordial_wave",			326059},
+			{	"Fae Transfusion",			"fae_transfusion",			328923}
+		},
+		[10] = {
+			{	"Weapons of Order",			"weapons_of_order",			310454},
+			{	"Fallen Order",				"fallen_order",				326860},
+			{	"Bonedust Brew",			"bonebust_brew",			325216},
+			{	"Faeline Stomp",			"faeline_stomp",			327104}
+		},
+		[11] = {
+			{	"Kindred Spirits",			"kindred_spirits",			326434},
+			{	"Ravenous Frenzy",			"ravenous_frenzy",			323546},
+			{	"Adaptive Swarm",			"adaptive_swarm",			325727},
+			{	"Convoke the Spirits",		"convoke_the_spirits",		323764}
+		},
 	}
 	-- /Data for garbage collection --
 	
 	local basicCovenantSpellId = ( 
-			select(AUDIOQS.SPELL_TYPE_SPELL_ID, IsSpellKnown(324739)) or 
-			select(AUDIOQS.SPELL_TYPE_SPELL_ID, IsSpellKnown(300728)) or 
-			select(AUDIOQS.SPELL_TYPE_SPELL_ID, IsSpellKnown(324631)) or 
-			select(AUDIOQS.SPELL_TYPE_SPELL_ID, IsSpellKnown(310143)) )
+			(IsSpellKnown(324739) and 324739) or 
+			(IsSpellKnown(300728) and 300728) or 
+			(IsSpellKnown(324631) and 324631) or 
+			(IsSpellKnown(310143) and 310143) )
 	if ( basicCovenantSpellId ) then
-		local covenantClassAbilityInfo = basicCovenantAbilityToClassAbility[basicCovenantSpellId][AUDIOQS.GetClassId()]
+		local knownBasicCovenantAbilityInfo = basicCovenantAbilityInfo[basicCovenantSpellId]
+		local covenantClassAbilityInfo = basicCovenantAbilityToClassAbilityInfo[basicCovenantSpellId][AUDIOQS.GetClassId()]
 		local thisCovenantClassSpellId = covenantClassAbilityInfo[COVENANT_ABILITY_SPELL_ID]
 		extSpells[ basicCovenantSpellId ] = 
-				{basicCovenantAbilityInfo[COVENANT_ABILITY_SPELL_NAME], 0, 0, 0, 	"player", 	AUDIOQS.SPELL_TYPE_ABILITY}  -- TODO ugly results of avoiding implementing prompt generation
+				{knownBasicCovenantAbilityInfo[COVENANT_ABILITY_SPELL_NAME], 0, 0, 0, 	"player", 	AUDIOQS.SPELL_TYPE_ABILITY}  -- TODO ugly results of avoiding implementing prompt generation
 		extSpells[ thisCovenantClassSpellId ] =
 				{covenantClassAbilityInfo[COVENANT_ABILITY_SPELL_NAME], 0, 0, 0, 	"player", 	AUDIOQS.SPELL_TYPE_ABILITY}
 		extSegments[ basicCovenantSpellId ] = 
@@ -146,7 +186,7 @@ do -- check chosen covenant. TODO Is this primitive? Rushed the design and just 
 							"return AUDIOQS.spells["..basicCovenantSpellId.."][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot["..basicCovenantSpellId.."][AUDIOQS.SPELL_EXPIRATION] > 0",
 							false
 						},
-						{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Covenants/"..basicCovenantAbilityInfo[COVENANT_ABILITY_FILE_NAME]..".ogg",		nil,	true }
+						{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Covenants/"..knownBasicCovenantAbilityInfo[COVENANT_ABILITY_FILE_NAME]..".ogg",		nil,	true }
 					}
 				}
 		extSegments[ thisCovenantClassSpellId ] =
@@ -159,6 +199,26 @@ do -- check chosen covenant. TODO Is this primitive? Rushed the design and just 
 						{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Covenants/"..covenantClassAbilityInfo[COVENANT_ABILITY_FILE_NAME]..".ogg",		nil,	true }
 					}
 				}
+	else -- just do a manual search for each class. Not a permanent sol^n. Doesn't work when switching abilities.
+		local myClassCovenantAbilitiesInfo = classToClassCovenantAbilitiesInfo[AUDIOQS.GetClassId()]
+		for i,abilityInfo in pairs(myClassCovenantAbilitiesInfo) do
+			local thisSpellId = abilityInfo[COVENANT_ABILITY_SPELL_ID]
+			if IsSpellKnown(thisSpellId) then
+				extSpells[ thisSpellId ] =
+				{abilityInfo[COVENANT_ABILITY_SPELL_NAME], 0, 0, 0, 	"player", 	AUDIOQS.SPELL_TYPE_ABILITY}
+				extSegments[ thisSpellId ] =
+				{
+					{
+						{
+							"return AUDIOQS.spells["..thisSpellId.."][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot["..thisSpellId.."][AUDIOQS.SPELL_EXPIRATION] > 0",
+							false
+						},
+						{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Covenants/"..abilityInfo[COVENANT_ABILITY_FILE_NAME]..".ogg",		nil,	true }
+					}
+				}
+				break
+			end
+		end
 	end
 end
 --
