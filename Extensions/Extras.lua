@@ -40,8 +40,6 @@ local extSpells = {
 
 -- events["EVENT_NAME"] = eventArgsArray (automatically generated)
 local extEvents = {
-		["UNIT_POWER_UPDATE"] = {
-		}
 }
 
 local extSegments = {

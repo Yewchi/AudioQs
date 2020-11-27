@@ -439,9 +439,9 @@ function AUDIOQS.GSI_LoadSpecTables(specId, funcsForLoading)
 		-- Load Extensions
 		for extName,_ in pairs(SV_Specializations[specId]) do 
 			local thisExtFuncs = AUDIOQS.GetExtensionFuncs(extName)
+			thisExtFuncs["Initialize"]()
 if AUDIOQS.DEBUG then print(AUDIOQS.audioQsSpecifier..AUDIOQS.debugSpecifier.."  Loading EXT: "..extName) end
 			AmmendTables(thisExtFuncs["GetSpells"](), thisExtFuncs["GetEvents"](), thisExtFuncs["GetSegments"]())
-			thisExtFuncs["Initialize"]()
 		end
 		
 		RemoveUntrackedSpells(AUDIOQS.spells)

@@ -27,7 +27,7 @@ local extFuncs = {
 		["GetSegments"] = function() return GetSegments() end,
 		["GetExtension"] = function() return GetExtension() end,
 		["SpecAllowed"] = function(specId) return SpecAllowed(specId) end,
-		["Initialize"] = function() end
+		["Initialize"] = function() AUDIOQS.COVENANT_ReloadCovenantAbilities() end
 }
 
 --- Spell Tables and Prompts --
@@ -40,7 +40,8 @@ local extSpells = {
 local extEvents = {
 	["LOADING_SCREEN_ENABLED"] = {},
 	["LOADING_SCREEN_DISABLED"] = {},
-	["PLAYER_SPECIALIZATION_CHANGED"] = {}
+	["PLAYER_SPECIALIZATION_CHANGED"] = {},
+	["COVENANT_CHOSEN"] = {},
 }
 
 local extSegments = {
@@ -72,25 +73,31 @@ local extSegments = {
 			{0.25, 	nil, nil, true},
 			{nil,	nil, nil, "AUDIOQS.ChargeCooldownsAllowed = true return true"}
 		}
+	},
+	["COVENANT_CHOSEN"] = {
+		{
+			{
+				"AUDIOQS.COVENANT_ReloadCovenantAbilities() return false",
+				false
+			},
+			{}
+		}
 	}
 }
 
-do -- check chosen covenant. TODO Is this primitive? Rushed the design and just stepping into solution
+function AUDIOQS.COVENANT_ReloadCovenantAbilities()
 	--- Data for garbage collection --
-	
-	-- NOTE TO ANYONE READING CODE -- I hope this code burns in the hottest fire of hell. Everything's working fine but it's the least extensible most redundant crap I could imagine. Honestly.. I have some gearing up to do.
 	local COVENANT_ABILITY_SPELL_NAME = 1
-	local COVENANT_ABILITY_FILE_NAME = 2 -- TODO Dork over to this behaviour for covenants. Only repeats the question of why spell cd prompt data still isn't mostly auto-generated, with just overrides for special functionality.
+	local COVENANT_ABILITY_FILE_NAME = 2
 	local COVENANT_ABILITY_SPELL_ID = 3
 
 	local basicCovenantAbilityInfo = {
-		[324739] = { "Summon Steward", 	"summon_steward"}, 
-		[300728] = { "Door of Shadows",	"door_of_shadows"},
-		[324631] = { "Fleshcraft",		"fleshcraft"},
-		[310143] = { "Soulshape",		"soulshape"}
+		{ "Summon Steward", 	"summon_steward", 	324739}, -- 1 	Kyrian
+		{ "Door of Shadows",	"door_of_shadows", 	300728}, -- 2	Venthyr
+		{ "Soulshape",			"soulshape", 		310143}, -- 3	Night Fae
+		{ "Fleshcraft",		"fleshcraft",			324631}  --	4	Necrolord
 	}
 
-	
 	local basicCovenantAbilityToClassAbilityInfo = {
 		[324739] = {
 			[2] 	= { "Divine Toll",				"divine_toll", 				304971},
@@ -108,14 +115,6 @@ do -- check chosen covenant. TODO Is this primitive? Rushed the design and just 
 			[10] 	= {	"Fallen Order",				"fallen_order",				326860},
 			[11] 	= {	"Ravenous Frenzy",			"ravenous_frenzy",			323546},
 		},
-		[331180] = {
-			[2] 	= {	"Vanquisher's Hammer",		"vanquishers_hammer",		328204},
-			[3] 	= {	"Death Chakram",			"death_chakram",			325028},
-			[5] 	= {	"Unholy Nova",				"unholy_nova",				324724},
-			[7] 	= {	"Primordial Wave",			"primordial_wave",			326059},
-			[10] 	= {	"Bonedust Brew",			"bonebust_brew",			325216},
-			[11] 	= {	"Adaptive Swarm",			"adaptive_swarm",			325727},
-		},
 		[310143] = {
 			[2] 	= {	"Blessing of the Seasons",	"blessing_of_the_seasons",	328278},
 			[3] 	= {	"Wild Spirits",				"wild_spirits",				328231},
@@ -123,6 +122,14 @@ do -- check chosen covenant. TODO Is this primitive? Rushed the design and just 
 			[7] 	= {	"Fae Transfusion",			"fae_transfusion",			328923},
 			[10] 	= {	"Faeline Stomp",			"faeline_stomp",			327104},
 			[11] 	= {	"Convoke the Spirits",		"convoke_the_spirits",		323764},
+		},
+		[331180] = {
+			[2] 	= {	"Vanquisher's Hammer",		"vanquishers_hammer",		328204},
+			[3] 	= {	"Death Chakram",			"death_chakram",			325028},
+			[5] 	= {	"Unholy Nova",				"unholy_nova",				324724},
+			[7] 	= {	"Primordial Wave",			"primordial_wave",			326059},
+			[10] 	= {	"Bonedust Brew",			"bonebust_brew",			325216},
+			[11] 	= {	"Adaptive Swarm",			"adaptive_swarm",			325727},
 		}
 	}
 	
@@ -165,14 +172,10 @@ do -- check chosen covenant. TODO Is this primitive? Rushed the design and just 
 		},
 	}
 	-- /Data for garbage collection --
-	
-	local basicCovenantSpellId = ( 
-			(IsSpellKnown(324739) and 324739) or 
-			(IsSpellKnown(300728) and 300728) or 
-			(IsSpellKnown(324631) and 324631) or 
-			(IsSpellKnown(310143) and 310143) )
-	if ( basicCovenantSpellId ) then
-		local knownBasicCovenantAbilityInfo = basicCovenantAbilityInfo[basicCovenantSpellId]
+	local covenantChosen = C_Covenants.GetActiveCovenantID()
+	if ( covenantChosen and covenantChosen ~= 0 ) then
+		local knownBasicCovenantAbilityInfo = basicCovenantAbilityInfo[covenantChosen]
+		local basicCovenantSpellId = knownBasicCovenantAbilityInfo[COVENANT_ABILITY_SPELL_ID]
 		local covenantClassAbilityInfo = basicCovenantAbilityToClassAbilityInfo[basicCovenantSpellId][AUDIOQS.GetClassId()]
 		local thisCovenantClassSpellId = covenantClassAbilityInfo[COVENANT_ABILITY_SPELL_ID]
 		extSpells[ basicCovenantSpellId ] = 

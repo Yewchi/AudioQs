@@ -146,6 +146,7 @@ SlashCmdList["AQ"] = function(msg)
 				return
 			else
 				if AUDIOQS.GSI_RemoveExtension(mySpec, funcs["GetName"]()) then
+					--AUDIOQS.GSI_LoadSpecTables(mySpec, funcs) TODO test without reload, can't remember loading pipeline / data 100%, but preliminary tests look good
 					AUDIOQS.SetAbilityAndAuraTables(AUDIOQS.InitializePrompts(mySpec))
 					AUDIOQS.ReregisterEvents()
 					ReloadUI()
