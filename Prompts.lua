@@ -319,7 +319,6 @@ function AUDIOQS.AttemptStartPrompt(id, runCheckPrompts)
 
 		local thisSegmentsPrompt = promptsTable[segmentPromptsArray[n]]
 		if AUDIOQS.GSI_EvaluateConditional(thisSegments[SEGT_CONDITIONALS], SEGT_CONDITIONALS_START) then
-			--print("Start will stop")
 			CheckStopSegments(thisSegments, thisSegmentsPrompt, false, true) -- TODO--Design decis. Always stop if the spell has been updated?
 			local startingSegment = GetNextTrueSegment(thisSegments, SEGT_FIRST)
 			

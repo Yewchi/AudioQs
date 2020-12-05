@@ -44,6 +44,7 @@ local loadstring = loadstring
 
 local Frame_SpellCooldownTicker = CreateFrame("Frame", "AQ:SPELL_COOLDOWNS")
 local spellsOnCooldown = {}
+local spellsOnCooldownLastGcdAllowable = {}  -- If a spell cooldown goes up from a gcdExpiration to gcdExpiration + currGcd, it is off cooldown (or 1 in a billion chance it is recurrently having some other game mechanic timer added to it, while under the GCD)
 
 -------- SaveSpellSnapshot()
 local function SaveSpellSnapshot(spellId)
@@ -147,6 +148,7 @@ local function RemoveSpellOnCooldown(spellId) -- TODO Needs checks or needs safe
 	for n = 1, #spellsOnCooldown, 1 do
 		if spellId == spellsOnCooldown[n][ON_COOLDOWN_SPELLID] then
 			table.remove(spellsOnCooldown, n)
+			spellsOnCooldownLastGcdAllowable[spellId] = nil
 			break
 		end
 	end
@@ -157,6 +159,7 @@ end
 
 local function RemoveAllTrackedSpells()
 	wipe(spellsOnCooldown or {})
+	wipe(spellsOnCooldownLastGcdAllowable or {})
 	Frame_SpellCooldownTicker:SetScript("OnUpdate", nil)
 end
 
@@ -170,40 +173,55 @@ local function AddSpellOnCooldown(spellId, cdExpiration)
 	table.insert(spellsOnCooldown, {[ON_COOLDOWN_SPELLID]=spellId, [ON_COOLDOWN_CDEXPIRATION] = cdExpiration})
 end
 
+local function SpellCooldownBlasterCannon(_, elapsed)
+	Frame_SpellCooldownTicker.limiter = Frame_SpellCooldownTicker.limiter - elapsed
+	if Frame_SpellCooldownTicker.limiter > 0 then return end
+	Frame_SpellCooldownTicker.limiter = BAD_SPELL_LIMITER_TIME
+	local currTime = GetTime()
+	local n = 1
+	while n <= #spellsOnCooldown do
+		local thisSpellOnCooldown = spellsOnCooldown[n]
+		local thisSpellId = thisSpellOnCooldown[ON_COOLDOWN_SPELLID]
+		local thisCdExpiration = thisSpellOnCooldown[ON_COOLDOWN_CDEXPIRATION]
+		local cdStart, cdDur = GetSpellCooldown(thisSpellId)
+
+		if AUDIOQS.GetGcdExpiration() == cdStart + cdDur then
+			if spellsOnCooldownLastGcdAllowable[thisSpellId] == nil then
+				spellsOnCooldownLastGcdAllowable[thisSpellId] = cdStart + cdDur
+				--print("SpellCooldownBlasterCannon setting final allowable GCD:", AUDIOQS.PrintableTable(spellsOnCooldown[n]))
+			elseif currTime > spellsOnCooldownLastGcdAllowable[thisSpellId] + AUDIOQS.GetGcdDur() then -- Doesn't account for haste differences
+				--print("SpellCooldownBlasterCannon final GCD chance taken:", AUDIOQS.PrintableTable(spellsOnCooldown[n]))
+				AUDIOQS.ProcessSpell(thisSpellId, currTime)
+			end
+		elseif thisSpellOnCooldown[ON_COOLDOWN_FIRST_ALLOWABLE_GCD] == nil and currTime > thisCdExpiration+0.15 then
+			--print("SpellCooldownBlasterCannon killing", AUDIOQS.PrintableTable(spellsOnCooldown[n]))
+			AUDIOQS.ProcessSpell(thisSpellId, currTime) -- Will kill frame for us. -- TODO Potential endless loop if there are programmer logic decision failings in numerical checks/comparisons. Especially, GSI_UpdateSpellTable must be a brick wall
+		end
+		n = n + 1 -- Removed strange conditional n++. Probably vestigial through edits
+	end
+end
+
 local function FrameInitOrUpdateExpiration(spellId, cdExpiration)
-	local frame = Frame_SpellCooldownTicker
-	
 	if cdExpiration > 0 then
 		AddSpellOnCooldown(spellId, cdExpiration)
+		
+		if Frame_SpellCooldownTicker:GetScript("OnUpdate") == nil then
+			Frame_SpellCooldownTicker.limiter = BAD_SPELL_LIMITER_TIME
+			Frame_SpellCooldownTicker:SetScript("OnUpdate", SpellCooldownBlasterCannon)
+		end
 	elseif cdExpiration == 0 then
 		RemoveSpellOnCooldown(spellId)
 	end
-	
-	if frame:GetScript("OnUpdate") == nil then
-		frame.limiter = BAD_SPELL_LIMITER_TIME
-		frame:SetScript("OnUpdate", 
-			function(_, elapsed)
-				frame.limiter = frame.limiter - elapsed
-				if frame.limiter > 0 then return end
-				frame.limiter = BAD_SPELL_LIMITER_TIME
-				local currTime = GetTime()
-				local n = 1
-				while n <= #spellsOnCooldown do
-					local thisSpellOnCooldown = spellsOnCooldown[n]
-					local thisSpellId = thisSpellOnCooldown[ON_COOLDOWN_SPELLID]
-					local thisCdExpiration = thisSpellOnCooldown[ON_COOLDOWN_CDEXPIRATION]
-					if currTime > thisCdExpiration then
-						AUDIOQS.ProcessSpell(thisSpellId, currTime) -- Will kill frame for us. -- TODO Potential enless loop for errors
-						if n <= #spellsOnCooldown and thisSpellId == spellsOnCooldown[n][ON_COOLDOWN_SPELLID] then
-								n = n + 1
-						end
-					else
-						n = n + 1
-					end
-				end
-			end
-		)
+end
+
+local getSpellCooldown1, getSpellCooldown2, getSpellCooldown3, getSpellCooldown4
+-------- AUDIOQS.GSI_GetSpellCooldownGcdOverride()
+function AUDIOQS.GSI_GetSpellCooldownGcdOverride(spellId)
+	getSpellCooldown1, getSpellCooldown2, getSpellCooldown3, getSpellCooldown4 = GetSpellCooldown(spellId)
+	if spellsOnCooldownLastGcdAllowable[spellId] and GetTime() >= spellsOnCooldownLastGcdAllowable[spellId] then -- this if has the requirement that the LastGcdAllowable[spellId] is correctly removed after adjusting spell cooldown data
+		return 0, 0, getSpellCooldown3, getSpellCooldown4
 	end
+	return getSpellCooldown1, getSpellCooldown2, getSpellCooldown3, getSpellCooldown4
 end
 
 -------- AUDIOQS.GSI_RemoveExtension()
@@ -304,7 +322,7 @@ function AUDIOQS.GSI_UpdateSpellTable(spellId, cdDur, cdExpiration)
 	
 	if cdDur == nil or cdExpiration == nil then
 if AUDIOQS.DEBUG then if cdDur~=cdExpiration then print(AUDIOQS.audioQsSpecifier..AUDIOQS.debugSpecifier.."GSI_UpdateSpellTable(): - "..(cdDur == nil and "cdDur" or "cdExpiration").." was sole nil passed.") end end
-		local start, dur = GetSpellCooldown(spellId)
+		local start, dur = AUDIOQS.GSI_GetSpellCooldownGcdOverride(spellId)
 		cdDur = dur
 		cdExpiration = start + dur
 	end
@@ -331,9 +349,9 @@ if AUDIOQS.DEBUG then if cdDur~=cdExpiration then print(AUDIOQS.audioQsSpecifier
 			if isChargeSpell and thisSpell[AUDIOQS.SPELL_CHARGES] == AUDIOQS.spellsSnapshot[spellId][AUDIOQS.SPELL_CHARGES] then -- TODO Let the charge send the AttemptStartPrompt() instead. Also, trash code. Should be higher-level determined.
 				return false
 			end
+			return true
 		end
-		
-		return true
+		--return true (removed, placed above to avoid redundant checks)
 	end
 	return false
 end
@@ -341,7 +359,7 @@ end
 -------- AUDIOQS.GSI_UpdateAllSpellTables()
 function AUDIOQS.GSI_UpdateAllSpellTables(init)
 	for spellId,spell in pairs(AUDIOQS.spells) do
-		local cdStart, cdDur = GetSpellCooldown(spellId)
+		local cdStart, cdDur = AUDIOQS.GSI_GetSpellCooldownGcdOverride(spellId)
 		local cdExpiration = cdStart + cdDur
 		
 		AUDIOQS.GSI_UpdateSpellTable(spellId, cdDur, cdExpiration)

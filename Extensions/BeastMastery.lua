@@ -68,7 +68,6 @@ local extSpells = {
 local extEvents = {
 }
 
-
 local checkLen = "local frenzyDuration = select("..AUDIOQS.UNIT_AURA_DURATION..", AUDIOQS.GetAuraInfo('pet', 272790)) if frenzyDuration == nil then return 0.0 end return frenzyDuration - 5.0" -- Only declared to maintain table width -- These evaluations are to be simplified into an evaluation language, in a later version.
 local extSegments = {
 --[[ [spellId][i] = { {startConditionals, stopConditionals}, {seg1}, {seg2}, ..., {segN} } ]]--
@@ -111,23 +110,9 @@ local extSegments = {
 	[131894] = {
 		{
 			{
-				"return AUDIOQS.spells[131894][AUDIOQS.SPELL_EXPIRATION] > 0 and AUDIOQS.spellsSnapshot[131894][AUDIOQS.SPELL_EXPIRATION] == 0",
+				"return AUDIOQS.spells[131894][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[131894][AUDIOQS.SPELL_EXPIRATION] > 0",
 				false
 			},
-			{	
-				"AUDIOQS.GS.BM_crowsElapsed = 0 return 0.0",		
-				nil,		
-				nil,	
-				true 
-			},
-			{	
-				"AUDIOQS.GS.BM_crowsElapsed = AUDIOQS.GS.BM_crowsElapsed + 1 if AUDIOQS.GS.BM_crowsElapsed > 20 then if AUDIOQS.ProcessSpell(131894, GetTime()) then AUDIOQS.GS.BM_crowsElapsed = nil return 0.0 end AUDIOQS.GS.BM_crowsElapsed = 0 end return AUDIOQS.spells[131894][AUDIOQS.SPELL_EXPIRATION] - GetTime() - 45.0",		
-				nil,		
-				nil,	
-				true 
-			},
-			{"AUDIOQS.GS.BM_crowsLostTime = AUDIOQS.spells[131894][AUDIOQS.SPELL_EXPIRATION] - GetTime() return 0.0",		nil,		nil,	true },
-			{"return AUDIOQS.GS.BM_crowsLostTime", nil, nil, true}, -- Convenient, doesn't require if crowsLostTime == nil check.
 			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Hunter/a_murder_of_crows.ogg",		nil,	true }
 		},
 	},

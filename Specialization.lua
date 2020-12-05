@@ -62,12 +62,12 @@ function AUDIOQS.ProcessCombatLogForPrompts()
 	local spellId = combatLogEventInfo[AUDIOQS.COMBAT_LOG_SPELL_ID]
 	local spell = AUDIOQS.GSI_GetSpell(spellId)
 	
-	if spell == nil or combatLogEventInfo[AUDIOQS.COMBAT_LOG_SOURCE_GUID] ~= AUDIOQS.PLAYER_GUID then
+	if spell == nil or combatLogEventInfo[AUDIOQS.COMBAT_LOG_SOURCE_GUID] ~= AUDIOQS.PLAYER_GUID then -- TODO Reductive, limiting. Currently applicable but not a wise capability kill.
 		return
 	end
 	
 	if spell[AUDIOQS.SPELL_SPELL_TYPE] == AUDIOQS.SPELL_TYPE_ABILITY then
-		local cdStart, cdDur = GetSpellCooldown(spellId)
+		local cdStart, cdDur = AUDIOQS.GSI_GetSpellCooldownGcdOverride(spellId)
 		local cdExpiration = cdStart + cdDur
 		
 		if AUDIOQS.IsEqualToGcd(cdDur) then  
@@ -81,7 +81,7 @@ function AUDIOQS.ProcessCombatLogForPrompts()
 end
 
 function AUDIOQS.ProcessSpell(spellId, currTime) -- TODO Poorly named
-	local cdStart, cdDur = GetSpellCooldown(spellId)
+	local cdStart, cdDur = AUDIOQS.GSI_GetSpellCooldownGcdOverride(spellId)
 	local charges = GetSpellCharges(spellId)
 	local foundChange = false
 	
@@ -127,9 +127,10 @@ function AUDIOQS.ProcessSpellCooldownsForPrompts()
 	for n=1,#abilityTable,1 do
 		local spellId = abilityTable[n]
 		local charges = GetSpellCharges(spellId)
-		local cdDur = GetSpellCooldown(spellId)
+		local cdDur = AUDIOQS.GSI_GetSpellCooldownGcdOverride(spellId)
 		if cdDur > 1.5 or (cdDur == 0 and AUDIOQS.spells[spellId][AUDIOQS.SPELL_EXPIRATION] > 0) or (charges ~= nil and charges ~= AUDIOQS.spells[spellId][AUDIOQS.SPELL_CHARGES]) then
 			if AUDIOQS.ProcessSpell(spellId, currTime) and not foundChange then
+				--print("Found change:", select(1, GetSpellInfo(spellId)), AUDIOQS.GSI_GetSpellCooldownGcdOverride(spellId))
 				foundChange = true
 			end
 		end

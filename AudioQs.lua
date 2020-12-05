@@ -196,24 +196,30 @@ Frame_LoadOrSpecChange:SetScript("OnEvent", function(_, event, ...) UpdateSpecia
 
 Frame_CombatLog:SetScript("OnEvent",
 	function(_, _, ...)
+		AUDIOQS.PerformanceStart("cbl")
 		local success, err = pcall(AUDIOQS.ProcessCombatLogForPrompts)
 		if not success then AUDIOQS.HandleError(err, "CombatLogOnEvent", "AUDIOQS.ProcessCombatLogForPrompts()") end
+		AUDIOQS.PerformanceEnd("cbl")
 	end
 )
 
 Frame_SpellUpdateCooldown:SetScript("OnEvent",
 	function(_, _, ...)
+		AUDIOQS.PerformanceStart("usc")
 		local success, err = pcall(AUDIOQS.ProcessSpellCooldownsForPrompts)
 		if not success then AUDIOQS.HandleError(err, "SpellUpdateCooldownOnEvent()", "AUDIOQS.ProcessSpellCooldownsForPrompts()") end
+		AUDIOQS.PerformanceEnd("usc")
 	end
 )
 
 -- Optimize for already completed checks, no further spell prompts possible, etc.
 Frame_UnitAura:SetScript("OnEvent",
 	function(_, _, ...)
+		AUDIOQS.PerformanceStart("ua")
 		local unitId = ...
 		
 		if not AUDIOQS.UnitIsIncluded(unitId) then
+			AUDIOQS.PerformanceStart("ua")
 			return
 		end
 		if specId ~= nil then
@@ -229,21 +235,25 @@ Frame_UnitAura:SetScript("OnEvent",
 				end
 			end	
 		end
+		AUDIOQS.PerformanceEnd("ua")
 	end
 )
 
 Frame_CustomEvents:SetScript("OnEvent",
 	function(_, event, ...)
+		AUDIOQS.PerformanceStart("ce")
 		if not FreshEventForFrame(event) then return end
 
 		--print("Event starting ProcessCustomEventForPrompts() is "..event)
 		local success, err = pcall(AUDIOQS.ProcessCustomEventForPrompts, event, ...)
 		if not success then AUDIOQS.HandleError(err, "CustomEventsOnEvent()", "AUDIOQS.ProcessCustomEventForPrompts()") end
+		AUDIOQS.PerformanceEnd("ce")
 	end
 )
 
 Frame_LoadingScreen:SetScript("OnEvent",
 	function(_, event, ...)
+		AUDIOQS.PerformanceStart("ls")
 		if AUDIOQS.hushMode ~= AUDIOQS.HUSHMODE_LOADINGSCREEN then
 			prevHushMode = AUDIOQS.hushMode
 		end
@@ -252,6 +262,7 @@ Frame_LoadingScreen:SetScript("OnEvent",
 		elseif event == "LOADING_SCREEN_DISABLED" then
 			AUDIOQS.hushMode = prevHushMode
 		end
+		AUDIOQS.PerformanceEnd("ls")
 	end
 )
 --

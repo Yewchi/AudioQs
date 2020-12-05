@@ -264,6 +264,12 @@ function AUDIOQS.GetGcdDur()
 	return select(2, GetSpellCooldown(AUDIOQS.SPELLID_GCD))
 end
 
+function AUDIOQS.GetGcdExpiration()
+	local gcdStart, gcdDur = GetSpellCooldown(AUDIOQS.SPELLID_GCD)
+	
+	return gcdStart + gcdDur
+end
+
 function AUDIOQS.Printable(val)
 	local t = type(val)
 	if val == nil then return "nil"
@@ -375,17 +381,17 @@ end
 -- TEST (Incomplete -- Bad Refactor)
 AUDIOQS.Perf = {}
 AUDIOQS.CurrFrame = 0
+local disablePerf = true -- local for safety, not consistentency
 function AUDIOQS.PerformanceStart(area_str)
-	if not AUDIOQS.DEBUG then return end
+	if not AUDIOQS.DEBUG or disablePerf then return end
 	if AUDIOQS.Perf[area_str] == nil then
 		AUDIOQS.Perf[area_str] = {{0, 0}, {0, 0}, false}
 	end
 	local newFrame = GetTime() > AUDIOQS.CurrFrame
 	
 	UpdateAddOnMemoryUsage()
-	
-	AUDIOQS.Perf[area_str][1][1] = debugprofilestop()
 	AUDIOQS.Perf[area_str][2][1] = GetAddOnMemoryUsage("AudioQs")
+	AUDIOQS.Perf[area_str][1][1] = debugprofilestop()
 	
 	if newFrame or AUDIOQS.Perf[area_str][3] == false then
 		AUDIOQS.CurrFrame = GetTime()
@@ -404,17 +410,19 @@ function AUDIOQS.PerformanceStart(area_str)
 end
 
 function AUDIOQS.PerformanceEnd(area_str)
-	if not AUDIOQS.DEBUG then return end
+	if not AUDIOQS.DEBUG or disablePerf then return end
+	local perfEndTime = debugprofilestop()
 	local perf = AUDIOQS.Perf[area_str]
 	
 	UpdateAddOnMemoryUsage()
 	
-	perf[1][2], perf[2][2] = perf[1][2] + debugprofilestop()-perf[1][1], GetAddOnMemoryUsage("AudioQs")-perf[2][1]
+	perf[1][2], perf[2][2] = perf[1][2] + perfEndTime-perf[1][1], GetAddOnMemoryUsage("AudioQs")-perf[2][1]
 end
 
 function AUDIOQS.PerformancePrint(area_str)
 	local perf = AUDIOQS.Perf[area_str]
 	print(string.format("%s -- ms:%d. KB:%d. KB+:%d", area_str, perf[1][2], perf[2][1], perf[2][2]))
+	--print(string.format("%s -- ms:%d. KB:N/A. KB+:N/A", area_str, perf[1][2]))
 end
 
 -------- AUDIOQS.IsEqualToGcd() -- Returns if the cooldown is equal to the GCD cd, or 1.5 (some abilities trigger a GCD which is not affected by haste)

@@ -173,7 +173,7 @@ function AUDIOQS.COVENANT_ReloadCovenantAbilities()
 	}
 	-- /Data for garbage collection --
 	local covenantChosen = C_Covenants.GetActiveCovenantID()
-	if ( covenantChosen and covenantChosen ~= 0 ) then
+	if ( covenantChosen and covenantChosen ~= 0 and false ) then
 		local knownBasicCovenantAbilityInfo = basicCovenantAbilityInfo[covenantChosen]
 		local basicCovenantSpellId = knownBasicCovenantAbilityInfo[COVENANT_ABILITY_SPELL_ID]
 		local covenantClassAbilityInfo = basicCovenantAbilityToClassAbilityInfo[basicCovenantSpellId][AUDIOQS.GetClassId()]
@@ -204,7 +204,7 @@ function AUDIOQS.COVENANT_ReloadCovenantAbilities()
 				}
 	else -- just do a manual search for each class. Not a permanent sol^n. Doesn't work when switching abilities.
 		local myClassCovenantAbilitiesInfo = classToClassCovenantAbilitiesInfo[AUDIOQS.GetClassId()]
-		for i,abilityInfo in pairs(myClassCovenantAbilitiesInfo) do
+		for _,abilityInfo in pairs(myClassCovenantAbilitiesInfo) do
 			local thisSpellId = abilityInfo[COVENANT_ABILITY_SPELL_ID]
 			if IsSpellKnown(thisSpellId) then
 				extSpells[ thisSpellId ] =
