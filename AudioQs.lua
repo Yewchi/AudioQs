@@ -4,7 +4,7 @@
 
 AUDIOQS = {}
 
-AUDIOQS.DEBUG = false
+AUDIOQS.DEBUG = true
 AUDIOQS.VERBOSE = AUDIOQS.DEBUG and true
 
 AUDIOQS.WOW_CLASSIC = (select(4, GetBuildInfo()) < 20000) -- Can this be more broadly determined?

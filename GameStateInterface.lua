@@ -179,22 +179,23 @@ local function SpellCooldownBlasterCannon(_, elapsed)
 	Frame_SpellCooldownTicker.limiter = BAD_SPELL_LIMITER_TIME
 	local currTime = GetTime()
 	local n = 1
+	local gcdExpiration = AUDIOQS.GetGcdExpiration()
 	while n <= #spellsOnCooldown do
 		local thisSpellOnCooldown = spellsOnCooldown[n]
 		local thisSpellId = thisSpellOnCooldown[ON_COOLDOWN_SPELLID]
 		local thisCdExpiration = thisSpellOnCooldown[ON_COOLDOWN_CDEXPIRATION]
 		local cdStart, cdDur = GetSpellCooldown(thisSpellId)
 
-		if AUDIOQS.GetGcdExpiration() == cdStart + cdDur then
+		if gcdExpiration ~= 0 and gcdExpiration == cdStart + cdDur then
 			if spellsOnCooldownLastGcdAllowable[thisSpellId] == nil then
 				spellsOnCooldownLastGcdAllowable[thisSpellId] = cdStart + cdDur
-				--print("SpellCooldownBlasterCannon setting final allowable GCD:", AUDIOQS.PrintableTable(spellsOnCooldown[n]))
+				print("SpellCooldownBlasterCannon setting final allowable GCD:", AUDIOQS.PrintableTable(spellsOnCooldown[n]))
 			elseif currTime > spellsOnCooldownLastGcdAllowable[thisSpellId] + AUDIOQS.GetGcdDur() then -- Doesn't account for haste differences
-				--print("SpellCooldownBlasterCannon final GCD chance taken:", AUDIOQS.PrintableTable(spellsOnCooldown[n]))
+				print("SpellCooldownBlasterCannon final GCD chance taken:", AUDIOQS.PrintableTable(spellsOnCooldown[n]))
 				AUDIOQS.ProcessSpell(thisSpellId, currTime)
 			end
 		elseif thisSpellOnCooldown[ON_COOLDOWN_FIRST_ALLOWABLE_GCD] == nil and currTime > thisCdExpiration+0.15 then
-			--print("SpellCooldownBlasterCannon killing", AUDIOQS.PrintableTable(spellsOnCooldown[n]))
+			print("SpellCooldownBlasterCannon killing", AUDIOQS.PrintableTable(spellsOnCooldown[n]))
 			AUDIOQS.ProcessSpell(thisSpellId, currTime) -- Will kill frame for us. -- TODO Potential endless loop if there are programmer logic decision failings in numerical checks/comparisons. Especially, GSI_UpdateSpellTable must be a brick wall
 		end
 		n = n + 1 -- Removed strange conditional n++. Probably vestigial through edits
@@ -218,9 +219,9 @@ local getSpellCooldown1, getSpellCooldown2, getSpellCooldown3, getSpellCooldown4
 -------- AUDIOQS.GSI_GetSpellCooldownGcdOverride()
 function AUDIOQS.GSI_GetSpellCooldownGcdOverride(spellId)
 	getSpellCooldown1, getSpellCooldown2, getSpellCooldown3, getSpellCooldown4 = GetSpellCooldown(spellId)
-	if spellsOnCooldownLastGcdAllowable[spellId] and GetTime() >= spellsOnCooldownLastGcdAllowable[spellId] then -- this if has the requirement that the LastGcdAllowable[spellId] is correctly removed after adjusting spell cooldown data
-		return 0, 0, getSpellCooldown3, getSpellCooldown4
-	end
+	--if spellsOnCooldownLastGcdAllowable[spellId] and GetTime() >= spellsOnCooldownLastGcdAllowable[spellId] then -- this if has the requirement that the LastGcdAllowable[spellId] is correctly removed after adjusting spell cooldown data
+	--	return 0, 0, getSpellCooldown3, getSpellCooldown4
+	--end
 	return getSpellCooldown1, getSpellCooldown2, getSpellCooldown3, getSpellCooldown4
 end
 
@@ -341,6 +342,7 @@ if AUDIOQS.DEBUG then if cdDur~=cdExpiration then print(AUDIOQS.audioQsSpecifier
 		local isChargeSpell = thisSpell[AUDIOQS.SpellCharges] ~= nil
 		
 		if not (cdDur > 0 and AUDIOQS.IsEqualToGcd(cdDur)) then
+			if spellId == 272790 then print(AUDIOQS.TablePrint(AUDIOQS.spells[272790])) end
 			thisSpell[AUDIOQS.SPELL_DURATION] = cdDur
 			thisSpell[AUDIOQS.SPELL_EXPIRATION] = cdExpiration
 			

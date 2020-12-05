@@ -47,21 +47,21 @@ local extFuncs = {
 --
 -- spells[spellId] = { "Spell Name", charges, cdDur, cdExpiration, unitId, spellType}
 local extSpells = { 
-		[217200] = 	{ "Barbed Shot", 			2, 	0, 	0, 	"player", 		AUDIOQS.SPELL_TYPE_ABILITY}, -- TODO If two prompts use the same spellId, spellName, unitId and spellType, they should be tracked as one spell as a single entry in the GSI data. Requires checking for similarities before adding.
+		--[217200] = 	{ "Barbed Shot", 			2, 	0, 	0, 	"player", 		AUDIOQS.SPELL_TYPE_ABILITY}, -- TODO If two prompts use the same spellId, spellName, unitId and spellType, they should be tracked as one spell as a single entry in the GSI data. Requires checking for similarities before adding.
 		[272790] = 	{ "Frenzy", 				0, 	0, 	0, 	"pet", 			AUDIOQS.SPELL_TYPE_AURA},
-		[53209] = 	{ "Chimaera Shot", 			0, 	0, 	0, 	"player", 		AUDIOQS.SPELL_TYPE_ABILITY},
-		[131894] = 	{ "A Murder Of Crows", 		0, 	0, 	0, 	"player", 		AUDIOQS.SPELL_TYPE_ABILITY},
-		[19574] = 	{ "Bestial Wrath", 			0, 	0, 	0, 	"player", 		AUDIOQS.SPELL_TYPE_ABILITY},
-		[193530] = 	{ "Aspect of the Wild", 	0, 	0, 	0, 	"player", 		AUDIOQS.SPELL_TYPE_ABILITY},
-		[186265] = 	{ "Aspect of the Turtle", 	0, 	0, 	0, 	"player", 		AUDIOQS.SPELL_TYPE_ABILITY},
-		[186257] = 	{ "Aspect of the Cheetah", 	0, 	0, 	0, 	"player", 		AUDIOQS.SPELL_TYPE_ABILITY},
-		[109304] = 	{ "Exhilaration", 			0, 	0, 	0, 	"player", 		AUDIOQS.SPELL_TYPE_ABILITY},
-		[1543] = 	{ "Flare", 					0, 	0, 	0, 	"player", 		AUDIOQS.SPELL_TYPE_ABILITY},
-		[187698] = 	{ "Tar Trap", 				0, 	0, 	0, 	"player", 		AUDIOQS.SPELL_TYPE_ABILITY},
-		[187650] = 	{ "Freezing Trap", 			0, 	0, 	0, 	"player", 		AUDIOQS.SPELL_TYPE_ABILITY},
-		[147362] = 	{ "Counter Shot", 			0, 	0, 	0, 	"player", 		AUDIOQS.SPELL_TYPE_ABILITY},
-		[19577] = 	{ "Intimidation", 			0, 	0, 	0, 	"player", 		AUDIOQS.SPELL_TYPE_ABILITY},
-		[34477] = 	{ "Misdirection", 			0, 	0, 	0, 	"player", 		AUDIOQS.SPELL_TYPE_ABILITY}
+		--[53209] = 	{ "Chimaera Shot", 			0, 	0, 	0, 	"player", 		AUDIOQS.SPELL_TYPE_ABILITY},
+		--[131894] = 	{ "A Murder Of Crows", 		0, 	0, 	0, 	"player", 		AUDIOQS.SPELL_TYPE_ABILITY},
+		--[19574] = 	{ "Bestial Wrath", 			0, 	0, 	0, 	"player", 		AUDIOQS.SPELL_TYPE_ABILITY},
+		--[193530] = 	{ "Aspect of the Wild", 	0, 	0, 	0, 	"player", 		AUDIOQS.SPELL_TYPE_ABILITY},
+		--[186265] = 	{ "Aspect of the Turtle", 	0, 	0, 	0, 	"player", 		AUDIOQS.SPELL_TYPE_ABILITY},
+		--[186257] = 	{ "Aspect of the Cheetah", 	0, 	0, 	0, 	"player", 		AUDIOQS.SPELL_TYPE_ABILITY},
+		--[109304] = 	{ "Exhilaration", 			0, 	0, 	0, 	"player", 		AUDIOQS.SPELL_TYPE_ABILITY},
+		--[1543] = 	{ "Flare", 					0, 	0, 	0, 	"player", 		AUDIOQS.SPELL_TYPE_ABILITY},
+		--[187698] = 	{ "Tar Trap", 				0, 	0, 	0, 	"player", 		AUDIOQS.SPELL_TYPE_ABILITY},
+		--[187650] = 	{ "Freezing Trap", 			0, 	0, 	0, 	"player", 		AUDIOQS.SPELL_TYPE_ABILITY},
+		--[147362] = 	{ "Counter Shot", 			0, 	0, 	0, 	"player", 		AUDIOQS.SPELL_TYPE_ABILITY},
+		--[19577] = 	{ "Intimidation", 			0, 	0, 	0, 	"player", 		AUDIOQS.SPELL_TYPE_ABILITY},
+		--[34477] = 	{ "Misdirection", 			0, 	0, 	0, 	"player", 		AUDIOQS.SPELL_TYPE_ABILITY}
 }
 
 -- events["EVENT_NAME"] = eventArgsArray (automatically generated)
@@ -87,7 +87,7 @@ local extSegments = {
 			{nil, 		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Timers/pulse_3_dropped.ogg",	nil,		AUDIOQS.PROMPTSEG_CONDITIONAL_CONTINUATION} 
 		}
 	},
-	[217200] = { -- Barbed Shot
+	--[[[217200] = { -- Barbed Shot
 		{
 			{
 				"return AUDIOQS.spells[217200][AUDIOQS.SPELL_CHARGES] > AUDIOQS.spellsSnapshot[217200][AUDIOQS.SPELL_CHARGES]",
@@ -214,7 +214,7 @@ local extSegments = {
 			},
 			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Hunter/misdirection.ogg",		nil,	true }
 		}
-	},
+	},--]]
 }
 --
 -- /Spell Tables and Rules
