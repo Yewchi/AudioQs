@@ -130,7 +130,7 @@ function AUDIOQS.ProcessSpellCooldownsForPrompts()
 		local cdDur = AUDIOQS.GSI_GetSpellCooldownGcdOverride(spellId)
 		if cdDur > 1.5 or (cdDur == 0 and AUDIOQS.spells[spellId][AUDIOQS.SPELL_EXPIRATION] > 0) or (charges ~= nil and charges ~= AUDIOQS.spells[spellId][AUDIOQS.SPELL_CHARGES]) then
 			if AUDIOQS.ProcessSpell(spellId, currTime) and not foundChange then
-				print("Found change:", select(1, GetSpellInfo(spellId)), AUDIOQS.GSI_GetSpellCooldownGcdOverride(spellId))
+				--print("Found change:", select(1, GetSpellInfo(spellId)), AUDIOQS.GSI_GetSpellCooldownGcdOverride(spellId))
 				foundChange = true
 			end
 		end
