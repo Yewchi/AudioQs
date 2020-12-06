@@ -80,13 +80,11 @@ function AUDIOQS.ProcessCombatLogForPrompts()
 	end
 end
 
-function AUDIOQS.ProcessSpell(spellId, currTime) -- TODO Poorly named
+function AUDIOQS.ProcessSpell(spellId, currTime, sentBy) -- TODO Poorly named
 	local cdStart, cdDur = AUDIOQS.GSI_GetSpellCooldownGcdOverride(spellId)
 	local charges = GetSpellCharges(spellId)
 	local foundChange = false
-	
-	--print(fourtyNine, (fourtyNine and cdStart.." "..cdDur or ""))
-	
+		
 	if (charges ~= nil and charges ~= AUDIOQS.spells[spellId][AUDIOQS.SPELL_CHARGES]) then -- TODO Hacky
 		if AUDIOQS.GSI_UpdateSpellTable(spellId, cdDur, cdStart+cdDur) then 
 			AUDIOQS.AttemptStartPrompt(spellId)
@@ -127,10 +125,9 @@ function AUDIOQS.ProcessSpellCooldownsForPrompts()
 	for n=1,#abilityTable,1 do
 		local spellId = abilityTable[n]
 		local charges = GetSpellCharges(spellId)
-		local cdDur = AUDIOQS.GSI_GetSpellCooldownGcdOverride(spellId)
-		if cdDur > 1.5 or (cdDur == 0 and AUDIOQS.spells[spellId][AUDIOQS.SPELL_EXPIRATION] > 0) or (charges ~= nil and charges ~= AUDIOQS.spells[spellId][AUDIOQS.SPELL_CHARGES]) then
-			if AUDIOQS.ProcessSpell(spellId, currTime) and not foundChange then
-				--print("Found change:", select(1, GetSpellInfo(spellId)), AUDIOQS.GSI_GetSpellCooldownGcdOverride(spellId))
+		local cdStart, cdDur = AUDIOQS.GSI_GetSpellCooldownGcdOverride(spellId)
+		if (cdDur > 1.5 and AUDIOQS.spells[spellId][AUDIOQS.SPELL_EXPIRATION] == 0) or (cdDur == 0 and AUDIOQS.spells[spellId][AUDIOQS.SPELL_EXPIRATION] > 0) or (charges ~= nil and charges ~= AUDIOQS.spells[spellId][AUDIOQS.SPELL_CHARGES]) then
+			if AUDIOQS.ProcessSpell(spellId, currTime, "ProcessSpellCooldownsForPrompts") and not foundChange then
 				foundChange = true
 			end
 		end
