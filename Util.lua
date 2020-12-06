@@ -381,7 +381,7 @@ end
 -- TEST (Incomplete -- Bad Refactor)
 AUDIOQS.Perf = {}
 AUDIOQS.CurrFrame = 0
-local disablePerf = true -- local for safety, not consistentency
+local disablePerf = false -- local for safety, not consistentency
 function AUDIOQS.PerformanceStart(area_str)
 	if not AUDIOQS.DEBUG or disablePerf then return end
 	if AUDIOQS.Perf[area_str] == nil then
@@ -421,7 +421,7 @@ end
 
 function AUDIOQS.PerformancePrint(area_str)
 	local perf = AUDIOQS.Perf[area_str]
-	print(string.format("%s -- ms:%d. KB:%d. KB+:%d", area_str, perf[1][2], perf[2][1], perf[2][2]))
+	print(string.format("%s -- ms:%f. KB:%d. KB+:%d", area_str, perf[1][2], perf[2][1], perf[2][2]))
 	--print(string.format("%s -- ms:%d. KB:N/A. KB+:N/A", area_str, perf[1][2]))
 end
 

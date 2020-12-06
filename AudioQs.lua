@@ -214,16 +214,15 @@ Frame_UnitAura:SetScript("OnEvent",
 		local unitId = ...
 		
 		if not AUDIOQS.UnitIsIncluded(unitId) then
-			AUDIOQS.PerformanceStart("ua")
 			return
 		end
 		if specId ~= nil then
 		-- Abstract into class file funcs
 			local aura
 			for n = 1, 40, 1 do
-				aura = AUDIOQS.LoadAura(unitId, n, "HELPFUL")
+				aura = AUDIOQS.LoadAura(unitId, n)
 				if aura[AUDIOQS.UNIT_AURA_SPELL_ID] ~= nil then 
-					local success, err = pcall(AUDIOQS.FindPromptsFromUnitAura, aura)
+					local success, err = pcall(AUDIOQS.FindPromptsFromUnitAura, aura, unitId)
 					if not success then AUDIOQS.HandleError(err, "UnitAuraOnEvent()", "AUDIOQS.FindPromptsFromUnitAura()") break end
 				else
 					break 

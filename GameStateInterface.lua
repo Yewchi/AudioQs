@@ -183,20 +183,21 @@ local function SpellCooldownBlasterCannon(_, elapsed)
 	while n <= #spellsOnCooldown do
 		local thisSpellOnCooldown = spellsOnCooldown[n]
 		local thisSpellId = thisSpellOnCooldown[ON_COOLDOWN_SPELLID]
-		local thisCdExpiration = thisSpellOnCooldown[ON_COOLDOWN_CDEXPIRATION]
 		local cdStart, cdDur = GetSpellCooldown(thisSpellId)
+		local thisCdExpiration = cdStart + cdDur
+		thisSpellOnCooldown[ON_COOLDOWN_CDEXPIRATION] = thisCdExpiration
 
-		if gcdExpiration ~= 0 and gcdExpiration == cdStart + cdDur then
+		if gcdExpiration ~= 0 and gcdExpiration == thisCdExpiration then
 			if spellsOnCooldownLastGcdAllowable[thisSpellId] == nil then
-				spellsOnCooldownLastGcdAllowable[thisSpellId] = cdStart + cdDur
+				spellsOnCooldownLastGcdAllowable[thisSpellId] = thisCdExpiration
 				--if thisSpellId == 19574 then print("SpellCooldownBlasterCannon setting final allowable GCD:", AUDIOQS.PrintableTable(spellsOnCooldown[n])) end
 			elseif currTime > spellsOnCooldownLastGcdAllowable[thisSpellId] + AUDIOQS.GetGcdDur() then -- Doesn't account for haste differences
 				--if thisSpellId == 19574 then print("SpellCooldownBlasterCannon final GCD chance taken:", AUDIOQS.PrintableTable(spellsOnCooldown[n])) end
-				AUDIOQS.ProcessSpell(thisSpellId, currTime, "GsiFinalGcd")
+				AUDIOQS.ProcessSpell(thisSpellId, currTime)
 			end
 		elseif thisSpellOnCooldown[ON_COOLDOWN_FIRST_ALLOWABLE_GCD] == nil and currTime > thisCdExpiration+0.15 then
 			--if thisSpellId == 19574 then print("SpellCooldownBlasterCannon killing", AUDIOQS.PrintableTable(spellsOnCooldown[n])) end
-			AUDIOQS.ProcessSpell(thisSpellId, currTime, "GsiCaught") -- Will kill frame for us. -- TODO Potential endless loop if there are programmer logic decision failings in numerical checks/comparisons. Especially, GSI_UpdateSpellTable must be a brick wall
+			AUDIOQS.ProcessSpell(thisSpellId, currTime) -- Will kill frame for us. -- TODO Potential endless loop if there are programmer logic decision failings in numerical checks/comparisons. Especially, GSI_UpdateSpellTable must be a brick wall
 		end
 		n = n + 1 -- Removed strange conditional n++. Probably vestigial through edits
 	end
@@ -320,7 +321,7 @@ function AUDIOQS.GSI_UpdateSpellTable(spellId, cdDur, cdExpiration)
 		error({code=AUDIOQS.ERR_UNKNOWN_SPELL_AS_ARGUMENT, func="AUDIOQS.GSI_UpdateSpellTable() spellId="..(spellId~=nil and spellId or "nil").." cdDur="..(cdDur~=nil and cdDur or "nil").." cdExpiration="..(cdExpiration~=nil and cdExpiration or "nil")})
 	end
 	local thisSpell = AUDIOQS.spells[spellId]
-	
+		
 	if cdDur == nil or cdExpiration == nil then
 if AUDIOQS.DEBUG then if cdDur~=cdExpiration then print(AUDIOQS.audioQsSpecifier..AUDIOQS.debugSpecifier.."GSI_UpdateSpellTable(): - "..(cdDur == nil and "cdDur" or "cdExpiration").." was sole nil passed.") end end
 		local start, dur = AUDIOQS.GSI_GetSpellCooldownGcdOverride(spellId)
@@ -345,7 +346,9 @@ if AUDIOQS.DEBUG then if cdDur~=cdExpiration then print(AUDIOQS.audioQsSpecifier
 			thisSpell[AUDIOQS.SPELL_DURATION] = cdDur
 			thisSpell[AUDIOQS.SPELL_EXPIRATION] = cdExpiration
 			
-			FrameInitOrUpdateExpiration(spellId, cdExpiration)
+			if thisSpell[AUDIOQS.SPELL_SPELL_TYPE] == AUDIOQS.SPELL_TYPE_ABILITY then -- TODO Restrictive -- Indicates SCBC needs expanding
+				FrameInitOrUpdateExpiration(spellId, cdExpiration) 
+			end
 			
 			if isChargeSpell and thisSpell[AUDIOQS.SPELL_CHARGES] == AUDIOQS.spellsSnapshot[spellId][AUDIOQS.SPELL_CHARGES] then -- TODO Let the charge send the AttemptStartPrompt() instead. Also, trash code. Should be higher-level determined.
 				return false

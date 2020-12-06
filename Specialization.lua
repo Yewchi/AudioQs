@@ -38,13 +38,13 @@ function AUDIOQS.SetAbilityAndAuraTables(newAbilities, newAuras)
 end
 
 -------- AUDIOQS.FindPromptsFromUnitAura()
-function AUDIOQS.FindPromptsFromUnitAura(aura)
+function AUDIOQS.FindPromptsFromUnitAura(aura, unitId)
 	if aura[AUDIOQS.UNIT_AURA_TIME_MOD] ~= AURA_ALWAYS_IS_VALUE then
 		error({code=AUDIOQS.ERR_INVALID_AURA_DATA, func=string.format("FindPromptsFromUnitAura(aura=%s)", aura[AUDIOQS.UNIT_AURA_NAME])})
 	end
 	
 	if AUDIOQS.GSI_AuraIsIncluded(aura[AUDIOQS.UNIT_AURA_SPELL_ID]) then 
-		return AUDIOQS.ProcessAuraForPrompts(aura)
+		return AUDIOQS.ProcessAuraForPrompts(aura, unitId)
 	end
 end
 
@@ -80,7 +80,7 @@ function AUDIOQS.ProcessCombatLogForPrompts()
 	end
 end
 
-function AUDIOQS.ProcessSpell(spellId, currTime, sentBy) -- TODO Poorly named
+function AUDIOQS.ProcessSpell(spellId, currTime) -- TODO Poorly named
 	local cdStart, cdDur = AUDIOQS.GSI_GetSpellCooldownGcdOverride(spellId)
 	local charges = GetSpellCharges(spellId)
 	local foundChange = false
@@ -141,20 +141,23 @@ end
 -- Puting full aura table processing in here, then call this func, such that
 --   we don't require passing table spell refs to core.
 -------- AUDIOQS.ProccessAuraForPrompts()
-function AUDIOQS.ProcessAuraForPrompts(aura)
-	if aura == nil then
+function AUDIOQS.ProcessAuraForPrompts(aura, unitId)
+	if aura == nil or unitId == nil then
 		error({code=AUDIOQS.ERR_INVALID_ARGS, func="ProcessAuraForPrompts(aura=nil)"})
 	end
-
+	
 	local cdDur, cdExpiration, spellId = aura[AUDIOQS.UNIT_AURA_DURATION], aura[AUDIOQS.UNIT_AURA_EXPIRATION], aura[AUDIOQS.UNIT_AURA_SPELL_ID]
 	local spellIncluded = AUDIOQS.GSI_SpellIsIncluded(spellId)
+	
+	if unitId ~= AUDIOQS.spells[spellId][AUDIOQS.SPELL_UNIT_ID] then -- This may one day be a problem, but due to scale of AudioQs could be fine.
+		return false
+	end
 
 	if spellIncluded == nil then
 		error({code=AUDIOQS.ERR_UNKNOWN_SPELL_AS_ARGUMENT, func="ProcessAuraForPrompts(aura="..(AUDIOQS.PrintableTable(aura))..")"})
 	elseif AUDIOQS.GSI_UpdateSpellTable(spellId, cdDur, cdExpiration) then
 		AUDIOQS.AttemptStartPrompt(spellId)
 	end
-
 end
 
 -------- AUDIOQS.LoadSpecialization()

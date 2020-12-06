@@ -92,15 +92,13 @@ local function GenerateTablesAndIndices()
 		for spellId,spell in pairs(spells) do
 			-- spellsLookUp
 			spellsLookUp[spell[AUDIOQS.SPELL_SPELL_NAME]] = spellId
-			-- abilityTable
+
 			local previousAbilitySpellId = (#abilityTable > 0 and abilityTable[i-1] or nil)
-			if spell[AUDIOQS.SPELL_SPELL_TYPE] == AUDIOQS.SPELL_TYPE_ABILITY and previousAbilitySpellId ~= spellId then
+			local previousAuraSpellId = (#auraTable > 0 and auraTable[j-1] or nil)
+			if spell[AUDIOQS.SPELL_SPELL_TYPE] == AUDIOQS.SPELL_TYPE_ABILITY and previousAbilitySpellId ~= spellId then -- abilityTable
 				abilityTable[i] = spellId
 				i = i + 1
-			end
-			-- auraTable
-			local previousAuraSpellId = (#auraTable > 0 and auraTable[j-1] or nil)
-			if spell[AUDIOQS.SPELL_SPELL_TYPE] == AUDIOQS.SPELL_TYPE_AURA and previousAuraSpellId ~= spellId then
+			elseif spell[AUDIOQS.SPELL_SPELL_TYPE] == AUDIOQS.SPELL_TYPE_AURA and previousAuraSpellId ~= spellId then -- auraTable
 				auraTable[j] = spellId
 				j = j + 1
 			end
