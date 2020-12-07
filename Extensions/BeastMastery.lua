@@ -122,7 +122,7 @@ local extSegments = {
 				"return AUDIOQS.spells[19574][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[19574][AUDIOQS.SPELL_EXPIRATION] > 0",
 				false
 			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Hunter/bestial_wrath.ogg",		nil,	true }
+			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Hunter/bestial_wrath.ogg",		nil,		true}
 		}
 	},
 	[193530] = {

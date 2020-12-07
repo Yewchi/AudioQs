@@ -185,19 +185,30 @@ local function SpellCooldownBlasterCannon(_, elapsed)
 		local thisSpellId = thisSpellOnCooldown[ON_COOLDOWN_SPELLID]
 		local cdStart, cdDur = GetSpellCooldown(thisSpellId)
 		local thisCdExpiration = cdStart + cdDur
-		thisSpellOnCooldown[ON_COOLDOWN_CDEXPIRATION] = thisCdExpiration
+		local previousCdExpiration = thisSpellOnCooldown[ON_COOLDOWN_CDEXPIRATION]
 
-		if gcdExpiration ~= 0 and gcdExpiration == thisCdExpiration then
+		if spellsOnCooldownLastGcdAllowable[thisSpellId] ~= nil or 
+				(spellsOnCooldownLastGcdAllowable[thisSpellId] == nil and gcdExpiration ~= 0 and gcdExpiration == thisCdExpiration) then
 			if spellsOnCooldownLastGcdAllowable[thisSpellId] == nil then
-				spellsOnCooldownLastGcdAllowable[thisSpellId] = thisCdExpiration
-				--if thisSpellId == 19574 then print("SpellCooldownBlasterCannon setting final allowable GCD:", AUDIOQS.PrintableTable(spellsOnCooldown[n])) end
-			elseif currTime > spellsOnCooldownLastGcdAllowable[thisSpellId] + AUDIOQS.GetGcdDur() then -- Doesn't account for haste differences
-				--if thisSpellId == 19574 then print("SpellCooldownBlasterCannon final GCD chance taken:", AUDIOQS.PrintableTable(spellsOnCooldown[n])) end
+				--if thisSpellId == 19574 then  print("SpellCooldownBlasterCannon previousCdExpiration:", previousCdExpiration, "; gcdExpiration:", gcdExpiration) end
+				if previousCdExpiration < gcdExpiration then -- The spell has increased it's cdExpiration upon duping the gcd, it's probably really ending at it's original time.
+					spellsOnCooldownLastGcdAllowable[thisSpellId] = previousCdExpiration
+					thisSpellOnCooldown[ON_COOLDOWN_CDEXPIRATION] = previousCdExpiration
+					--if thisSpellId == 19574 then print("SpellCooldownBlasterCannon overriding GCD to previousCdExpiration:", AUDIOQS.PrintableTable(spellsOnCooldown[n])) end				
+				else -- The spell cooldown has been reduced to mimic the gcd, unknown when from now til gcd end it really comes off cd. Call at GCD drop. (Random differentiation would actually provide a spread of the audio clog if all CDs are reset at once, alternatively, if all audio files were measured, a "Step-By-Step" call-out option could be given for spell cooldowns.
+					spellsOnCooldownLastGcdAllowable[thisSpellId] = gcdExpiration
+					thisSpellOnCooldown[ON_COOLDOWN_CDEXPIRATION] = gcdExpiration
+					--if thisSpellId == 19574 then print("SpellCooldownBlasterCannon setting final allowable GCD:", AUDIOQS.PrintableTable(spellsOnCooldown[n])) end				
+				end
+			elseif currTime > spellsOnCooldownLastGcdAllowable[thisSpellId] then -- Doesn't account for haste differences
+				--if thisSpellId == 19574 then print(string.format("<%f>", GetTime()), "SpellCooldownBlasterCannon final GCD chance taken:", AUDIOQS.PrintableTable(spellsOnCooldown[n])) end
 				AUDIOQS.ProcessSpell(thisSpellId, currTime)
 			end
 		elseif thisSpellOnCooldown[ON_COOLDOWN_FIRST_ALLOWABLE_GCD] == nil and currTime > thisCdExpiration+0.15 then
 			--if thisSpellId == 19574 then print("SpellCooldownBlasterCannon killing", AUDIOQS.PrintableTable(spellsOnCooldown[n])) end
 			AUDIOQS.ProcessSpell(thisSpellId, currTime) -- Will kill frame for us. -- TODO Potential endless loop if there are programmer logic decision failings in numerical checks/comparisons. Especially, GSI_UpdateSpellTable must be a brick wall
+		else
+			thisSpellOnCooldown[ON_COOLDOWN_CDEXPIRATION] = thisCdExpiration -- code works if this is taken out of else, GSI_GscGcdOverride() will ignore if lastGcdAllowable was set
 		end
 		n = n + 1 -- Removed strange conditional n++. Probably vestigial through edits
 	end

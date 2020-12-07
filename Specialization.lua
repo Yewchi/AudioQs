@@ -143,7 +143,7 @@ end
 -------- AUDIOQS.ProccessAuraForPrompts()
 function AUDIOQS.ProcessAuraForPrompts(aura, unitId)
 	if aura == nil or unitId == nil then
-		error({code=AUDIOQS.ERR_INVALID_ARGS, func="ProcessAuraForPrompts(aura=nil)"})
+		error({code=AUDIOQS.ERR_INVALID_ARGS, func="ProcessAuraForPrompts(aura=nil, unitId=nil)"})
 	end
 	
 	local cdDur, cdExpiration, spellId = aura[AUDIOQS.UNIT_AURA_DURATION], aura[AUDIOQS.UNIT_AURA_EXPIRATION], aura[AUDIOQS.UNIT_AURA_SPELL_ID]
