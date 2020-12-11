@@ -66,202 +66,70 @@ local extEvents = {
 
 local extSegments = {
 	[22812] = {
-		{
-			{
-				"return AUDIOQS.spells[22812][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[22812][AUDIOQS.SPELL_EXPIRATION] > 0",
-				false
-			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Druid/barkskin.ogg",		nil,	true }
-		}
+		AUDIOQS.SEGLIB_CREATE_GENERIC_SPELL_COOLDOWN_SEGMENT("Cooldowns/Druid/barkskin.ogg")
 	},
 	[102351] = 	{
-		{
-			{
-				"return AUDIOQS.spells[102351][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[102351][AUDIOQS.SPELL_EXPIRATION] > 0",
-				false
-			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Druid/cenarion_ward.ogg",		nil,	true }
-		}
+		AUDIOQS.SEGLIB_CREATE_GENERIC_SPELL_COOLDOWN_SEGMENT("Cooldowns/Druid/cenarion_ward.ogg")
 	},
 	[33786] = 	{
-		{
-			{
-				"return AUDIOQS.spells[33786][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[33786][AUDIOQS.SPELL_EXPIRATION] > 0",
-				false
-			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Druid/cyclone.ogg",		nil,	true }
-		}
+		AUDIOQS.SEGLIB_CREATE_GENERIC_SPELL_COOLDOWN_SEGMENT("Cooldowns/Druid/cyclone.ogg")
 	},
 	[1850] = 	{
-		{
-			{
-				"return AUDIOQS.spells[1850][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[1850][AUDIOQS.SPELL_EXPIRATION] > 0",
-				false
-			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Druid/dash.ogg",		nil,	true }
-		}
+		AUDIOQS.SEGLIB_CREATE_GENERIC_SPELL_COOLDOWN_SEGMENT("Cooldowns/Druid/dash.ogg")
 	},
 	[319454] = 	{
-		{
-			{
-				"return AUDIOQS.spells[319454][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[319454][AUDIOQS.SPELL_EXPIRATION] > 0",
-				false
-			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Druid/heart_of_the_wild.ogg",		nil,	true }
-		}
+		AUDIOQS.SEGLIB_CREATE_GENERIC_SPELL_COOLDOWN_SEGMENT("Cooldowns/Druid/heart_of_the_wild.ogg")
 	},
 	[29166] = 	{
-		{
-			{
-				"return AUDIOQS.spells[29166][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[29166][AUDIOQS.SPELL_EXPIRATION] > 0",
-				false
-			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Druid/innervate.ogg",		nil,	true }
-		}
+		AUDIOQS.SEGLIB_CREATE_GENERIC_SPELL_COOLDOWN_SEGMENT("Cooldowns/Druid/innervate.ogg")
 	},
 	[102342] = 	{
-		{
-			{
-				"return AUDIOQS.spells[102342][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[102342][AUDIOQS.SPELL_EXPIRATION] > 0",
-				false
-			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Druid/ironbark.ogg",		nil,	true }
-		}
+		AUDIOQS.SEGLIB_CREATE_GENERIC_SPELL_COOLDOWN_SEGMENT("Cooldowns/Druid/ironbark.ogg")
 	},
 	[102359] = 	{
-		{
-			{
-				"return AUDIOQS.spells[102359][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[102359][AUDIOQS.SPELL_EXPIRATION] > 0",
-				false
-			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Druid/mass_entanglement.ogg",		nil,	true }
-		}
+		AUDIOQS.SEGLIB_CREATE_GENERIC_SPELL_COOLDOWN_SEGMENT("Cooldowns/Druid/mass_entanglement.ogg")
 	},
 	[5211] = 	{
-		{
-			{
-				"return AUDIOQS.spells[5211][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[5211][AUDIOQS.SPELL_EXPIRATION] > 0",
-				false
-			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Druid/mighty_bash.ogg",		nil,	true }
-		}
+		AUDIOQS.SEGLIB_CREATE_GENERIC_SPELL_COOLDOWN_SEGMENT("Cooldowns/Druid/mighty_bash.ogg")
 	},
 	[203651] = 	{
-		{
-			{
-				"return AUDIOQS.spells[203651][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[203651][AUDIOQS.SPELL_EXPIRATION] > 0",
-				false
-			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Druid/overgrowth.ogg",		nil,	true }
-		}
+		AUDIOQS.SEGLIB_CREATE_GENERIC_SPELL_COOLDOWN_SEGMENT("Cooldowns/Druid/overgrowth.ogg")
 	},
 	[20484] = 	{
-		{
-			{
-				"return AUDIOQS.spells[20484][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[20484][AUDIOQS.SPELL_EXPIRATION] > 0",
-				false
-			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Druid/rebirth.ogg",		nil,	true }
-		}
+		AUDIOQS.SEGLIB_CREATE_GENERIC_SPELL_COOLDOWN_SEGMENT("Cooldowns/Druid/rebirth.ogg")
 	},
 	[108238] = 	{
-		{
-			{
-				"return AUDIOQS.spells[108238][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[108238][AUDIOQS.SPELL_EXPIRATION] > 0",
-				false
-			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Druid/renewal.ogg",		nil,	true }
-		}
+		AUDIOQS.SEGLIB_CREATE_GENERIC_SPELL_COOLDOWN_SEGMENT("Cooldowns/Druid/renewal.ogg")
 	},
 	[2908] = {
-		{
-			{
-				"return AUDIOQS.spells[2908][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[2908][AUDIOQS.SPELL_EXPIRATION] > 0",
-				false
-			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Druid/soothe.ogg",		nil,	true }
-		}
+		AUDIOQS.SEGLIB_CREATE_GENERIC_SPELL_COOLDOWN_SEGMENT("Cooldowns/Druid/soothe.ogg")
 	},
 	[77764] = {
-		{
-			{
-				"return AUDIOQS.spells[77764][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[77764][AUDIOQS.SPELL_EXPIRATION] > 0",
-				false
-			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Druid/stampeding_roar.ogg",		nil,	true }
-		}
+		AUDIOQS.SEGLIB_CREATE_GENERIC_SPELL_COOLDOWN_SEGMENT("Cooldowns/Druid/stampeding_roar.ogg")
 	},
-	[18562] = 	{
-		{
-			{
-				"return AUDIOQS.spells[18562][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[18562][AUDIOQS.SPELL_EXPIRATION] > 0",
-				false
-			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Druid/swiftmend.ogg",		nil,	true }
-		}
+	[18562] = {
+		AUDIOQS.SEGLIB_CREATE_GENERIC_SPELL_COOLDOWN_SEGMENT("Cooldowns/Druid/swiftmend.ogg")
 	},
 	[305497] = {
-		{
-			{
-				"return AUDIOQS.spells[305497][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[305497][AUDIOQS.SPELL_EXPIRATION] > 0",
-				false
-			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Druid/thorns.ogg",		nil,	true }
-		}
+		AUDIOQS.SEGLIB_CREATE_GENERIC_SPELL_COOLDOWN_SEGMENT("Cooldowns/Druid/thorns.ogg")
 	},
-	[740] = 	{
-		{
-			{
-				"return AUDIOQS.spells[740][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[740][AUDIOQS.SPELL_EXPIRATION] > 0",
-				false
-			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Druid/tranquility.ogg",		nil,	true }
-		}
+	[740] = {
+		AUDIOQS.SEGLIB_CREATE_GENERIC_SPELL_COOLDOWN_SEGMENT("Cooldowns/Druid/tranquility.ogg")
 	},	
-	[33891] = 	{
-		{
-			{
-				"return AUDIOQS.spells[33891][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[33891][AUDIOQS.SPELL_EXPIRATION] > 0",
-				false
-			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Druid/tree_of_life.ogg",		nil,	true }
-		}
+	[33891] = {
+		AUDIOQS.SEGLIB_CREATE_GENERIC_SPELL_COOLDOWN_SEGMENT("Cooldowns/Druid/tree_of_life.ogg")
 	},
-	[132469] = 	{
-		{
-			{
-				"return AUDIOQS.spells[132469][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[132469][AUDIOQS.SPELL_EXPIRATION] > 0",
-				false
-			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Druid/typhoon.ogg",		nil,	true }
-		}
+	[132469] = {
+		AUDIOQS.SEGLIB_CREATE_GENERIC_SPELL_COOLDOWN_SEGMENT("Cooldowns/Druid/typhoon.ogg")
 	},
-	[102793] = 	{
-		{
-			{
-				"return AUDIOQS.spells[102793][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[102793][AUDIOQS.SPELL_EXPIRATION] > 0",
-				false
-			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Druid/ursols_vortex.ogg",		nil,	true }
-		}
+	[102793] = {
+		AUDIOQS.SEGLIB_CREATE_GENERIC_SPELL_COOLDOWN_SEGMENT("Cooldowns/Druid/ursols_vortex.ogg")
 	},
-	[102401] = 	{
-		{
-			{
-				"return AUDIOQS.spells[102401][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[102401][AUDIOQS.SPELL_EXPIRATION] > 0",
-				false
-			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Druid/wild_charge.ogg",		nil,	true }
-		}
+	[102401] = {
+		AUDIOQS.SEGLIB_CREATE_GENERIC_SPELL_COOLDOWN_SEGMENT("Cooldowns/Druid/wild_charge.ogg")
 	},
-	[48438] = 	{
-		{
-			{
-				"return AUDIOQS.spells[48438][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[48438][AUDIOQS.SPELL_EXPIRATION] > 0",
-				false
-			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Druid/wild_growth.ogg",		nil,	true }
-		}
+	[48438] = {
+		AUDIOQS.SEGLIB_CREATE_GENERIC_SPELL_COOLDOWN_SEGMENT("Cooldowns/Druid/wild_growth.ogg")
 	},
 	["LOADING_SCREEN_DISABLED"] = { -- TODO Should be in an "essentials", hidden extension or in the AudioQs.lua main event handlers. Workaround for now.
 		{

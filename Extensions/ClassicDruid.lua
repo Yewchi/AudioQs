@@ -48,22 +48,10 @@ local extEvents = {
 
 local extSegments = {
 	[740] = {
-		{
-			{
-				"return AUDIOQS.spells[740][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[740][AUDIOQS.SPELL_EXPIRATION] > 0",
-				false
-			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Druid/tranquility.ogg",		nil,	true }
-		}
+		AUDIOQS.SEGLIB_CREATE_GENERIC_SPELL_COOLDOWN_SEGMENT("Cooldowns/Druid/tranquility.ogg")
 	},
 	[20484] = {
-		{
-			{
-				"return AUDIOQS.spells[20484][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[20484][AUDIOQS.SPELL_EXPIRATION] > 0",
-				false
-			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Druid/rebirth.ogg",		nil,	true }
-		}
+		AUDIOQS.SEGLIB_CREATE_GENERIC_SPELL_COOLDOWN_SEGMENT("Cooldowns/Druid/rebirth.ogg")
 	},
 	["LOADING_SCREEN_DISABLED"] = { -- TODO Should be in an "essentials", hidden extension or in the AudioQs.lua main event handlers. Workaround for now.
 		{

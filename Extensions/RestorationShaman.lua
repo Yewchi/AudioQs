@@ -72,193 +72,69 @@ local extEvents = {
 
 local extSegments = {
 	[114052] = {
-		{
-			{
-				"return AUDIOQS.spells[114052][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[114052][AUDIOQS.SPELL_EXPIRATION] > 0",
-				false
-			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Shaman/ascendance.ogg",		nil,	true }
-		}
+		AUDIOQS.SEGLIB_CREATE_GENERIC_SPELL_COOLDOWN_SEGMENT("Cooldowns/Shaman/ascendance.ogg")
 	},
 	[108271] = {
-		{
-			{
-				"return AUDIOQS.spells[108271][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[108271][AUDIOQS.SPELL_EXPIRATION] > 0",
-				false
-			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Shaman/astral_shift.ogg",		nil,	true }
-		}
+		AUDIOQS.SEGLIB_CREATE_GENERIC_SPELL_COOLDOWN_SEGMENT("Cooldowns/Shaman/astral_shift.ogg")
 	},
 	[192058] = {
-		{
-			{
-				"return AUDIOQS.spells[192058][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[192058][AUDIOQS.SPELL_EXPIRATION] > 0",
-				false
-			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Shaman/capacitor_totem.ogg",		nil,	true }
-		}
+		AUDIOQS.SEGLIB_CREATE_GENERIC_SPELL_COOLDOWN_SEGMENT("Cooldowns/Shaman/capacitor_totem.ogg")
 	},
 	[204331] = {
-		{
-			{
-				"return AUDIOQS.spells[204331][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[204331][AUDIOQS.SPELL_EXPIRATION] > 0",
-				false
-			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Shaman/counterstrike_totem.ogg",		nil,	true }
-		}
+		AUDIOQS.SEGLIB_CREATE_GENERIC_SPELL_COOLDOWN_SEGMENT("Cooldowns/Shaman/counterstrike_totem.ogg")
 	},
 	[198103] = {
-		{
-			{
-				"return AUDIOQS.spells[198103][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[198103][AUDIOQS.SPELL_EXPIRATION] > 0",
-				false
-			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Shaman/earth_elemental.ogg",		nil,	true }
-		}
+		AUDIOQS.SEGLIB_CREATE_GENERIC_SPELL_COOLDOWN_SEGMENT("Cooldowns/Shaman/earth_elemental.ogg")
 	},
 	[2484] = {
-		{
-			{
-				"return AUDIOQS.spells[2484][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[2484][AUDIOQS.SPELL_EXPIRATION] > 0",
-				false
-			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Shaman/earthbind_totem.ogg",		nil,	true }
-		}
+		AUDIOQS.SEGLIB_CREATE_GENERIC_SPELL_COOLDOWN_SEGMENT("Cooldowns/Shaman/earthbind_totem.ogg")
 	},
 	[198838] = {
-		{
-			{
-				"return AUDIOQS.spells[198838][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[198838][AUDIOQS.SPELL_EXPIRATION] > 0",
-				false
-			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Shaman/earthen_wall_totem.ogg",		nil,	true }
-		}
+		AUDIOQS.SEGLIB_CREATE_GENERIC_SPELL_COOLDOWN_SEGMENT("Cooldowns/Shaman/earthen_wall_totem.ogg")
 	},
 	[51485] = {
-		{
-			{
-				"return AUDIOQS.spells[51485][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[51485][AUDIOQS.SPELL_EXPIRATION] > 0",
-				false
-			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Shaman/earthgrab_totem.ogg",		nil,	true }
-		}
+		AUDIOQS.SEGLIB_CREATE_GENERIC_SPELL_COOLDOWN_SEGMENT("Cooldowns/Shaman/earthgrab_totem.ogg")
 	},
 	[73920] = {
-		{
-			{
-				"return AUDIOQS.spells[73920][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[73920][AUDIOQS.SPELL_EXPIRATION] > 0",
-				false
-			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Shaman/healing_rain.ogg",		nil,	true }
-		}
+		AUDIOQS.SEGLIB_CREATE_GENERIC_SPELL_COOLDOWN_SEGMENT("Cooldowns/Shaman/healing_rain.ogg")
 	},
 	[5394] = {
 		{
 			{
-				"if AUDIOQS.ChargeCooldownsAllowed ~= nil and AUDIOQS.ChargeCooldownsAllowed then local charges = GetSpellCharges(5394) return (AUDIOQS.spells[5394][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[5394][AUDIOQS.SPELL_EXPIRATION] > 0) or (charges ~= nil and charges > AUDIOQS.spellsSnapshot[5394][AUDIOQS.SPELL_CHARGES]) end return false",
+				AUDIOQS.SEGLIB_GENERIC_SPELL_CHARGES_COOLDOWN,
 				false
 			},
 			{nil,		AUDIOQS.SOUND_FUNC_PREFIX.."if select(4, GetTalentInfo(6, 3, 1)) then return '"..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Shaman/cloudburst_totem.ogg' end return '"..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Shaman/healing_stream_totem.ogg'",		nil,	true }
 		}
 	},
 	[108280] = {
-		{
-			{
-				"return AUDIOQS.spells[108280][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[108280][AUDIOQS.SPELL_EXPIRATION] > 0",
-				false
-			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Shaman/healing_tide_totem.ogg",		nil,	true }
-		}
+		AUDIOQS.SEGLIB_CREATE_GENERIC_SPELL_COOLDOWN_SEGMENT("Cooldowns/Shaman/healing_tide_totem.ogg")
 	},
 	[51514] = {
-		{
-			{
-				"return AUDIOQS.spells[51514][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[51514][AUDIOQS.SPELL_EXPIRATION] > 0",
-				false
-			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Shaman/hex.ogg",		nil,	true }
-		}
+		AUDIOQS.SEGLIB_CREATE_GENERIC_SPELL_COOLDOWN_SEGMENT("Cooldowns/Shaman/hex.ogg")
 	},
 	[16191] = {
-		{
-			{
-				"return AUDIOQS.spells[16191][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[16191][AUDIOQS.SPELL_EXPIRATION] > 0",
-				false
-			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Shaman/mana_tide_totem.ogg",		nil,	true }
-		}
+		AUDIOQS.SEGLIB_CREATE_GENERIC_SPELL_COOLDOWN_SEGMENT("Cooldowns/Shaman/mana_tide_totem.ogg")
 	},
---[[[77130] = { -- Purify Spirit
-		{
-			{
-				"return AUDIOQS.spells[77130][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[77130][AUDIOQS.SPELL_EXPIRATION] > 0",
-				false
-			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/purify_spirit.ogg",		nil,	true }
-		}
-	}, ]]--
---[[[61295] = {
-		{
-			{
-				"return AUDIOQS.spells[61295][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[61295][AUDIOQS.SPELL_EXPIRATION] > 0",
-				false
-			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/riptide.ogg",		nil,	true }
-		}
-	}, ]]--
+--	[77130] = { AUDIOQS.SEGLIB_CREATE_GENERIC_SPELL_COOLDOWN_SEGMENT("Cooldowns/purify_spirit.ogg") }, -- Purify Spirit
+--	[61295] = { AUDIOQS.SEGLIB_CREATE_GENERIC_SPELL_COOLDOWN_SEGMENT("Cooldowns/riptide.ogg") }, -- Riptide
 	[320746] = {
-		{
-			{
-				"return AUDIOQS.spells[320746][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[320746][AUDIOQS.SPELL_EXPIRATION] > 0",
-				false
-			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Shaman/surge_of_earth.ogg",		nil,	true }
-		}
+		AUDIOQS.SEGLIB_CREATE_GENERIC_SPELL_COOLDOWN_SEGMENT("Cooldowns/Shaman/surge_of_earth.ogg")
 	},
 	[98008] = {
-		{
-			{
-				"return AUDIOQS.spells[98008][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[98008][AUDIOQS.SPELL_EXPIRATION] > 0",
-				false
-			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Shaman/spirit_link_totem.ogg",		nil,	true }
-		}
+		AUDIOQS.SEGLIB_CREATE_GENERIC_SPELL_COOLDOWN_SEGMENT("Cooldowns/Shaman/spirit_link_totem.ogg")
 	},
 	[79206] = {
-		{
-			{
-				"return AUDIOQS.spells[79206][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[79206][AUDIOQS.SPELL_EXPIRATION] > 0",
-				false
-			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Shaman/spiritwalkers_grace.ogg",		nil,	true }
-		}
+		AUDIOQS.SEGLIB_CREATE_GENERIC_SPELL_COOLDOWN_SEGMENT("Cooldowns/Shaman/spiritwalkers_grace.ogg")
 	},
 	[8143] = {
-		{
-			{
-				"return AUDIOQS.spells[8143][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[8143][AUDIOQS.SPELL_EXPIRATION] > 0",
-				false
-			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Shaman/tremor_totem.ogg",		nil,	true }
-		}
+		AUDIOQS.SEGLIB_CREATE_GENERIC_SPELL_COOLDOWN_SEGMENT("Cooldowns/Shaman/tremor_totem.ogg")
 	},
 	[73685] = {
-		{
-			{
-				"return AUDIOQS.spells[73685][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[73685][AUDIOQS.SPELL_EXPIRATION] > 0",
-				false
-			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Shaman/unleash_life.ogg",		nil,	true }
-		}
+		AUDIOQS.SEGLIB_CREATE_GENERIC_SPELL_COOLDOWN_SEGMENT("Cooldowns/Shaman/unleash_life.ogg")
 	},
 	[57994] = {
-		{
-			{
-				"return AUDIOQS.spells[57994][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[57994][AUDIOQS.SPELL_EXPIRATION] > 0",
-				false
-			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Shaman/wind_shear.ogg",		nil,	true }
-		}
+		AUDIOQS.SEGLIB_CREATE_GENERIC_SPELL_COOLDOWN_SEGMENT("Cooldowns/Shaman/wind_shear.ogg")
 	},
 --[[[974] = { -- Earth Shield Drop (Unfinished) TODO Requires tracking of GUID of player with earthshield on them. UNIT_AURA checking if the ES has dropped from that player.
 		{
@@ -270,49 +146,19 @@ local extSegments = {
 		}
 	},]]--
 	[207399] = {
-		{
-			{
-				"return AUDIOQS.spells[207399][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[207399][AUDIOQS.SPELL_EXPIRATION] > 0",
-				false
-			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Shaman/ancestral_protection_totem.ogg",		nil,	true }
-		}
+		AUDIOQS.SEGLIB_CREATE_GENERIC_SPELL_COOLDOWN_SEGMENT("Cooldowns/Shaman/ancestral_protection_totem.ogg")
 	},
 	[192077] = {
-		{
-			{
-				"return AUDIOQS.spells[192077][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[192077][AUDIOQS.SPELL_EXPIRATION] > 0",
-				false
-			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Shaman/wind_rush_totem.ogg",		nil,	true }
-		}
+		AUDIOQS.SEGLIB_CREATE_GENERIC_SPELL_COOLDOWN_SEGMENT("Cooldowns/Shaman/wind_rush_totem.ogg")
 	},
 	[207778] = {
-		{
-			{
-				"return AUDIOQS.spells[207778][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[207778][AUDIOQS.SPELL_EXPIRATION] > 0",
-				false
-			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Shaman/downpour.ogg",		nil,	true }
-		}
+		AUDIOQS.SEGLIB_CREATE_GENERIC_SPELL_COOLDOWN_SEGMENT("Cooldowns/Shaman/downpour.ogg")
 	},
 	[197995] = {
-		{
-			{
-				"return AUDIOQS.spells[197995][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[197995][AUDIOQS.SPELL_EXPIRATION] > 0",
-				false
-			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Shaman/wellspring.ogg",		nil,	true }
-		}
+		AUDIOQS.SEGLIB_CREATE_GENERIC_SPELL_COOLDOWN_SEGMENT("Cooldowns/Shaman/wellspring.ogg")
 	},
 	[204336] = {
-		{
-			{
-				"return AUDIOQS.spells[204336][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[204336][AUDIOQS.SPELL_EXPIRATION] > 0",
-				false
-			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Shaman/grounding_totem.ogg",		nil,	true }
-		}
+		AUDIOQS.SEGLIB_CREATE_GENERIC_SPELL_COOLDOWN_SEGMENT("Cooldowns/Shaman/grounding_totem.ogg")
 	},
 	["LOADING_SCREEN_DISABLED"] = { -- TODO Should be in an "essentials", hidden extension or in the AudioQs.lua main event handlers. Workaround for now.
 		{

@@ -381,22 +381,23 @@ end
 -- TEST (Incomplete -- Bad Refactor)
 AUDIOQS.Perf = {}
 AUDIOQS.CurrFrame = 0
+AUDIOQS.PerfTotalMs = 0.0
 local disablePerf = false -- local for safety, not consistentency
-function AUDIOQS.PerformanceStart(area_str)
+function AUDIOQS.PerformanceStart(area_str, printPerf)
 	if not AUDIOQS.DEBUG or disablePerf then return end
 	if AUDIOQS.Perf[area_str] == nil then
 		AUDIOQS.Perf[area_str] = {{0, 0}, {0, 0}, false}
 	end
 	local newFrame = GetTime() > AUDIOQS.CurrFrame
 	
-	UpdateAddOnMemoryUsage()
+	--UpdateAddOnMemoryUsage()
 	AUDIOQS.Perf[area_str][2][1] = GetAddOnMemoryUsage("AudioQs")
 	AUDIOQS.Perf[area_str][1][1] = debugprofilestop()
 	
 	if newFrame or AUDIOQS.Perf[area_str][3] == false then
 		AUDIOQS.CurrFrame = GetTime()
 		
-		AUDIOQS.PerformancePrint(area_str)
+		if printPerf ~= false then AUDIOQS.PerformancePrint(area_str) end
 		if newFrame then
 			for _, area in pairs(AUDIOQS.Perf) do
 				area[3] = false
@@ -414,14 +415,17 @@ function AUDIOQS.PerformanceEnd(area_str)
 	local perfEndTime = debugprofilestop()
 	local perf = AUDIOQS.Perf[area_str]
 	
-	UpdateAddOnMemoryUsage()
+	--UpdateAddOnMemoryUsage()
+	
+	AUDIOQS.PerfTotalMs = AUDIOQS.PerfTotalMs + perfEndTime-perf[1][1]
 	
 	perf[1][2], perf[2][2] = perf[1][2] + perfEndTime-perf[1][1], GetAddOnMemoryUsage("AudioQs")-perf[2][1]
 end
 
 function AUDIOQS.PerformancePrint(area_str)
 	local perf = AUDIOQS.Perf[area_str]
-	print(string.format("%s -- ms:%f. KB:%d. KB+:%d", area_str, perf[1][2], perf[2][1], perf[2][2]))
+	
+	print(string.format("%s -- allPerfMs:%f. thisCodeAreaMs:%f. KB:%d. KB+:%d", area_str, AUDIOQS.PerfTotalMs, perf[1][2], perf[2][1], perf[2][2]))
 	--print(string.format("%s -- ms:%d. KB:N/A. KB+:N/A", area_str, perf[1][2]))
 end
 

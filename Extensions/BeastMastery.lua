@@ -90,7 +90,7 @@ local extSegments = {
 	[217200] = { -- Barbed Shot
 		{
 			{
-				"return AUDIOQS.spells[217200][AUDIOQS.SPELL_CHARGES] > AUDIOQS.spellsSnapshot[217200][AUDIOQS.SPELL_CHARGES]",
+				AUDIOQS.SEGLIB_GENERIC_SPELL_CHARGES_COOLDOWN,
 				false
 			},
 			{0.25, 		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."barbed_primer.ogg",			nil,		true },
@@ -99,121 +99,43 @@ local extSegments = {
 		}
 	},
 	[53209] = {
-		{
-			{
-				"return AUDIOQS.spells[53209][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[53209][AUDIOQS.SPELL_EXPIRATION] > 0",
-				false
-			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Hunter/chimaera_shot.ogg",		nil,	true }
-		}
+		AUDIOQS.SEGLIB_CREATE_GENERIC_SPELL_COOLDOWN_SEGMENT("Cooldowns/Hunter/chimaera_shot.ogg")
 	},
 	[131894] = {
-		{
-			{
-				"return AUDIOQS.spells[131894][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[131894][AUDIOQS.SPELL_EXPIRATION] > 0",
-				false
-			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Hunter/a_murder_of_crows.ogg",		nil,	true }
-		},
+		AUDIOQS.SEGLIB_CREATE_GENERIC_SPELL_COOLDOWN_SEGMENT("Cooldowns/Hunter/a_murder_of_crows.ogg")
 	},
 	[19574] = {
-		{
-			{
-				"return AUDIOQS.spells[19574][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[19574][AUDIOQS.SPELL_EXPIRATION] > 0",
-				false
-			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Hunter/bestial_wrath.ogg",		nil,		true}
-		}
+		AUDIOQS.SEGLIB_CREATE_GENERIC_SPELL_COOLDOWN_SEGMENT("Cooldowns/Hunter/bestial_wrath.ogg")
 	},
 	[193530] = {
-		{
-			{
-				"return AUDIOQS.spells[193530][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[193530][AUDIOQS.SPELL_EXPIRATION] > 0",
-				false
-			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Hunter/aspect_of_the_wild.ogg",		nil,	true }
-		}
+		AUDIOQS.SEGLIB_CREATE_GENERIC_SPELL_COOLDOWN_SEGMENT("Cooldowns/Hunter/aspect_of_the_wild.ogg")
 	},
 	[186265] = {
-		{
-			{
-				"return AUDIOQS.spells[186265][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[186265][AUDIOQS.SPELL_EXPIRATION] > 0",
-				false
-			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Hunter/aspect_of_the_turtle.ogg",		nil,	true }
-		}
+		AUDIOQS.SEGLIB_CREATE_GENERIC_SPELL_COOLDOWN_SEGMENT("Cooldowns/Hunter/aspect_of_the_turtle.ogg")
 	},
 	[186257] = {
-		{
-			{
-				"return AUDIOQS.spells[186257][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[186257][AUDIOQS.SPELL_EXPIRATION] > 0",
-				false
-			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Hunter/aspect_of_the_cheetah.ogg",		nil,	true }
-		}
+		AUDIOQS.SEGLIB_CREATE_GENERIC_SPELL_COOLDOWN_SEGMENT("Cooldowns/Hunter/aspect_of_the_cheetah.ogg")
 	},
 	[109304] = {
-		{
-			{
-				"return AUDIOQS.spells[109304][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[109304][AUDIOQS.SPELL_EXPIRATION] > 0",
-				false
-			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Hunter/exhileration.ogg",		nil,	true }
-		}
+		AUDIOQS.SEGLIB_CREATE_GENERIC_SPELL_COOLDOWN_SEGMENT("Cooldowns/Hunter/exhileration.ogg")
 	},
 	[1543] = {
-		{
-			{
-				"return AUDIOQS.spells[1543][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[1543][AUDIOQS.SPELL_EXPIRATION] > 0",
-				false
-			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Hunter/flare.ogg",		nil,	true }
-		}
+		AUDIOQS.SEGLIB_CREATE_GENERIC_SPELL_COOLDOWN_SEGMENT("Cooldowns/Hunter/flare.ogg")
 	},
-	[187698] = {
-		{
-			{
-				"return AUDIOQS.spells[187698][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[187698][AUDIOQS.SPELL_EXPIRATION] > 0",
-				false
-			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Hunter/tar_trap.ogg",		nil,	true }
-		}
+	[187698] = { 
+		AUDIOQS.SEGLIB_CREATE_GENERIC_SPELL_COOLDOWN_SEGMENT("Cooldowns/Hunter/tar_trap.ogg")
 	},
 	[187650] = {
-		{
-			{
-				"return AUDIOQS.spells[187650][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[187650][AUDIOQS.SPELL_EXPIRATION] > 0",
-				false
-			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Hunter/freezing_trap.ogg",		nil,	true }
-		}
+		AUDIOQS.SEGLIB_CREATE_GENERIC_SPELL_COOLDOWN_SEGMENT("Cooldowns/Hunter/freezing_trap.ogg")
 	},
 	[147362] = {
-		{
-			{
-				"return AUDIOQS.spells[147362][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[147362][AUDIOQS.SPELL_EXPIRATION] > 0",
-				false
-			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Hunter/counter_shot.ogg",		nil,	true }
-		}
+		AUDIOQS.SEGLIB_CREATE_GENERIC_SPELL_COOLDOWN_SEGMENT("Cooldowns/Hunter/counter_shot.ogg")
 	},
 	[19577] = {
-		{
-			{
-				"return AUDIOQS.spells[19577][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[19577][AUDIOQS.SPELL_EXPIRATION] > 0",
-				false
-			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Hunter/intimidation.ogg",		nil,	true }
-		}
+		AUDIOQS.SEGLIB_CREATE_GENERIC_SPELL_COOLDOWN_SEGMENT("Cooldowns/Hunter/intimidation.ogg")
 	},
 	[34477] = {
-		{
-			{
-				"return AUDIOQS.spells[34477][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[34477][AUDIOQS.SPELL_EXPIRATION] > 0",
-				false
-			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Hunter/misdirection.ogg",		nil,	true }
-		}
+		AUDIOQS.SEGLIB_CREATE_GENERIC_SPELL_COOLDOWN_SEGMENT("Cooldowns/Hunter/misdirection.ogg")
 	},
 }
 --

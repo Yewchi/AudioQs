@@ -54,76 +54,28 @@ local extEvents = {
 
 local extSegments = {
 	[2944] = {
-		{
-			{
-				"return AUDIOQS.spells[2944][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[2944][AUDIOQS.SPELL_EXPIRATION] > 0",
-				false
-			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Priest/devouring_plague.ogg",		nil,	true }
-		}
+		AUDIOQS.SEGLIB_CREATE_GENERIC_SPELL_COOLDOWN_SEGMENT("Cooldowns/Priest/devouring_plague.ogg")
 	},
 	[586] = {
-		{
-			{
-				"return AUDIOQS.spells[586][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[586][AUDIOQS.SPELL_EXPIRATION] > 0",
-				false
-			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Priest/fade.ogg",		nil,	true }
-		}
+		AUDIOQS.SEGLIB_CREATE_GENERIC_SPELL_COOLDOWN_SEGMENT("Cooldowns/Priest/fade.ogg")
 	},
 	[6346] = {
-		{
-			{
-				"return AUDIOQS.spells[6346][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[6346][AUDIOQS.SPELL_EXPIRATION] > 0",
-				false
-			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Priest/fear_ward.ogg",		nil,	true }
-		}
+		AUDIOQS.SEGLIB_CREATE_GENERIC_SPELL_COOLDOWN_SEGMENT("Cooldowns/Priest/fear_ward.ogg")
 	},
 	[8122] = {
-		{
-			{
-				"return AUDIOQS.spells[8122][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[8122][AUDIOQS.SPELL_EXPIRATION] > 0",
-				false
-			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Priest/psychic_scream.ogg",		nil,	true }
-		}
+		AUDIOQS.SEGLIB_CREATE_GENERIC_SPELL_COOLDOWN_SEGMENT("Cooldowns/Priest/psychic_scream.ogg")
 	},
 	[724] = {
-		{
-			{
-				"return AUDIOQS.spells[724][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[724][AUDIOQS.SPELL_EXPIRATION] > 0",
-				false
-			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Priest/lightwell.ogg",		nil,	true }
-		}
+		AUDIOQS.SEGLIB_CREATE_GENERIC_SPELL_COOLDOWN_SEGMENT("Cooldowns/Priest/lightwell.ogg")
 	},
 	[13908] = {
-		{
-			{
-				"return AUDIOQS.spells[13908][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[13908][AUDIOQS.SPELL_EXPIRATION] > 0",
-				false
-			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Priest/desperate_prayer.ogg",		nil,	true }
-		}
+		AUDIOQS.SEGLIB_CREATE_GENERIC_SPELL_COOLDOWN_SEGMENT("Cooldowns/Priest/desperate_prayer.ogg")
 	},
 	[13896] = {
-		{
-			{
-				"return AUDIOQS.spells[13896][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[13896][AUDIOQS.SPELL_EXPIRATION] > 0",
-				false
-			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Priest/feedback.ogg",		nil,	true }
-		}
+		AUDIOQS.SEGLIB_CREATE_GENERIC_SPELL_COOLDOWN_SEGMENT("Cooldowns/Priest/feedback.ogg")
 	},
 	[2651] = {
-		{
-			{
-				"return AUDIOQS.spells[2651][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[2651][AUDIOQS.SPELL_EXPIRATION] > 0",
-				false
-			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Priest/elunes_grace.ogg",		nil,	true }
-		}
+		AUDIOQS.SEGLIB_CREATE_GENERIC_SPELL_COOLDOWN_SEGMENT("Cooldowns/Priest/elunes_grace.ogg")
 	},
 	["LOADING_SCREEN_DISABLED"] = { -- TODO Should be in an "essentials", hidden extension or in the AudioQs.lua main event handlers. Workaround for now.
 		{

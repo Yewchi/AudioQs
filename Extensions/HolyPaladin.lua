@@ -72,247 +72,85 @@ local extEvents = {
 
 local extSegments = {
 	[210294] = {
-		{
-			{
-				"return AUDIOQS.spells[210294][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[210294][AUDIOQS.SPELL_EXPIRATION] > 0",
-				false
-			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Paladin/divine_favor.ogg",		nil,	true }
-		}
+		AUDIOQS.SEGLIB_CREATE_GENERIC_SPELL_COOLDOWN_SEGMENT("Cooldowns/Paladin/divine_favor.ogg")
 	},
 	[10326] = {
-		{
-			{
-				"return AUDIOQS.spells[10326][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[10326][AUDIOQS.SPELL_EXPIRATION] > 0",
-				false
-			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Paladin/turn_evil.ogg",		nil,	true }
-		}
+		AUDIOQS.SEGLIB_CREATE_GENERIC_SPELL_COOLDOWN_SEGMENT("Cooldowns/Paladin/turn_evil.ogg")
 	},
 	[152262] = {
-		{
-			{
-				"return AUDIOQS.spells[152262][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[152262][AUDIOQS.SPELL_EXPIRATION] > 0",
-				false
-			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Paladin/seraphim.ogg",		nil,	true }
-		}
+		AUDIOQS.SEGLIB_CREATE_GENERIC_SPELL_COOLDOWN_SEGMENT("Cooldowns/Paladin/seraphim.ogg")
 	},
 	--[[[24275] = {
-		{
-			{
-				"return AUDIOQS.spells[24275][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[24275][AUDIOQS.SPELL_EXPIRATION] > 0",
-				false
-			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Paladin/hammer_of_wrath.ogg",		nil,	true }
-		}
+		AUDIOQS.SEGLIB_CREATE_GENERIC_SPELL_COOLDOWN_SEGMENT("Cooldowns/Paladin/hammer_of_wrath.ogg")
 	},]]--
 	[642] = {
-		{
-			{
-				"return AUDIOQS.spells[642][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[642][AUDIOQS.SPELL_EXPIRATION] > 0",
-				false
-			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Paladin/divine_shield.ogg",		nil,	true }
-		}
+		AUDIOQS.SEGLIB_CREATE_GENERIC_SPELL_COOLDOWN_SEGMENT("Cooldowns/Paladin/divine_shield.ogg")
 	},
 	[853] = {
-		{
-			{
-				"return AUDIOQS.spells[853][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[853][AUDIOQS.SPELL_EXPIRATION] > 0",
-				false
-			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Paladin/hammer_of_justice.ogg",		nil,	true }
-		}
+		AUDIOQS.SEGLIB_CREATE_GENERIC_SPELL_COOLDOWN_SEGMENT("Cooldowns/Paladin/hammer_of_justice.ogg")
 	},
 --[[[20473] = { -- Holy Shock
-		{
-			{
-				"return AUDIOQS.spells[20473][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[20473][AUDIOQS.SPELL_EXPIRATION] > 0",
-				false
-			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Paladin/holy_shock.ogg",		nil,	true }
-		}
+		AUDIOQS.SEGLIB_CREATE_GENERIC_SPELL_COOLDOWN_SEGMENT("Cooldowns/Paladin/holy_shock.ogg")
 	},]]--
 --[[[275773] = { -- Judgment
-		{
-			{
-				"return AUDIOQS.spells[275773][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[275773][AUDIOQS.SPELL_EXPIRATION] > 0",
-				false
-			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Paladin/judgment.ogg",		nil,	true }
-		}
+		AUDIOQS.SEGLIB_CREATE_GENERIC_SPELL_COOLDOWN_SEGMENT("Cooldowns/Paladin/judgment.ogg")
 	},]]--
 	[114158] = {
-		{
-			{
-				"return AUDIOQS.spells[114158][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[114158][AUDIOQS.SPELL_EXPIRATION] > 0",
-				false
-			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Paladin/lights_hammer.ogg",		nil,	true }
-		}
+		AUDIOQS.SEGLIB_CREATE_GENERIC_SPELL_COOLDOWN_SEGMENT("Cooldowns/Paladin/lights_hammer.ogg")
 	},
 	[4987] = {
-		{
-			{
-				"return AUDIOQS.spells[4987][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[4987][AUDIOQS.SPELL_EXPIRATION] > 0",
-				false
-			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Paladin/cleanse.ogg",		nil,	true }
-		}
+		AUDIOQS.SEGLIB_CREATE_GENERIC_SPELL_COOLDOWN_SEGMENT("Cooldowns/Paladin/cleanse.ogg")
 	},
 	[190784] = {
-		{
-			{
-				"return AUDIOQS.spells[190784][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[190784][AUDIOQS.SPELL_EXPIRATION] > 0",
-				false
-			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Paladin/divine_steed.ogg",		nil,	true }
-		}
+		AUDIOQS.SEGLIB_CREATE_GENERIC_SPELL_COOLDOWN_SEGMENT("Cooldowns/Paladin/divine_steed.ogg")
 	},
 	[498] = {
-		{
-			{
-				"return AUDIOQS.spells[498][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[498][AUDIOQS.SPELL_EXPIRATION] > 0",
-				false
-			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Paladin/divine_protection.ogg",		nil,	true }
-		}
+		AUDIOQS.SEGLIB_CREATE_GENERIC_SPELL_COOLDOWN_SEGMENT("Cooldowns/Paladin/divine_protection.ogg")
 	},
 	[1044] = {
-		{
-			{
-				"if AUDIOQS.ChargeCooldownsAllowed ~= nil and AUDIOQS.ChargeCooldownsAllowed then local charges = GetSpellCharges(1044) return (AUDIOQS.spells[1044][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[1044][AUDIOQS.SPELL_EXPIRATION] > 0) or (charges ~= nil and charges > AUDIOQS.spellsSnapshot[1044][AUDIOQS.SPELL_CHARGES]) end return false",
-				false
-			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Paladin/blessing_of_freedom.ogg",		nil,	true }
-		}
+		AUDIOQS.SEGLIB_CREATE_GENERIC_SPELL_CHARGES_COOLDOWN_SEGMENT("Cooldowns/Paladin/blessing_of_freedom.ogg")
 	},
 	[85222] = {
-		{
-			{
-				"return AUDIOQS.spells[85222][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[85222][AUDIOQS.SPELL_EXPIRATION] > 0",
-				false
-			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Paladin/light_of_dawn.ogg",		nil,	true }
-		}
+		AUDIOQS.SEGLIB_CREATE_GENERIC_SPELL_COOLDOWN_SEGMENT("Cooldowns/Paladin/light_of_dawn.ogg")
 	},
 	[1022] = {
-		{
-			{
-				"if AUDIOQS.ChargeCooldownsAllowed ~= nil and AUDIOQS.ChargeCooldownsAllowed then local charges = GetSpellCharges(1022) return (AUDIOQS.spells[1022][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[1022][AUDIOQS.SPELL_EXPIRATION] > 0) or (charges ~= nil and charges > AUDIOQS.spellsSnapshot[1022][AUDIOQS.SPELL_CHARGES]) end return false",
-				false
-			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Paladin/blessing_of_protection.ogg",		nil,	true }
-		}
+		AUDIOQS.SEGLIB_CREATE_GENERIC_SPELL_CHARGES_COOLDOWN_SEGMENT("Cooldowns/Paladin/blessing_of_protection.ogg")
 	},
 	[633] = {
-		{
-			{
-				"return AUDIOQS.spells[633][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[633][AUDIOQS.SPELL_EXPIRATION] > 0",
-				false
-			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Paladin/lay_on_hands.ogg",		nil,	true }
-		}
+		AUDIOQS.SEGLIB_CREATE_GENERIC_SPELL_COOLDOWN_SEGMENT("Cooldowns/Paladin/lay_on_hands.ogg")
 	},
 	[223306] = {
-		{
-			{
-				"return AUDIOQS.spells[223306][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[223306][AUDIOQS.SPELL_EXPIRATION] > 0",
-				false
-			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Paladin/bestow_faith.ogg",		nil,	true }
-		}
+		AUDIOQS.SEGLIB_CREATE_GENERIC_SPELL_COOLDOWN_SEGMENT("Cooldowns/Paladin/bestow_faith.ogg")
 	},
 	[214202] = {
-		{
-			{
-				"return AUDIOQS.spells[214202][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[214202][AUDIOQS.SPELL_EXPIRATION] > 0",
-				false
-			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Paladin/rule_of_law.ogg",		nil,	true }
-		}
+		AUDIOQS.SEGLIB_CREATE_GENERIC_SPELL_COOLDOWN_SEGMENT("Cooldowns/Paladin/rule_of_law.ogg")
 	},
 	[20066] = {
-		{
-			{
-				"return AUDIOQS.spells[20066][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[20066][AUDIOQS.SPELL_EXPIRATION] > 0",
-				false
-			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Paladin/repentance.ogg",		nil,	true }
-		}
+		AUDIOQS.SEGLIB_CREATE_GENERIC_SPELL_COOLDOWN_SEGMENT("Cooldowns/Paladin/repentance.ogg")
 	},
 	[115750] = {
-		{
-			{
-				"return AUDIOQS.spells[115750][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[115750][AUDIOQS.SPELL_EXPIRATION] > 0",
-				false
-			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Paladin/blinding_light.ogg",		nil,	true }
-		}
+		AUDIOQS.SEGLIB_CREATE_GENERIC_SPELL_COOLDOWN_SEGMENT("Cooldowns/Paladin/blinding_light.ogg")
 	},
 	[114165] = {
-		{
-			{
-				"return AUDIOQS.spells[114165][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[114165][AUDIOQS.SPELL_EXPIRATION] > 0",
-				false
-			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Paladin/holy_prism.ogg",		nil,	true }
-		}
+		AUDIOQS.SEGLIB_CREATE_GENERIC_SPELL_COOLDOWN_SEGMENT("Cooldowns/Paladin/holy_prism.ogg")
 	},
 	[105809] = {
-		{
-			{
-				"return AUDIOQS.spells[105809][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[105809][AUDIOQS.SPELL_EXPIRATION] > 0",
-				false
-			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Paladin/holy_avenger.ogg",		nil,	true }
-		}
+		AUDIOQS.SEGLIB_CREATE_GENERIC_SPELL_COOLDOWN_SEGMENT("Cooldowns/Paladin/holy_avenger.ogg")
 	},
 	[216331] = {
-		{
-			{
-				"return AUDIOQS.spells[216331][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[216331][AUDIOQS.SPELL_EXPIRATION] > 0",
-				false
-			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Paladin/avenging_crusader.ogg",		nil,	true }
-		}
+		AUDIOQS.SEGLIB_CREATE_GENERIC_SPELL_COOLDOWN_SEGMENT("Cooldowns/Paladin/avenging_crusader.ogg")
 	},
 	[200025] = {
-		{
-			{
-				"return AUDIOQS.spells[200025][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[200025][AUDIOQS.SPELL_EXPIRATION] > 0",
-				false
-			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Paladin/beacon_of_virtue.ogg",		nil,	true }
-		}
+		AUDIOQS.SEGLIB_CREATE_GENERIC_SPELL_COOLDOWN_SEGMENT("Cooldowns/Paladin/beacon_of_virtue.ogg")
 	},
 	[199454] = {
-		{
-			{
-				"return AUDIOQS.spells[199454][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[199454][AUDIOQS.SPELL_EXPIRATION] > 0",
-				false
-			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Paladin/blessed_hands.ogg",		nil,	true }
-		}
+		AUDIOQS.SEGLIB_CREATE_GENERIC_SPELL_COOLDOWN_SEGMENT("Cooldowns/Paladin/blessed_hands.ogg")
 	},
 	[31821] = {
-		{
-			{
-				"return AUDIOQS.spells[31821][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[31821][AUDIOQS.SPELL_EXPIRATION] > 0",
-				false
-			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Paladin/aura_mastery.ogg",		nil,	true }
-		}
+		AUDIOQS.SEGLIB_CREATE_GENERIC_SPELL_COOLDOWN_SEGMENT("Cooldowns/Paladin/aura_mastery.ogg")
 	},
 	[31884] = {
-		{
-			{
-				"return AUDIOQS.spells[31884][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[31884][AUDIOQS.SPELL_EXPIRATION] > 0",
-				false
-			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Paladin/avenging_wrath.ogg",		nil,	true }
-		}
+		AUDIOQS.SEGLIB_CREATE_GENERIC_SPELL_COOLDOWN_SEGMENT("Cooldowns/Paladin/avenging_wrath.ogg")
 	},
 	["LOADING_SCREEN_DISABLED"] = { -- TODO Should be in an "essentials", hidden extension or in the AudioQs.lua main event handlers. Workaround for now.
 		{

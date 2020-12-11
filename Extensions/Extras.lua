@@ -44,22 +44,10 @@ local extEvents = {
 
 local extSegments = {
 	[208683] = {
-		{
-			{
-				"return AUDIOQS.spells[208683][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[208683][AUDIOQS.SPELL_EXPIRATION] > 0",
-				false
-			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/medallion.ogg",		nil,	true }
-		}
+		AUDIOQS.SEGLIB_CREATE_GENERIC_SPELL_COOLDOWN_SEGMENT("Cooldowns/medallion.ogg")
 	},
 	[152244] = {
-		{
-			{
-				"return AUDIOQS.spells[152244][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[152244][AUDIOQS.SPELL_EXPIRATION] > 0",
-				false
-			},
-			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/adaptation.ogg",		nil,	true }
-		}
+		AUDIOQS.SEGLIB_CREATE_GENERIC_SPELL_COOLDOWN_SEGMENT("Cooldowns/adaptation.ogg")
 	},
 }
 --

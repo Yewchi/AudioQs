@@ -184,23 +184,11 @@ function AUDIOQS.COVENANT_ReloadCovenantAbilities()
 				{covenantClassAbilityInfo[COVENANT_ABILITY_SPELL_NAME], 0, 0, 0, 	"player", 	AUDIOQS.SPELL_TYPE_ABILITY}
 		extSegments[ basicCovenantSpellId ] = 
 				{
-					{
-						{
-							"return AUDIOQS.spells["..basicCovenantSpellId.."][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot["..basicCovenantSpellId.."][AUDIOQS.SPELL_EXPIRATION] > 0",
-							false
-						},
-						{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Covenants/"..knownBasicCovenantAbilityInfo[COVENANT_ABILITY_FILE_NAME]..".ogg",		nil,	true }
-					}
+					AUDIOQS.SEGLIB_CREATE_GENERIC_SPELL_COOLDOWN_SEGMENT("Cooldowns/Covenants/"..knownBasicCovenantAbilityInfo[COVENANT_ABILITY_FILE_NAME]..".ogg")
 				}
 		extSegments[ thisCovenantClassSpellId ] =
 				{
-					{
-						{
-							"return AUDIOQS.spells["..thisCovenantClassSpellId.."][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot["..thisCovenantClassSpellId.."][AUDIOQS.SPELL_EXPIRATION] > 0",
-							false
-						},
-						{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Covenants/"..covenantClassAbilityInfo[COVENANT_ABILITY_FILE_NAME]..".ogg",		nil,	true }
-					}
+					AUDIOQS.SEGLIB_CREATE_GENERIC_SPELL_COOLDOWN_SEGMENT("Cooldowns/Covenants/"..covenantClassAbilityInfo[COVENANT_ABILITY_FILE_NAME]..".ogg")
 				}
 	else -- just do a manual search for each class. Not a permanent sol^n. Doesn't work when switching abilities.
 		local myClassCovenantAbilitiesInfo = classToClassCovenantAbilitiesInfo[AUDIOQS.GetClassId()]
@@ -211,13 +199,7 @@ function AUDIOQS.COVENANT_ReloadCovenantAbilities()
 				{abilityInfo[COVENANT_ABILITY_SPELL_NAME], 0, 0, 0, 	"player", 	AUDIOQS.SPELL_TYPE_ABILITY}
 				extSegments[ thisSpellId ] =
 				{
-					{
-						{
-							"return AUDIOQS.spells["..thisSpellId.."][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot["..thisSpellId.."][AUDIOQS.SPELL_EXPIRATION] > 0",
-							false
-						},
-						{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Cooldowns/Covenants/"..abilityInfo[COVENANT_ABILITY_FILE_NAME]..".ogg",		nil,	true }
-					}
+					AUDIOQS.SEGLIB_CREATE_GENERIC_SPELL_COOLDOWN_SEGMENT("Cooldowns/Covenants/"..abilityInfo[COVENANT_ABILITY_FILE_NAME]..".ogg")
 				}
 				break
 			end

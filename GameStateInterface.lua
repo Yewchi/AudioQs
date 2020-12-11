@@ -112,30 +112,6 @@ local function InitializeAndLoadExtension(specId, funcsForLoading, fullReset)
 	end
 end
 
-local function FunctionEval(cond)
-	local f
-	local neededLoad
-	if type(cond) == "string" then
-		neededLoad = true
-		f = loadstring(cond)
-	elseif type(cond) == "function" then
-		neededLoad = false
-		f = cond
-	end
-	local success, result = pcall(f)
-	if not success then 
-if AUDIOQS.VERBOSE then print("Error in conditional string: '", (type(cond) == "string" and cond or result), "'") end 
-		AUDIOQS.LogError({code=AUDIOQS.ERR_CUSTOM_FUNCTION_RUNTIME}, "FunctionEval()", "", (type(cond) == "string" and cond or result) )
-		result = nil
-	end
-	
-	if neededLoad then
-		return result, f
-	else
-		return result
-	end
-end
-
 local function RemoveUntrackedSpells(spellsTbl)
 	for i,arr in ipairs(spellsOnCooldown) do 
 		if spellsTbl[arr[ON_COOLDOWN_SPELLID]] == nil then
@@ -250,80 +226,6 @@ end
 -------- AUDIOQS.GSI_ResetAudioQs
 function AUDIOQS.GSI_ResetAudioQs()
 	SV_Specializations = {}
-end
-
--------- AUDIOQS.GSI_EvaluateLength()
-function AUDIOQS.GSI_EvaluateLength(prompt, promptIndex)
-	if prompt == nil or promptIndex == nil then 
-		error({code=AUDIOQS.ERR_INVALID_ARGS, func="AUDIOQS.GSI_EvaluateSound(prompt="..AUDIOQS.Printable(prompt)..", promptIndex="..AUDIOQS.Printable(promptIndex)..")"})
-	end
-	local length = prompt[promptIndex]
-	
-	local t = type(length)
-	if t == "function" then
-		local eval = FunctionEval(length)
-		return (eval ~= nil and eval or 0.0)
-	elseif t == "number" then
-		return length
-	elseif t == "string" then
-		local eval, func = FunctionEval(length)
-		prompt[promptIndex] = func 
-		if type(eval) == "number" then
-			return eval
-		else
-			return 0.0
-		end
-	elseif t == "nil" then
-		return 0.0
-	else
-		error({code=AUDIOQS.ERR_INVALID_CONDITIONAL_RESULT, func="GSI_EvaluateLength(length = "..(length == nil and "nil" or length).." type:"..type(length)..")"})
-	end
-end
-
--------- AUDIOQS.GSI_EvaluateSound()
-function AUDIOQS.GSI_EvaluateSound(prompt, promptIndex) -- TODO Memoize soundPaths[(sounds_root_cut)"folder/folder/.../filename"(extension cut)] = "full/file/path.ogg"
-	if prompt == nil or promptIndex == nil then 
-		error({code=AUDIOQS.ERR_INVALID_ARGS, func="AUDIOQS.GSI_EvaluateSound(prompt="..AUDIOQS.Printable(prompt)..", promptIndex="..AUDIOQS.Printable(promptIndex)..")"})
-	end
-	local sound = prompt[promptIndex]
-
-	local t = type(sound)
-	if t == "function" then
-		return FunctionEval(sound)
-	elseif t == "number" then
-		return sound
-	elseif t == "string" then 
-		local split = AUDIOQS.SplitString(sound, "::")
-		if #split == 1 then
-			return sound
-		elseif #split == 2 then		
-			if split[1] == AUDIOQS.SOUND_PATH and split[2] ~= nil then
-				return split[2]
-			elseif split[1] == AUDIOQS.SOUND_FUNC and split[2] ~= nil then
-				local eval, func = FunctionEval(split[2])
-				prompt[promptIndex] = func 
-				return eval
-			end
-		end
-	end
-	return nil
-end
-
--------- AUDIOQS.GSI_EvaluateConditional()
-function AUDIOQS.GSI_EvaluateConditional(prompt, promptIndex)
-	if prompt == nil or promptIndex == nil then
-		error({code=AUDIOQS.ERR_INVALID_ARGS, func="AUDIOQS.GSI_EvaluateConditional(prompt="..AUDIOQS.Printable(prompt)..", promptIndex="..AUDIOQS.Printable(promptIndex)..")"})
-	end
-	local conditional = prompt[promptIndex]
-
-	if type(conditional) == "function" then 
-		return FunctionEval(conditional)
-	elseif type(conditional) == "string" then
-		local eval, func = FunctionEval(conditional)
-		prompt[promptIndex] = func
-		return eval
-	end
-	return conditional == true
 end
 
 -------- AUDIOQS.GSI_UpdateSpellTable()
