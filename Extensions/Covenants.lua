@@ -95,7 +95,7 @@ function AUDIOQS.COVENANT_ReloadCovenantAbilities()
 		{ "Summon Steward", 	"summon_steward", 	324739}, -- 1 	Kyrian
 		{ "Door of Shadows",	"door_of_shadows", 	300728}, -- 2	Venthyr
 		{ "Soulshape",			"soulshape", 		310143}, -- 3	Night Fae
-		{ "Fleshcraft",		"fleshcraft",			324631}  --	4	Necrolord
+		{ "Fleshcraft",			"fleshcraft",		324631}  --	4	Necrolord
 	}
 
 	local basicCovenantAbilityToClassAbilityInfo = {
@@ -123,7 +123,7 @@ function AUDIOQS.COVENANT_ReloadCovenantAbilities()
 			[10] 	= {	"Faeline Stomp",			"faeline_stomp",			327104},
 			[11] 	= {	"Convoke the Spirits",		"convoke_the_spirits",		323764},
 		},
-		[331180] = {
+		[324631] = {
 			[2] 	= {	"Vanquisher's Hammer",		"vanquishers_hammer",		328204},
 			[3] 	= {	"Death Chakram",			"death_chakram",			325028},
 			[5] 	= {	"Unholy Nova",				"unholy_nova",				324724},
@@ -173,7 +173,7 @@ function AUDIOQS.COVENANT_ReloadCovenantAbilities()
 	}
 	-- /Data for garbage collection --
 	local covenantChosen = C_Covenants.GetActiveCovenantID()
-	if ( covenantChosen and covenantChosen ~= 0 and false ) then
+	if ( covenantChosen and covenantChosen ~= 0 ) then
 		local knownBasicCovenantAbilityInfo = basicCovenantAbilityInfo[covenantChosen]
 		local basicCovenantSpellId = knownBasicCovenantAbilityInfo[COVENANT_ABILITY_SPELL_ID]
 		local covenantClassAbilityInfo = basicCovenantAbilityToClassAbilityInfo[basicCovenantSpellId][AUDIOQS.GetClassId()]
