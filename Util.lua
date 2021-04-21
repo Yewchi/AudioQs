@@ -11,7 +11,8 @@ AUDIOQS.ERR_UNKNOWN_EVENT_AS_ARGUMENT =						0xEFF4
 AUDIOQS.ERR_INVALID_AURA_DATA =								0xEFF5
 AUDIOQS.ERR_INVALID_SOUND_DATA = 							0xEFF6
 AUDIOQS.ERR_INVALID_CONDITIONAL_RESULT =					0xEFF7
-AUDIOQS.ERR_CUSTOM_FUNCTION_RUNTIME =						0XEFF8
+AUDIOQS.ERR_CUSTOM_FUNCTION_RUNTIME =						0xEFF8
+AUDIOQS.ERR_UNIMPLEMENTED_EXTENSION_REQUIREMENTS =			0xEFF9
 --
 ------ /Error Codes --
 
@@ -61,12 +62,17 @@ AUDIOQS.ERR_MSGS = {
 		AUDIOQS.audioQsSpecifier..
 		AUDIOQS.errSpecifier..
 		"#"..AUDIOQS.ERR_INVALID_CONDITIONAL_RESULT.." "..
-		" An invalid result was derived from a segment conditional",
+		" An invalid result was derived from a segment conditional.",
 	[AUDIOQS.ERR_CUSTOM_FUNCTION_RUNTIME] = 
 		AUDIOQS.audioQsSpecifier..
 		AUDIOQS.errSpecifier..
 		"#"..AUDIOQS.ERR_CUSTOM_FUNCTION_RUNTIME.." "..
-		" Runtime error occured in CustomFunc."
+		" Runtime error occured in CustomFunc.",
+	[AUDIOQS.ERR_UNIMPLEMENTED_EXTENSION_REQUIREMENTS] =
+		AUDIOQS.audioQsSpecifier..
+		AUDIOQS.errSpecifier..
+		"#"..AUDIOQS.ERR_UNIMPLEMENTED_EXTENSION_REQUIREMENTS.." "..
+		" Extension doesn't implement all functions and/or data.",
 }
 AUDIOQS.extensionColour = "|cffFFA020"
 AUDIOQS.STOP_ERROR_MAX_REPORTS = AUDIOQS.audioQsSpecifier.." Max errors exceeded. Stopping error reports."
@@ -117,7 +123,7 @@ SlashCmdList["AQ"] = function(msg)
 			local funcs = AUDIOQS.GetExtensionFuncs(args[2])
 			
 			if funcs == nil then
-				print(AUDIOQS.audioQsSpecifier..AUDIOQS.infoSpecifier.."Extension \""..args[2].."\" is not available.\nRegistered extensions are:\n"..AUDIOQS.PrintableTable(AUDIOQS.GetRegisteredExtensionNames()))
+				print(AUDIOQS.audioQsSpecifier..AUDIOQS.infoSpecifier.."\""..args[2].."\" is not a known Extension.\nAvailable Extensions are:\n"..AUDIOQS.PrintableTable(AUDIOQS.GetRegisteredExtensionNames()))
 				return
 			elseif SV_Specializations ~= nil and SV_Specializations[mySpec] ~= nil and SV_Specializations[mySpec][funcs["GetName"]()] ~= nil then
 				print(AUDIOQS.audioQsSpecifier..AUDIOQS.infoSpecifier.."Extension \""..funcs["GetName"]().."\" is already installed.") -- TODO Placeholder, informative, but messy output.
@@ -142,7 +148,8 @@ SlashCmdList["AQ"] = function(msg)
 			local extName = args[2]
 			local funcs = AUDIOQS.GetExtensionFuncs(extName)
 			if funcs == nil or SV_Specializations == nil or SV_Specializations[mySpec] == nil or SV_Specializations[mySpec][funcs["GetName"]()] == nil then
-				print(AUDIOQS.audioQsSpecifier..AUDIOQS.infoSpecifier.."Extension \""..extName.."\" is not loaded.\nLoaded extensions are:\n"..AUDIOQS.PrintableTable(SV_Specializations == nil and "nil" or SV_Specializations[mySpec])) -- TODO Placeholder, informative, but messy output.
+				print(AUDIOQS.audioQsSpecifier..AUDIOQS.infoSpecifier.."Extension \""..extName.."\" is not loaded.\nLoaded extensions are:\n"..AUDIOQS.PrintableTable(SV_Specializations == nil and "nil" or SV_Specializations[mySpec]))
+				AUDIOQS.GSI_RemoveExtension(mySpec, funcs["GetName"]())
 				return
 			else
 				if AUDIOQS.GSI_RemoveExtension(mySpec, funcs["GetName"]()) then
@@ -177,6 +184,10 @@ SlashCmdList["AQ"] = function(msg)
 				print(AUDIOQS.audioQsSpecifier..AUDIOQS.infoSpecifier.."AudioQs is already enabled.")
 				return
 			end
+		----- CHANGE SOUND CHANNEL -----
+		elseif (args[1] == "channel" or args[1] == "track") and args[2] ~= nil then
+			AUDIOQS.ChangeAudioChannel(args[2])
+			return
 		----- RESET -----
 		elseif args[1] == "reset" then
 			AUDIOQS.GSI_ResetAudioQs()
@@ -283,17 +294,17 @@ function AUDIOQS.Printable(val)
 	return "[WTF]"
 end
 
--- TODO "Nicer"
 function AUDIOQS.PrintableTable(tbl, depth)
 	if depth == nil then depth = 0 elseif depth > 7 then return AUDIOQS.Printable(tbl) end
 	if type(tbl) ~= "table" then
-		return AUDIOQS.Printable(tbl)..", "
+		return AUDIOQS.Printable(tbl)..",\n"
 	end
-	local str = "{\n "
+	local str = "{\n"
+	local theseTabs = "" for i=depth,2,-1 do theseTabs = theseTabs.."\t" end
 	for k,v in pairs(tbl) do
-		str = str.."["..AUDIOQS.Printable(k).."]="..AUDIOQS.PrintableTable(v, depth + 1)
+		str = str..theseTabs.."["..AUDIOQS.Printable(k).."]="..AUDIOQS.PrintableTable(v, depth + 1)
 	end
-	return str.."}\n"
+	return str..theseTabs.."}\n"
 end
 
 function AUDIOQS.TablePrint(tbl)

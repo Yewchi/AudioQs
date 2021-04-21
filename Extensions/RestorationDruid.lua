@@ -3,7 +3,7 @@
 
 local extName = "RestorationDruid"
 local extNameDetailed = "Restoration Druid"
-local extShortNames = "rd"
+local extShortNames = "rd|restodruid"
 local extSpecLimit = AUDIOQS.ANY_SPEC_ALLOWED -- TODO ExtensionsInterface needs update here
 
 -- Functions predeclared

@@ -3,7 +3,7 @@
 
 local extName = "HolyPaladin"
 local extNameDetailed = "Holy Paladin"
-local extShortNames = "hp"
+local extShortNames = "hpal|hpaly|hpally"
 local extSpecLimit = AUDIOQS.ANY_SPEC_ALLOWED -- TODO ExtensionsInterface needs update here
 
 -- Functions predeclared
@@ -40,6 +40,7 @@ local extSpells = {
 --		[24275] = 	{ "Hammer of Wrath", 			0, 	0, 	0, 	"player", 	AUDIOQS.SPELL_TYPE_ABILITY},
 		[642] = 	{ "Divine Shield", 				0, 	0, 	0, 	"player", 	AUDIOQS.SPELL_TYPE_ABILITY},
 		[853] = 	{ "Hammer of Justice", 			0, 	0, 	0, 	"player", 	AUDIOQS.SPELL_TYPE_ABILITY},
+		[26573] = 	{ "Consecration", 				0, 	0, 	0, 	"player", 	AUDIOQS.SPELL_TYPE_ABILITY},
 --		[20473] = 	{ "Holy Shock", 				0, 	0, 	0, 	"player", 	AUDIOQS.SPELL_TYPE_ABILITY},
 --		[275773] = 	{ "Judgment", 					0, 	0, 	0, 	"player", 	AUDIOQS.SPELL_TYPE_ABILITY},
 		[114158] = 	{ "Light's Hammer", 			0, 	0, 	0, 	"player", 	AUDIOQS.SPELL_TYPE_ABILITY},
@@ -88,6 +89,9 @@ local extSegments = {
 	},
 	[853] = {
 		AUDIOQS.SEGLIB_CREATE_GENERIC_SPELL_COOLDOWN_SEGMENT("Cooldowns/Paladin/hammer_of_justice.ogg")
+	},
+	[26573] = {
+		AUDIOQS.SEGLIB_CREATE_GENERIC_SPELL_COOLDOWN_SEGMENT("Cooldowns/Paladin/consecration.ogg")
 	},
 --[[[20473] = { -- Holy Shock
 		AUDIOQS.SEGLIB_CREATE_GENERIC_SPELL_COOLDOWN_SEGMENT("Cooldowns/Paladin/holy_shock.ogg")

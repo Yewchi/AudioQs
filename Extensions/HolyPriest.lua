@@ -3,7 +3,7 @@
 
 local extName = "HolyPriest"
 local extNameDetailed = "Holy Priest"
-local extShortNames = "hp"
+local extShortNames = "hpriest"
 local extSpecLimit = AUDIOQS.ANY_SPEC_ALLOWED -- TODO ExtensionsInterface needs update here
 
 -- Functions predeclared

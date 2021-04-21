@@ -10,8 +10,9 @@ end
 function AUDIOQS.SEGLIB_GENERIC_SPELL_CHARGES_COOLDOWN(spellId)
 	if AUDIOQS.ChargeCooldownsAllowed ~= nil and AUDIOQS.ChargeCooldownsAllowed then 
 		local charges = GetSpellCharges(spellId) 
-		
-		return ( AUDIOQS.spells[spellId][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[spellId][AUDIOQS.SPELL_EXPIRATION] > 0 ) 
+
+		-- TODO snapshotSpellExpiration - GetTime() > 0 (the "- GetTime()"part) was a hotfix for extremely low ICD spells, like shimmer (imperceptibly small ICD). Not thoroughly tested.
+		return ( AUDIOQS.spells[spellId][AUDIOQS.SPELL_EXPIRATION] == 0 and AUDIOQS.spellsSnapshot[spellId][AUDIOQS.SPELL_EXPIRATION]-GetTime() > 0 )
 				or ( charges ~= nil and charges > AUDIOQS.spellsSnapshot[spellId][AUDIOQS.SPELL_CHARGES] ) 
 	end 
 	return false

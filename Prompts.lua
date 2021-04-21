@@ -48,13 +48,23 @@ local REG_SEGMENT_INDEX = 3
 
 ------- Static vals --
 --
-local AUDIO_CHANNEL = "DIALOG"
+local VALID_AUDIO_CHANNELS_LIST = {
+		"MASTER",
+		"SFX",
+		"MUSIC",
+		"AMBIENCE",
+		"DIALOG",
+		"TALKING HEAD"
+	}
 
-local TICKER_SKIP_FRAMES = 5 -- TODO Cheap optimisation, should be evaluates n = [1,2,3]; n = n+3 of prompts per frame.
+local VALID_AUDIO_CHANNELS = {} -- {["MASTER"] = "MASTER, ["SFX"] = "SFX", ...}
+
+local TICKER_SKIP_FRAMES = 2 -- TODO Cheap optimisation, should be evaluates n = [1,2,3]; n = n+3 of prompts per frame.
 --
 ------ /Static vals --
 
 ------- AddOn variables --
+local AUDIO_CHANNEL = "DIALOG"
 --
 local segments = {}
 
@@ -73,6 +83,14 @@ local Frame_PromptTicker = CreateFrame("Frame", "Prompt Ticker")
 --
 ------ /AddOn variables --
 --
+do
+	for i=1,#VALID_AUDIO_CHANNELS_LIST do
+		VALID_AUDIO_CHANNELS[VALID_AUDIO_CHANNELS_LIST[i]] = VALID_AUDIO_CHANNELS_LIST[i]
+	end
+	if SV_Specializations and SV_Specializations.AUDIO_CHANNEL then
+		AUDIO_CHANNEL = VALID_AUDIO_CHANNELS[string.upper(SV_Specializations.AUDIO_CHANNEL)] or AUDIO_CHANNEL
+	end
+end
 -- /Initialization --
 
 --- Funcs --
@@ -279,6 +297,20 @@ local function RegisterPrompt(promptsTableIndex)
 	registered[REG_SEGMENT_INDEX] = promptsTable[PROMPT_SEGMENT_TABLE_INDEX]
 		
 	return unpack(promptsTable[promptsTableIndex])
+end
+
+-------- AUDIOQS.ChangeAudioChannel()
+function AUDIOQS.ChangeAudioChannel(channel)
+	if type(channel) == "string" and VALID_AUDIO_CHANNELS[string.upper(channel)] then
+		AUDIO_CHANNEL = VALID_AUDIO_CHANNELS[string.upper(channel)]
+	elseif type(channel) == "number" and channel < #VALID_AUDIO_CHANNELS_LIST then
+		AUDIO_CHANNEL = VALID_AUDIO_CHANNELS_LIST[channel]
+	else
+		print(string.format("%s%sAudio Channel provided '%s' is invalid. Try using a number from 1 to %d.", AUDIOQS.audioQsSpecifier, AUDIOQS.errSpecifier, #VALID_AUDIO_CHANNELS_LIST))
+		return
+	end
+	print(string.format("%s%sAudioQs using audio channel: '%s'.", AUDIOQS.audioQsSpecifier, AUDIOQS.infoSpecifier, AUDIO_CHANNEL))
+	SV_Specializations.AUDIO_CHANNEL = AUDIO_CHANNEL
 end
 
 -------- AUDIOQS.SetPromptTimestamp()

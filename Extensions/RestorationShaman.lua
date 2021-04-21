@@ -3,7 +3,7 @@
 
 local extName = "RestorationShaman"
 local extNameDetailed = "Restoration Shaman"
-local extShortNames = "rs"
+local extShortNames = "rs|restorationsham|restosham|restoshaman"
 local extSpecLimit = AUDIOQS.ANY_SPEC_ALLOWED
 
 -- Functions predeclared
