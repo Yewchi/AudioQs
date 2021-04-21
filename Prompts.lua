@@ -83,14 +83,7 @@ local Frame_PromptTicker = CreateFrame("Frame", "Prompt Ticker")
 --
 ------ /AddOn variables --
 --
-do
-	for i=1,#VALID_AUDIO_CHANNELS_LIST do
-		VALID_AUDIO_CHANNELS[VALID_AUDIO_CHANNELS_LIST[i]] = VALID_AUDIO_CHANNELS_LIST[i]
-	end
-	if SV_Specializations and SV_Specializations.AUDIO_CHANNEL then
-		AUDIO_CHANNEL = VALID_AUDIO_CHANNELS[string.upper(SV_Specializations.AUDIO_CHANNEL)] or AUDIO_CHANNEL
-	end
-end
+
 -- /Initialization --
 
 --- Funcs --
@@ -301,13 +294,21 @@ end
 
 -------- AUDIOQS.ChangeAudioChannel()
 function AUDIOQS.ChangeAudioChannel(channel)
-	if type(channel) == "string" and VALID_AUDIO_CHANNELS[string.upper(channel)] then
-		AUDIO_CHANNEL = VALID_AUDIO_CHANNELS[string.upper(channel)]
-	elseif type(channel) == "number" and channel < #VALID_AUDIO_CHANNELS_LIST then
-		AUDIO_CHANNEL = VALID_AUDIO_CHANNELS_LIST[channel]
-	else
-		print(string.format("%s%sAudio Channel provided '%s' is invalid. Try using a number from 1 to %d.", AUDIOQS.audioQsSpecifier, AUDIOQS.errSpecifier, #VALID_AUDIO_CHANNELS_LIST))
-		return
+	local channelNumber = tonumber(channel)
+	if channelNumber then
+		if channelNumber < #VALID_AUDIO_CHANNELS_LIST then
+			AUDIO_CHANNEL = VALID_AUDIO_CHANNELS_LIST[channelNumber]
+		else
+			print(string.format("%s%sAudio channel provided '%d' is invalid. Try using a number from 1 to %d. Current channel is %s", AUDIOQS.audioQsSpecifier, AUDIOQS.errSpecifier, channelNumber, #VALID_AUDIO_CHANNELS_LIST, AUDIO_CHANNEL))
+			return
+		end
+	elseif type(channel) == "string" then
+		if VALID_AUDIO_CHANNELS[string.upper(channel)] then
+			AUDIO_CHANNEL = VALID_AUDIO_CHANNELS[string.upper(channel)]
+		else
+			print(string.format("%s%sAudio channel provided '%s' is invalid. Try using any of \"master,sfx,music,ambience,dialog,talking head\". Current channel is %s", AUDIOQS.audioQsSpecifier, AUDIOQS.errSpecifier, channel, AUDIO_CHANNEL))
+			return
+		end
 	end
 	print(string.format("%s%sAudioQs using audio channel: '%s'.", AUDIOQS.audioQsSpecifier, AUDIOQS.infoSpecifier, AUDIO_CHANNEL))
 	SV_Specializations.AUDIO_CHANNEL = AUDIO_CHANNEL
@@ -388,7 +389,17 @@ function AUDIOQS.WipePrompts()
 end
 
 -------- AUDIOQS.InitializePrompts()
-function AUDIOQS.InitializePrompts()
+function AUDIOQS.InitializePrompts()	
+	if not segments[1] then -- First attempt to load a spec?
+		-- Set saved audio channel
+		for i=1,#VALID_AUDIO_CHANNELS_LIST do
+			VALID_AUDIO_CHANNELS[VALID_AUDIO_CHANNELS_LIST[i]] = VALID_AUDIO_CHANNELS_LIST[i]
+		end
+		if SV_Specializations and SV_Specializations.AUDIO_CHANNEL then
+			AUDIO_CHANNEL = VALID_AUDIO_CHANNELS[string.upper(SV_Specializations.AUDIO_CHANNEL)] or AUDIO_CHANNEL
+		end
+	end
+	
 	AUDIOQS.WipePrompts()
 
 	segments = AUDIOQS.GSI_GetSegmentsTable()
