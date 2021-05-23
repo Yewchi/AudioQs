@@ -50,6 +50,7 @@ local locTypeToFilepath = {
 	["CONFUSE"] = 					string.format("%sCrowdControl/%s.ogg", AUDIOQS.SOUNDS_ROOT, "disorientated"),
 	["POSSESS"] = 					string.format("%sCrowdControl/%s.ogg", AUDIOQS.SOUNDS_ROOT, "mind_controlled"),
 	["CONFUSE"] = 					string.format("%sCrowdControl/%s.ogg", AUDIOQS.SOUNDS_ROOT, "disoriented"),
+	["DISARM"] =					string.format("%sCrowdControl/%s.ogg", AUDIOQS.SOUNDS_ROOT, "disarmed"),
 	-- Any below this comment are untested / guesswork. Worst that can happen is it doesn't announce.
 	["BANISH"] = 					string.format("%sCrowdControl/%s.ogg", AUDIOQS.SOUNDS_ROOT, "banished"),
 	["SLEEP"] = 					string.format("%sCrowdControl/%s.ogg", AUDIOQS.SOUNDS_ROOT, "slept")
@@ -140,7 +141,7 @@ CC_Initialize = function()
 	AUDIOQS.GS.CC_locToBeAnnounced = {}
 end
 
--- Redundant in 90000
+-- Redundant in 90000 -- late note: Can't remember why, it's probably because modern wow has a variable LOC-data table size.
 -------------- CC_DeleteLoc()
 local function CC_DeleteLoc(key)
 	AUDIOQS.GS.CC_activeLoc[key].activeCheck = nil
@@ -165,22 +166,49 @@ if AUDIOQS.VERBOSE then print(AUDIOQS.audioQsSpecifier..AUDIOQS.debugSpecifier..
 end
 
 -------------- CC_GetLossOfControlTable() 
-local function CC_GetLossOfControlTable(index)
-	if AUDIOQS.WOW_SHADOWLANDS then
-		return C_LossOfControl.GetActiveLossOfControlData(index)
-	else
-		local locType, spellID, _, _, startTime, _, dur, lockoutSchool = C_LossOfControl.GetEventInfo(index) -- "ID" in API
-		return CC_CreateLoc(locType, spellID, startTime, dur, lockoutSchool)
-	end
-end
+local CC_GetLossOfControlTable = AUDIOQS.WOW_VC and 
+		function(index)
+			local locType, spellID, _, _, startTime, _, dur, lockoutSchool = C_LossOfControl.GetEventInfo(index) -- "ID" in API
+			return CC_CreateLoc(locType, spellID, startTime, dur, lockoutSchool)
+		end
+	or
+		function(index)
+			return C_LossOfControl.GetActiveLossOfControlData(index)
+		end
+;
 
-local function CC_GetLossOfControlCount()
-	if AUDIOQS.WOW_SHADOWLANDS then
-		return C_LossOfControl.GetActiveLossOfControlDataCount()
-	else
-		return C_LossOfControl.GetNumEvents()
-	end
-end
+local CC_GetLossOfControlCount = not AUDIOQS.WOW_VC and 
+		function()
+			return C_LossOfControl.GetActiveLossOfControlDataCount()
+		end
+	or
+		function()
+			return C_LossOfControl.GetNumEvents()
+		end
+;
+
+-- Late note: Doesn't this only stop LOSS_OF_CONTROL_UPDATE from repeating calls if LOC_UPDATE is called twice (and no more) in quick succession (but on different frames)? Is this always the case? This needs to be detailed.
+local CC_ClearHistory = not AUDIOQS.WOW_VC and
+		function(activeLocs)
+			for key,locTbl in pairs(activeLocs) do
+				if locTbl.activeCheck == CC_LOC_PENDING then
+					activeLocs[key] = nil -- Recycling LOC redundant in 90000 (The LoC data table is fully returned from the WoW API, we do not create the table ourself)
+				else
+					locTbl.activeCheck = CC_LOC_PENDING
+				end
+			end
+		end
+	or
+		function(activeLocs)
+			for key,locTbl in pairs(activeLocs) do
+				if locTbl.activeCheck == CC_LOC_PENDING then
+					CC_DeleteLoc(key)
+				else
+					locTbl.activeCheck = CC_LOC_PENDING
+				end
+			end
+		end
+;
 
 -------- AUDIOQS.CrowdControl_CheckLocUpdate()
 ---- Called on LOSS_OF_CONTROL_UPDATE. Updates stored Loc everytime, indicates if they are fresh to trigger prompting.
@@ -192,8 +220,7 @@ function AUDIOQS.CrowdControl_CheckLocUpdate()
 	local thisLocTable
 	local i = 1
 	-- Soln elegance is hmmmm, but shouldn't have too much overhead. i.e.: usage of str concat of startTime and spellID as key.
-	while (i <= thisNumLoc)
-	do
+	while (i <= thisNumLoc) do
 		thisLocTable = CC_GetLossOfControlTable(i)
 		if thisLocTable.startTime == nil then  -- This logic is true when standing in a "LoC pool": rather than on a timer, applied until the player is not within it's AoE, 
 			thisLocTable.startTime = GetTime()
@@ -203,25 +230,14 @@ function AUDIOQS.CrowdControl_CheckLocUpdate()
 		if not AUDIOQS.GS.CC_activeLoc[key] then
 			AUDIOQS.GS.CC_activeLoc[key] = thisLocTable
 			table.insert(AUDIOQS.GS.CC_locToBeAnnounced, key)
-			AUDIOQS.GS.CC_activeLoc[key].activeCheck = CC_LOC_FOUND
-		else
-			AUDIOQS.GS.CC_activeLoc[key].activeCheck = CC_LOC_FOUND
 		end
+		AUDIOQS.GS.CC_activeLoc[key].activeCheck = CC_LOC_FOUND
+		
 if AUDIOQS.VERBOSE then print(AUDIOQS.audioQsSpecifier..AUDIOQS.debugSpecifier.."LossOfControl!", thisLocTable.locType, thisLocTable.spellID, thisLocTable.startTime, thisLocTable.duration, thisLocTable.lockoutSchool) end
 		i = i + 1
 	end
 	
-	for k,tbl in pairs(AUDIOQS.GS.CC_activeLoc) do
-		if tbl.activeCheck == CC_LOC_PENDING then
-			if AUDIOQS.WOW_SHADOWLANDS then
-				AUDIOQS.GS.CC_activeLoc[k] = nil -- Recycling LOC redundant in 90000
-			else
-				CC_DeleteLoc(k)
-			end
-		else
-			tbl.activeCheck = CC_LOC_PENDING
-		end
-	end
+	CC_ClearHistory(AUDIOQS.GS.CC_activeLoc)
 end
 
 -------- AUDIOQS.CrowdControl_GetKeyLocFilename()

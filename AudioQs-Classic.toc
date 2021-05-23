@@ -1,4 +1,4 @@
-## Interface: 90005
+## Interface: 11307
 ## Title: AudioQs
 ## Notes: Custom audio prompts and blind assist.
 ## Author: Yewchi
@@ -17,14 +17,6 @@ Extensions\ManaMonitor.lua
 Extensions\HealthMonitor.lua
 Extensions\GPS.lua
 Extensions\KillingBlow.lua
-Extensions\BeastMastery.lua
-Extensions\RestorationDruid.lua
-Extensions\Mistweaver.lua
-Extensions\HolyPaladin.lua
-Extensions\HolyPriest.lua
-Extensions\RestorationShaman.lua
-Extensions\FireMage.lua
-Extensions\Covenants.lua
 Extensions\ClassicDruid.lua
 Extensions\ClassicPriest.lua
 Extensions\ClassicPaladin.lua

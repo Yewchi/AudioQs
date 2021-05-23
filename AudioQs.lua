@@ -7,8 +7,12 @@ AUDIOQS = {}
 AUDIOQS.DEBUG = false
 AUDIOQS.VERBOSE = AUDIOQS.DEBUG and true
 
-AUDIOQS.WOW_CLASSIC = (select(4, GetBuildInfo()) < 20000) -- Can this be more broadly determined?
-AUDIOQS.WOW_SHADOWLANDS = (select(4, GetBuildInfo()) >= 90000) -- To be removed after expac rollover -- TODO CTRL+F WOW_SHADOWLANDS
+AUDIOQS.BUILD_VERSION = select(4, GetBuildInfo())
+AUDIOQS.WOW_CLASSIC = AUDIOQS.BUILD_VERSION < 30000 -- Can this be more broadly determined?
+AUDIOQS.WOW_VC = AUDIOQS.BUILD_VERSION < 20000 -- Vanilla classic (unsure about WOW UI API versioning for vanilla)
+AUDIOQS.WOW_BCC = AUDIOQS.BUILD_VERSION >= 20000 and AUDIOQS.BUILD_VERSION < 30000
+AUDIOQS.WOW_SHADOWLANDS = AUDIOQS.BUILD_VERSION >= 90000 -- To be removed after expac rollover -- TODO CTRL+F WOW_SHADOWLANDS
+AUDIOQS.WOW_SPECS_IMPLEMENTED = AUDIOQS.BUILD_VERSION >= 50400
 
 AUDIOQS.COMPAT_UNIT_HEALTH_FREQ = (AUDIOQS.WOW_SHADOWLANDS and "UNIT_HEALTH" or "UNIT_HEALTH_FREQUENT")
 
@@ -189,7 +193,7 @@ if AUDIOQS.DEBUG then print(AUDIOQS.audioQsSpecifier..AUDIOQS.debugSpecifier.."T
 	end
 end	
 
-if not AUDIOQS.WOW_CLASSIC then Frame_LoadOrSpecChange:RegisterEvent("PLAYER_SPECIALIZATION_CHANGED") end
+if AUDIOQS.WOW_SPECS_IMPLEMENTED then Frame_LoadOrSpecChange:RegisterEvent("PLAYER_SPECIALIZATION_CHANGED") end
 --Frame_LoadOrSpecChange:RegisterEvent("PLAYER_LOGIN") -- TODO: Was this just naive, or some weird interaction?
 Frame_LoadOrSpecChange:RegisterEvent("PLAYER_ENTERING_WORLD")
 Frame_LoadOrSpecChange:SetScript("OnEvent", function(_, event, ...) UpdateSpecializationInfo(_, event, ...) end)

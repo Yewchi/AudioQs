@@ -1,6 +1,8 @@
 -- All code written and maintained by Yewchi 
 -- zyewchi@gmail.com
 
+local AUDIOQS = AUDIOQS
+
 local extName = "KillingBlow"
 local extNameDetailed = "Killing Blow"
 local extShortNames = "kb"
@@ -15,8 +17,9 @@ local KILLING_BLOW_SOUND_FILE = AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT..
 -- PLAYER KILLS ONLY - Change 'true' to 'false' to allow all killing blows to trigger sound
 local PVP_KILLS_ONLY = true
 
-AUDIOQS.KB_GENERIC_KILLED_SEARCH_KEY = (not AUDIOQS.WOW_CLASSIC and "You.+killed" or UnitName("player")..".-slain")
 local MAX_COMBATLOG_BUFFER_SEARCH = 30
+
+local CHAT_FRAME_COMBAT_LOG = ChatFrame2 -- Hard-coded as the combat log in wow ui
 
 mostPreviousKillTimestamp = 0
 lastTenKilledGuid = {}
@@ -42,7 +45,12 @@ local extFuncs = {
 		["GetSegments"] = function() return GetSegments() end,
 		["GetExtension"] = function() return GetExtension() end,
 		["SpecAllowed"] = function(specId) return SpecAllowed(specId) end,
-		["Initialize"] = function() end
+		["Initialize"] = 
+			function()
+				-- Post-load stuff
+				AUDIOQS.KB_GENERIC_KILLED_SEARCH_KEY = Blizzard_CombatLog_Filters.filters[Blizzard_CombatLog_Filters.currentFilter].settings.fullText and UnitName("player")..".-slain" or "You.+killed" -- Bugged on ChatConfigCombatSettings "Verbose" changed
+				Blizzard_CombatLog_Filters.filters[Blizzard_CombatLog_Filters.currentFilter].filters[1].eventList.PARTY_KILL = true -- forces the current chatcombatlog filter to track kills, an unfortunate consequence of this whole thing being otherwise impossible. Bugged on switched main chatcombatlog filter changed
+			end
 }
 
 --- Spell Tables and Prompts --
@@ -147,10 +155,11 @@ function AUDIOQS.KB_RotationalInsert(Guid)
 end
 
 function AUDIOQS.KB_Refilter()
+	if CHAT_FRAME_COMBAT_LOG:IsVisible() then return end -- Refreshing was only needed when the combat log was not open, because it would shut-off when not visible to the user.
 	Blizzard_CombatLog_Refilter()
-	if AUDIOQS.WOW_CLASSIC then
-		AUDIOQS.KB_clcRefilterTimestamp = time()
-	end
+	--if AUDIOQS.WOW_VC then
+	--	AUDIOQS.KB_clcRefilterTimestamp = time()
+	--end
 end
 
 function AUDIOQS.KB_CheckLostTargetForPlayerKills(thisGuid)

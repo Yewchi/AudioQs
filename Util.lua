@@ -149,7 +149,7 @@ SlashCmdList["AQ"] = function(msg)
 			local funcs = AUDIOQS.GetExtensionFuncs(extName)
 			if funcs == nil or SV_Specializations == nil or SV_Specializations[mySpec] == nil or SV_Specializations[mySpec][funcs["GetName"]()] == nil then
 				print(AUDIOQS.audioQsSpecifier..AUDIOQS.infoSpecifier.."Extension \""..extName.."\" is not loaded.\nLoaded extensions are:\n"..AUDIOQS.PrintableTable(SV_Specializations == nil and "nil" or SV_Specializations[mySpec]))
-				AUDIOQS.GSI_RemoveExtension(mySpec, funcs["GetName"]())
+				--AUDIOQS.GSI_RemoveExtension(mySpec, funcs["GetName"]())
 				return
 			else
 				if AUDIOQS.GSI_RemoveExtension(mySpec, funcs["GetName"]()) then
@@ -259,11 +259,11 @@ function AUDIOQS.Print(formatString, ...)
 end
 
 function AUDIOQS.GetSpecId()
-	if AUDIOQS.WOW_CLASSIC then
+	if AUDIOQS.WOW_SPECS_IMPLEMENTED then
+		return GetSpecializationInfo(GetSpecialization())
+	else
 		local class = {C_PlayerInfo.GetClass(PlayerLocation:CreateFromUnit("player"))}
 		return class[AUDIOQS.CLC_PLAYERLOCATION_CLASS_ID], class[AUDIOQS.CLC_PLAYERLOCATION_NAME]
-	else
-		return GetSpecializationInfo(GetSpecialization())
 	end
 end
 
@@ -316,10 +316,10 @@ function AUDIOQS.TablePrint(tbl)
 	end
 end
 
--- Will overwrite any matching keys from ammended into tbl. .'. use sparingly, and often only for conditional table creation on the moment of it's creation.
-function AUDIOQS.AmmendTable(tbl, ammended)
-	for k,v in pairs(ammended) do
-		tbl[k] = v
+-- Will overwrite any matching keys from ammending into ammended. .'. use sparingly, and often only for conditional table creation on the moment of it's creation.
+function AUDIOQS.AmmendTable(ammended, ammending)
+	for k,v in pairs(ammending) do
+		ammended[k] = v
 	end
 end
 

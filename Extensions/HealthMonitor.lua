@@ -90,7 +90,7 @@ local extEvents = {
 	["PLAYER_DEAD"] = {
 	}
 }
-if not AUDIOQS.WOW_CLASSIC then
+if AUDIOQS.WOW_SPECS_IMPLEMENTED then
 	AUDIOQS.AmmendTable(
 			extEvents, 
 			{["PLAYER_SPECIALIZATION_CHANGED"] = {}}

@@ -83,8 +83,8 @@ local extSegments = {
 				AUDIOQS.SEGLIB_GENERIC_SPELL_CHARGES_COOLDOWN,
 				false
 			},
-			{0.05,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."blast_primer.ogg",		nil,	true},
-			{0.125,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."blast_charge2.ogg",	nil,	"return GetSpellCharges(108853) >= 2"},
+			{0.1,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."blast_primer.ogg",		nil,	true},
+			{0.06,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."blast_charge2.ogg",	nil,	"return GetSpellCharges(108853) >= 2"},
 			{nil,		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."blast_charge3.ogg",	nil,	"return GetSpellCharges(108853) == 3"}
 		},
 	},
