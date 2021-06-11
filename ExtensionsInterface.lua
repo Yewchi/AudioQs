@@ -3,22 +3,26 @@
 
 --~ All extensions must register themselves with RegisterExtension(name, funcs)
 
-local extensionFuncs = {}
-local shortNameExtensionFuncs = {} -- Store a table ref, instead of a (slow) string
-local requiredFuncNames = {
+local AUDIOQS = AUDIOQS_4Q5
+
+local number_extensions_registered = 0
+
+local t_ext_funcs = {}
+local t_ext_name_to_ref = {}
+local required_func_names = {
 	"GetName",
 	"GetNameDetailed",
 	"GetShortNames",
 	"GetVersion",
 	"GetSpells",
 	"GetEvents",
-	"GetSegments",
+	"GetPrompts",
 	"GetExtension",
 	"SpecAllowed"
 }
 
-local function ExtensionBasicRequirementsMet(extName, funcs)
-	for _,funcName in pairs(requiredFuncNames) do
+local function ExtensionBasicRequirementsMet(extName, extRef, funcs)
+	for _,funcName in pairs(required_func_names) do
 		if type(funcs[funcName]) ~= "function" then
 if AUDIOQS.DEBUG then print(AUDIOQS.audioQsSpecifier..AUDIOQS.debugSpecifier.."Required function \""..funcName.."()\" missing in function table passed to ExtensionsInterface for \""..extName.."\".") end
 			AUDIOQS.HandleError({code=AUDIOQS.ERR_UNIMPLEMENTED_EXTENSION_REQUIREMENTS, func="AUDIOQS.ExtensionBasicRequirementsMet(extName = "..(extName == nil and "nil" or extName)..", funcs = t_"..type(funcs)..")"})
@@ -26,56 +30,70 @@ if AUDIOQS.DEBUG then print(AUDIOQS.audioQsSpecifier..AUDIOQS.debugSpecifier.."R
 		end
 	end
 	
-	local segments = funcs["GetSegments"]()
+	local prompts = funcs["GetPrompts"]()
 	local spells = funcs["GetSpells"]()
 	local events = funcs["GetEvents"]()
-	for k,_ in pairs(segments) do
-		if not (spells[k] or events[k]) then
+	for k,_ in pairs(prompts) do
+		if not spells or not events or not (spells[k] or events[k]) then
 if AUDIOQS.DEBUG then print(AUDIOQS.audioQsSpecifier..AUDIOQS.debugSpecifier.."Segment key "..(type(k) == "number" and "#"..k or "\""..k.."\"").." does not have a corresponding spell/event table entry for extension \""..extName.."\"") end
 			AUDIOQS.HandleError({code=AUDIOQS.ERR_UNIMPLEMENTED_EXTENSION_REQUIREMENTS, func="AUDIOQS.ExtensionBasicRequirementsMet(extName = "..(extName == nil and "nil" or extName)..", funcs = t_"..type(funcs)..")"})
 			return false
 		end
 	end
 	
+	AUDIOQS.SEGLIB_LoadDelims(extRef, funcs["GetDelimInfo"])
+	
 	return true
 end
 
 function AUDIOQS.RegisterExtension(extName, funcs)
+	local thisExtReferenceNumber = number_extensions_registered + 1
 	if type(extName) ~= "string" or type(funcs) ~= "table" then
 		AUDIOQS.HandleError({code=AUDIOQS.ERR_INVALID_ARGS, func="AUDIOQS.RegisterExtension(extName = "..(extName == nil and "nil" or extName)..", funcs = t_"..type(funcs)..")"})
 		return
 	end
 	
-	if not ExtensionBasicRequirementsMet(extName, funcs) then
+	if not ExtensionBasicRequirementsMet(extName, thisExtReferenceNumber, funcs) then
 		return nil
 	end
-	
-	extensionFuncs[extName:lower()] = funcs
-	
 	local shortNames = funcs["GetShortNames"]()
+	
+	t_ext_funcs[thisExtReferenceNumber] = funcs
+	
 	for substr in shortNames:gmatch("[%a]+") do
-		shortNameExtensionFuncs[substr] = funcs
+		t_ext_name_to_ref[substr] = thisExtReferenceNumber
 	end
+	t_ext_name_to_ref[extName:lower()] = thisExtReferenceNumber
+	number_extensions_registered = thisExtReferenceNumber
+	return thisExtReferenceNumber
 end
 
-function AUDIOQS.GetExtensionFuncs(extNameSearch)
-	if extNameSearch == nil then
-if AUDIOQS.DEBUG then print(AUDIOQS.audioQsSpecifier..AUDIOQS.debugSpecifier.."nil passed as extension name to GetExtensionFuncs()") end
+function AUDIOQS.GetNumberRegisteredExtensions()
+	return numerical_extension_reference
+end
+
+function AUDIOQS.GetExtensionNameFuncs(extNameSearch)
+	if type(extNameSearch) ~= "string" then
+if AUDIOQS.DEBUG then print(AUDIOQS.audioQsSpecifier..AUDIOQS.debugSpecifier.."invalid extension name passed to GetExtensionNameFuncs(extNameSearch="..AUDIOQS.Printable(extNameSearch)..")") end
 		return nil
 	end
-	
-	local extNameSearchToLower = extNameSearch:lower()
-	return extensionFuncs[extNameSearch:lower()] or shortNameExtensionFuncs[extNameSearch:lower()]
+
+	return t_ext_funcs[t_ext_name_to_ref[extNameSearch:lower()]]
+end
+
+function AUDIOQS.EXT_GetDelimInfoForReference(extRefNum)
+	local extFuncs = t_ext_funcs[extRefNum]
+	return extFuncs and extFuncs["GetDelimFuncInfo"]
 end
 
 function AUDIOQS.GetRegisteredExtensionNames()
-	local name_arr = {}
+	local nameArray = {}
 	local i = 1
-	for extName,_ in pairs(extensionFuncs) do
-		name_arr[i] = extName
+	for extName,_ in pairs(t_ext_funcs) do
+		nameArray[i] = extName
 		i = i + 1
 	end
-	return name_arr
+	return nameArray
 end
 
 function AUDIOQS.SpecAllowed(specToCheck, specsAllowed)

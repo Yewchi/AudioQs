@@ -4,6 +4,8 @@
 -- Currently requires HealthMonitor to be loaded.
 -- Does not currently support WoW Classic -- Patch planned before Jan 14 '20.
 
+local AUDIOQS = AUDIOQS_4Q5
+
 local extName = "GPS"
 local extNameDetailed = "GPS"
 local extShortNames = "gps"
@@ -13,6 +15,7 @@ local extSpecLimit = AUDIOQS.ANY_SPEC_ALLOWED
 local GetName
 local GetNameDetailed
 local GetShortNames
+local GetExtRef
 local GetVersion
 local GetSpells
 local GetEvents
@@ -26,18 +29,28 @@ GPS_CompassButtonFrame = nil
 local GPS_CompassKeybindHandlerFrame = "AQ_GPS_COMPASS_KEYBIND_HANDLER"
 local GPS_CompassKeybindHandlerFrameBindingAction = "CLICK "..GPS_CompassKeybindHandlerFrame..":LeftButton"
 
+local extSpells, extEvents, extSegments
+
+local ext_ref_num
 
 -- TODO - This implies an "unload" function is desirable when unloading extensions (to remove AQcompass macro).
-local extFuncs = {
-		["GetName"] = function() return GetName() end,
-		["GetNameDetailed"] = function() return GetNameDetailed() end,
-		["GetShortNames"] = function() return GetShortNames() end,
-		["GetVersion"] = function() return GetVersion() end,
-		["GetSpells"] = function() return GetSpells() end,
-		["GetEvents"] = function() return GetEvents() end,
-		["GetSegments"] = function() return GetSegments() end,
-		["GetExtension"] = function() return GetExtension() end,
-		["SpecAllowed"] = function(specId) return SpecAllowed(specId) end,
+local extFuncs = { -- For external use
+		["GetName"] = function() return extName end,
+		["GetNameDetailed"] = function() return extNameDetailed end,
+		["GetShortNames"] = function() return extShortNames end,
+		["GetExtRef"] = function() return ext_ref_num end,
+		["GetVersion"] = function() return extVersion end,
+		["GetSpells"] = function() return extSpells end,
+		["GetEvents"] = function() return extEvents end,
+		["GetPrompts"] = function() return extSegments end,
+		["GetExtension"] = function() 
+				return {spells=extSpells, events=extEvents, segments=extSegments, extNum=ext_ref_num}
+			end,
+		["SpecAllowed"] = function(specId) 
+				if extSpecLimit == AUDIOQS.ANY_SPEC_ALLOWED or extSpecLimit == specId then
+					return true
+				end 
+			end,
 		["Initialize"] = function() 
 			AUDIOQS.GS.GPS_PlayerAliveStatus = (UnitIsDeadOrGhost("player") and AUDIOQS.GS.GPS_PLAYER_DEAD or AUDIOQS.GS.GPS_PLAYER_LIVING) 
 
@@ -49,8 +62,7 @@ local extFuncs = {
 				GPS_CompassButtonFrame:SetScript("OnClick", function() -- Raises event (allows a hook into the prompting system, for cleaner audio handling/stop sound functionality)
 					AUDIOQS.GS.GPS_GetFacingUnhandled = true -- Turned off in segment conditional if this caused the UPDATE_MACRO
 
-					CreateMacro("AQDirtyEventRaiser", 132089, "", 0)
-					DeleteMacro("AQDirtyEventRaiser") -- If you're a WoW AddOn developer please mail me a trout to slap myself accross the face
+					AUDIOQS.AttemptStartPrompt("UPDATE_MACROS") -- TODO TEMP
 				end)
 				GPS_CompassButtonFrame:RegisterForClicks("AnyUp")
 			end
@@ -95,25 +107,25 @@ AUDIOQS.GS.GPS_lastRangeTimestamp = GetTime()
 --- Spell Tables and Prompts --
 --
 -- spells[spellId] = { "Spell Name", charges, cdDur, cdExpiration, unitId, spellType}
-local extSpells = { 
+extSpells = { 
 }
 
 -- events["EVENT_NAME"] = eventArgsArray (automatically generated)
-local extEvents = {
+extEvents = {
 	["PLAYER_ALIVE"] = {},
 	["PLAYER_DEAD"] = {},
 	["PLAYER_UNGHOST"] = {},
 	["AREA_SPIRIT_HEALER_IN_RANGE"] = {},
 	["AREA_SPIRIT_HEALER_OUT_OF_RANGE"] = {},
 	["RESURRECT_REQUEST"] = {},
-	["UPDATE_MACROS"] = {} -- Used with a macro to trigger a prompt stating the direction facing (out of PvP instances)
+	["UPDATE_MACROS"] = {}
 }
 
-local extSegments = {
+extSegments = {
 	["PLAYER_ALIVE"] = {
 		{
 			{
-				"AUDIOQS.GPS_ProcessAlive() return false",
+				function() AUDIOQS.GPS_ProcessAlive() return false end,
 				false,
 			},
 			{nil, nil,	nil, false} 
@@ -122,7 +134,7 @@ local extSegments = {
 	["PLAYER_DEAD"] = {
 		{
 			{
-				"AUDIOQS.GPS_ProcessDeath() return false",
+				function() AUDIOQS.GPS_ProcessDeath() return false end,
 				false,
 			},
 			{nil, nil, nil, false}
@@ -131,7 +143,7 @@ local extSegments = {
 	["PLAYER_UNGHOST"] = {
 		{
 			{
-				"AUDIOQS.GPS_ProcessUnghost() return false",
+				function() AUDIOQS.GPS_ProcessUnghost() return false end,
 				false
 			},
 			{nil, nil, nil, false}
@@ -140,7 +152,7 @@ local extSegments = {
 	["AREA_SPIRIT_HEALER_IN_RANGE"] = {
 		{
 			{
-				"return AUDIOQS.GPS_ProcessGraveyardInRange()",
+				function() return AUDIOQS.GPS_ProcessGraveyardInRange() end,
 				false
 			},
 			{
@@ -154,7 +166,7 @@ local extSegments = {
 	["AREA_SPIRIT_HEALER_OUT_OF_RANGE"] = {
 		{
 			{
-				"return AUDIOQS.GPS_ProcessGraveyardOutOfRange()", -- TODO Will this occur while alive
+				function() return AUDIOQS.GPS_ProcessGraveyardOutOfRange() end, -- TODO Will this occur while alive
 				false
 			},
 			{
@@ -168,7 +180,7 @@ local extSegments = {
 	["RESURRECT_REQUEST"] = {
 		{
 			{
-				"AUDIOQS.GPS_ProcessResurrectRequest() return true",
+				function() AUDIOQS.GPS_ProcessResurrectRequest() return true end,
 				false,
 			},
 			{
@@ -193,14 +205,13 @@ local extSegments = {
 			},
 			{
 				nil,
-				AUDIOQS.SOUND_FUNC_PREFIX.."local facing = AUDIOQS.GPS_GetFacing() if type(facing) == 'string' then return '"..AUDIOQS.SOUNDS_ROOT.."GPS/'..facing..'.ogg' end return nil",
+				AUDIOQS.SOUND_FUNC_PREFIX.."local facing = AUDIOQS_4Q5.GPS_GetFacing() if type(facing) == 'string' then return '"..AUDIOQS.SOUNDS_ROOT.."GPS/'..facing..'.ogg' end return nil",
 				nil,
-				"if AUDIOQS.GS.GPS_GetFacingUnhandled then AUDIOQS.GS.GPS_GetFacingUnhandled = false return true end return false"
+				function() if AUDIOQS.GS.GPS_GetFacingUnhandled then AUDIOQS.GS.GPS_GetFacingUnhandled = false return true end return false end
 			}
 		}
 	}
 }
-
 --
 -- /Spell Tables and Rules
 
@@ -287,47 +298,8 @@ function AUDIOQS.TEST_GPS_SaveFacing()
 
 	table.insert(SV_Specializations["Respawns"], {GetPlayerFacing(), date()})
 end
-
-GetName = function()
-	return extName
-end
-
-GetNameDetailed = function()
-	return extNameDetailed
-end
-
-GetShortNames = function()
-	return extShortNames
-end
-
-GetVersion = function()
-	return extVersion
-end
-
-GetSpells = function()
-	return extSpells
-end
-
-GetEvents = function()
-	return extEvents
-end
-
-GetSegments = function()
-	return extSegments
-end
-
-GetExtension = function()
-	return {spells=extSpells, events=extEvents, segments=extSegments}
-end
-
-SpecAllowed = function(specId)
-	if extSpecLimit == AUDIOQS.ANY_SPEC_ALLOWED or extSpecLimit == specId then
-		return true
-	end
-	return false
-end
 --
 -- /Funcs --
 
 -- Register Extension:
-AUDIOQS.RegisterExtension(extName, extFuncs)
+ext_ref_num = AUDIOQS.RegisterExtension(extName, extFuncs)

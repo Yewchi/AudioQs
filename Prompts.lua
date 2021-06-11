@@ -3,6 +3,8 @@
 
 --~ Table generation; PromptTicker and segment interpretation
 
+local AUDIOQS = AUDIOQS_4Q5
+
 --- Initialization --
 --
 
@@ -25,6 +27,9 @@ AUDIOQS.STOP_SOUND_DISALLOWED =						false
 
 ------- Table key Reference --
 --
+AUDIOQS.PROMPT_I_EXT_REF = 0 -- fast-easy extRef look-up, prompt array still operates at array speeds
+local PROMPT_I_EXT_REF = AUDIOQS.PROMPT_I_EXT_REF
+
 local SEGT_CONDITIONALS =	1
 local SEGT_FIRST = 2
 local SEGT_CONDITIONALS_START = 1
@@ -34,15 +39,13 @@ local PROMPT_TIMESTAMP = 1
 local PROMPT_CURR_STAGE = 2
 local PROMPT_SEGMENT_KEY = 3
 local PROMPT_SEGMENT_TABLE_INDEX = 4
+local PROMPT_NEXT_PROMPT_TRACKED = 6
+local PROMPT_PREV_PROMPT_TRACKED = 7
 
 local PROMPTSEG_LENGTH = 1
 local PROMPTSEG_SOUND = 2
 local PROMPTSEG_HANDLE = 3
 local PROMPTSEG_CONDITIONAL = 4
-
-local REG_PROMPT_INDEX = 1
-local REG_SEGMENT_KEY = 2
-local REG_SEGMENT_INDEX = 3
 --
 ------ /Table key Reference --
 
@@ -59,37 +62,100 @@ local VALID_AUDIO_CHANNELS_LIST = {
 
 local VALID_AUDIO_CHANNELS = {} -- {["MASTER"] = "MASTER, ["SFX"] = "SFX", ...}
 
-local TICKER_SKIP_FRAMES = 2 -- TODO Cheap optimisation, should be evaluates n = [1,2,3]; n = n+3 of prompts per frame.
+local TICKER_SKIP_FRAMES = 3 -- TODO Cheap optimisation, should be evaluates n = [1,2,3]; n = n+3 of prompts per frame.
 --
 ------ /Static vals --
 
-------- AddOn variables --
+------- Module variables --
 local AUDIO_CHANNEL = "DIALOG"
 --
-local segments = {}
+local prompts = {}
 
-local spellsLookUp = {}
+local spellsLookUp = {} -- [spellId]
 
 local unitsIncluded = {}
 
-local promptsTable = {}
+local promptStates = {}
 local segmentPromptIndex = {}
 
-local tickerStep = 0
+local registered_prompt -- Prompts are registered when they're being checked in the prompt ticker, allows for extensions to edit their own prompt data.
 
-local registered = {} -- Prompts are registered when they're being checked in the prompt ticker, allows for extensions to edit their own prompt data.
+local Frame_PromptTicker = CreateFrame("Frame", "AUDIOQS_FRAME_PROMPT_TICKER")
 
-local Frame_PromptTicker = CreateFrame("Frame", "Prompt Ticker")
+local configuration_changed_ext_refs = {} -- Must be an array incase many extensions are effected / the user is going ham or used a configuration macro.
+local batch_job_current_index = 0 -- where the batch is up to
+local batch_job_ends_index = 0 -- the index to finish the batch after a full circuit.
+local MAX_BATCH_PROCESS_PER_FRAME = 16
+local Frame_SetDefaultFuncStringsBatch = CreateFrame("Frame", "AUDIOQS_FRAME_DEFAULT_FSTR_BATCH")
+
+local check_prompt_ticker_state = false
 --
------- /AddOn variables --
+------ /Module variables --
 --
 
+local EVAL_LENGTH
+local EVAL_SOUND
+local EVAL_COND
+
+local HUSHMODE_OFF = AUDIOQS.HUSHMODE_OFF
+
+local PROMPT_STAGE_OFF = AUDIOQS.PROMPT_STAGE_OFF
+
+local PROMPTSEG_CONDITIONAL_USE_PREVIOUS = AUDIOQS.PROMPTSEG_CONDITIONAL_USE_PREVIOUS
+local PROMPTSEG_CONDITIONAL_USE_STOP = AUDIOQS.PROMPTSEG_CONDITIONAL_USE_STOP
+local PROMPTSEG_CONDITIONAL_CONTINUATION = AUDIOQS.PROMPTSEG_CONDITIONAL_CONTINUATION
+local PROMPTSEG_CONDITIONAL_REPEATER = AUDIOQS.PROMPTSEG_CONDITIONAL_REPEATER
+local PROMPTSEG_CONDITIONAL_RESTART = AUDIOQS.PROMPTSEG_CONDITIONAL_RESTART
+
+local PROMPTSEG_SOUND_STOP = PROMPTSEG_SOUND_STOP
+
+local STOP_SOUND_DISALLOWED = STOP_SOUND_DISALLOWED
+
+local type = type
 -- /Initialization --
 
 --- Funcs --
 --
 local AttemptStartPrompts
 local PromptTicker
+
+local l_prompts_tracked
+local function l_insert_active_prompt(promptState)
+	if promptState[PROMPT_NEXT_PROMPT_TRACKED] or promptState[PROMPT_PREV_PROMPT_TRACKED] then
+		-- Assert clean, not-inserted but now-active promptState
+		print("Tried to insert inserted")
+		return false
+	end
+	if l_prompts_tracked == nil then
+		l_prompts_tracked = promptState
+		promptState[PROMPT_NEXT_PROMPT_TRACKED] = nil
+		promptState[PROMPT_PREV_PROMPT_TRACKED] = nil
+	else
+		l_prompts_tracked[PROMPT_PREV_PROMPT_TRACKED] = promptState
+		promptState[PROMPT_NEXT_PROMPT_TRACKED] = l_prompts_tracked
+		l_prompts_tracked = promptState
+	end
+	checkPromptTickerState = true
+end
+local function l_remove_inactive_prompt(promptState)
+	local nextPromptState = promptState[PROMPT_NEXT_PROMPT_TRACKED]
+	local prevPromptState = promptState[PROMPT_PREV_PROMPT_TRACKED]
+	promptState[PROMPT_NEXT_PROMPT_TRACKED] = nil
+	promptState[PROMPT_PREV_PROMPT_TRACKED] = nil
+	if nextPromptState then
+		nextPromptState[PROMPT_PREV_PROMPT_TRACKED] = prevPromptState
+		if prevPromptState then
+			prevPromptState[PROMPT_NEXT_PROMPT_TRACKED] = nextPromptState
+		else
+			l_prompts_tracked = nextPromptState
+		end
+	elseif prevPromptState then -- but no nextPromptState
+		prevPromptState[PROMPT_NEXT_PROMPT_TRACKED] = nil
+	else
+		l_prompts_tracked = nil
+	end
+	checkPromptTickerState = true
+end
 
 -------------- GenerateTablesAndIndices()
 local function GenerateTablesAndIndices()
@@ -115,14 +181,16 @@ local function GenerateTablesAndIndices()
 			end
 		end
 	end
+	-- Create the promptStates (metadata about prompt running states), and create the segmentPromptIndex (a reference table for a 
+	--- prompt key (spellId or event) and array-index-prompt (often 1 of them) to the corresponding index of metadata in the promptStates)
 	do
 		local i = 1
-		for k,array in pairs(segments) do
+		for k,array in pairs(prompts) do
 			segmentPromptIndex[k] = {}
 			for n=1,#array,1 do
 				if #array[n] >= SEGT_FIRST then -- Is this a true set of segments for a prompt? Not an initialization function?
-					-- promptsTable
-					promptsTable[i] = {	0, AUDIOQS.PROMPT_STAGE_OFF, k, n } -- PROMPT_TIMESTAMP, PROMPT_CURR_STAGE, PROMPT_SEGMENT_KEY, PROMPT_SEGMENT_TABLE_INDEX
+					-- promptStates
+					promptStates[i] = {	0, AUDIOQS.PROMPT_STAGE_OFF, k, n } -- PROMPT_TIMESTAMP, PROMPT_CURR_STAGE, PROMPT_SEGMENT_KEY, PROMPT_SEGMENT_TABLE_INDEX
 					-- segmentPromptIndex
 					segmentPromptIndex[k][n] = i
 					i = i + 1
@@ -131,9 +199,9 @@ local function GenerateTablesAndIndices()
 		end
 	end
 	-- unitsIncluded
-	for n=1,#promptsTable,1 do
-		local thisSegmentKey = promptsTable[n][PROMPT_SEGMENT_KEY]
-		local thisSegmentArrayIndex = promptsTable[n][PROMPT_SEGMENT_TABLE_INDEX]
+	for n=1,#promptStates,1 do
+		local thisSegmentKey = promptStates[n][PROMPT_SEGMENT_KEY]
+		local thisSegmentArrayIndex = promptStates[n][PROMPT_SEGMENT_TABLE_INDEX]
 		if thisSegmentArrayIndex == 1 then
 			if type(thisSegmentKey) == "number" then
 				local thisUnit = spells[thisSegmentKey][AUDIOQS.SPELL_UNIT_ID]
@@ -162,12 +230,12 @@ end
 
 -- Needs confirmation, error thrown on missing file
 -------------- PlaySoundGetHandle()
-local function PlaySoundGetHandle(id, segment)
-	if AUDIOQS.hushMode ~= AUDIOQS.HUSHMODE_OFF or segment == nil then
+local function PlaySoundGetHandle(id, pIndex, sIndex, prompt)
+	if AUDIOQS.hushMode ~= HUSHMODE_OFF or prompt == nil then
 		return nil
 	end
 
-	local eval = AUDIOQS.SEGLIB_EvaluateSound(id, segment, PROMPTSEG_SOUND)
+	local eval = EVAL_SOUND(id, pIndex, sIndex, PROMPTSEG_SOUND, prompt)
 	
 	if eval == nil then
 		return nil
@@ -180,116 +248,113 @@ if AUDIOQS.VERBOSE then print(AUDIOQS.audioQsSpecifier..AUDIOQS.debugSpecifier..
 if AUDIOQS.VERBOSE then print(AUDIOQS.audioQsSpecifier..AUDIOQS.debugSpecifier.."Playing \""..eval.."\"") end
 		return select(2, PlaySoundFile(eval, AUDIO_CHANNEL))
 	end
-	error({code=AUDIOQS.ERR_INVALID_SOUND_DATA, func="PlaySoundGetHandle(segment="..(segment~=nil and segment or "nil")..")"})
+	error({code=AUDIOQS.ERR_INVALID_SOUND_DATA, func=string.format("PlaySoundGetHandle(id=%s, pIndex=%s, sIndex=%s, prompt=%s)", AUDIOQS.Printable(id), AUDIOQS.Printable(pIndex), AUDIOQS.Printable(sIndex), AUDIOQS.Printable(prompt))})
 end
 
 -------------- StopAllSegmentsSounds()
-local function StopAllSegmentsSounds(segmentsArray)
-	for n=SEGT_FIRST,#segmentsArray,1 do
-		local soundHandle = segmentsArray[n][PROMPTSEG_HANDLE]
+local function StopAllSegmentsSounds(prompt)
+	for sIndex=SEGT_FIRST,#prompt,1 do
+		local soundHandle = prompt[sIndex][PROMPTSEG_HANDLE]
 		if type(soundHandle) == "number" then
 			StopSound(soundHandle)
-			segmentsArray[n][PROMPTSEG_HANDLE] = nil
+			prompt[sIndex][PROMPTSEG_HANDLE] = nil
 		end
 	end
 end
 
 -------------- SetSegmentSoundHandle()
 local function SetSegmentSoundHandle(segment, handle)
-	if segment[PROMPTSEG_HANDLE] ~= AUDIOQS.STOP_SOUND_DISALLOWED then
+	if segment[PROMPTSEG_HANDLE] ~= STOP_SOUND_DISALLOWED then
 		segment[PROMPTSEG_HANDLE] = handle
 	end
 end
 -------------- CheckStopSegments()
-local function CheckStopSegments(id, segmentsArray, prompt, allowContinuationOfPlay, forceStop)
-	if prompt[PROMPT_CURR_STAGE] < SEGT_FIRST then
+local function CheckStopSegments(id, pIndex, promptState, prompt, allowContinuationOfPlay, forceStop)
+	if promptState[PROMPT_CURR_STAGE] < SEGT_FIRST then
 		return false
 	end
-	if AUDIOQS.SEGLIB_EvaluateConditional(id, segmentsArray[SEGT_CONDITIONALS], SEGT_CONDITIONALS_STOP) or forceStop == true then
+	if EVAL_COND(id, pIndex, SEGT_CONDITIONALS, SEGT_CONDITIONALS_STOP, prompt) or forceStop == true then
 		if allowContinuationOfPlay == false then
-			StopAllSegmentsSounds(segmentsArray)
+			StopAllSegmentsSounds(prompt)
 		end
-		prompt[PROMPT_TIMESTAMP] = 0
-		prompt[PROMPT_CURR_STAGE] = AUDIOQS.PROMPT_STAGE_OFF
+		promptState[PROMPT_TIMESTAMP] = 0
+		promptState[PROMPT_CURR_STAGE] = AUDIOQS.PROMPT_STAGE_OFF
+		l_remove_inactive_prompt(promptState)
+		check_prompt_ticker_state = true
 		return true
 	end
 	return false
 end
 
 -------------- GetNextTrueSegment()
-local function GetNextTrueSegment(id, segmentsArray, nextPromptStage)
-	if nextPromptStage > #segmentsArray and nextPromptStage > SEGT_FIRST then
-		if segmentsArray[nextPromptStage-1][PROMPTSEG_CONDITIONAL] == AUDIOQS.PROMPTSEG_CONDITIONAL_REPEATER then
+local function GetNextTrueSegment(id, pIndex, prompt, nextPromptStage)
+	if nextPromptStage > #prompt and nextPromptStage > SEGT_FIRST then
+		if prompt[nextPromptStage-1][PROMPTSEG_CONDITIONAL] == PROMPTSEG_CONDITIONAL_REPEATER then
 			return nextPromptStage-1 -- Go back, repeat previous (probably until stop conditional is met)
-		elseif segmentsArray[nextPromptStage-1][PROMPTSEG_CONDITIONAL] == AUDIOQS.PROMPTSEG_CONDITIONAL_RESTART then
+		elseif prompt[nextPromptStage-1][PROMPTSEG_CONDITIONAL] == PROMPTSEG_CONDITIONAL_RESTART then
 			return SEGT_FIRST -- Restart the prompts from Prompt 1
 		end
-		return AUDIOQS.PROMPT_STAGE_OFF
+		return PROMPT_STAGE_OFF
 	end
 	
 	local skippingFalseConditionalSet = false
-	for n=nextPromptStage,#segmentsArray,1 do -- Search downards for true conditionals
-		local conditional = segmentsArray[n][PROMPTSEG_CONDITIONAL]
+	for sI=nextPromptStage,#prompt,1 do -- Search downards for true conditionals
+		local conditional = prompt[sI][PROMPTSEG_CONDITIONAL]
 		if type(conditional) == "string" then
-			if AUDIOQS.SEGLIB_EvaluateConditional(id, segmentsArray[n], PROMPTSEG_CONDITIONAL) then
-				return n
+			if EVAL_COND(id, pIndex, sI, PROMPTSEG_CONDITIONAL, prompt) then
+				return sI
 			end
 			skippingFalseConditionalSet = true
-		elseif conditional == AUDIOQS.PROMPTSEG_CONDITIONAL_USE_PREVIOUS then
+		elseif conditional == PROMPTSEG_CONDITIONAL_USE_PREVIOUS then
 			if skippingFalseConditionalSet == false then
-				for p=n-1,SEGT_FIRST,-1 do -- search upwards for this conditional set's validity
-					local prevPrompt = segmentsArray[p]
-					local prevConditional = prevPrompt[PROMPTSEG_CONDITIONAL]
+				for backSearchI=sI-1,SEGT_FIRST,-1 do -- search upwards for this conditional set's validity
+					local prevSeg = prompt[backSearchI]
+					local prevConditional = prevSeg[PROMPTSEG_CONDITIONAL]
 					if prevConditional == nil then 
-						return AUDIOQS.PROMPT_STAGE_OFF -- TODO if p ~= SEGT_FIRST then error(SEGT_MALFORMED_SEGMENT_TABLE) ?
+						return PROMPT_STAGE_OFF -- TODO if backSearchI ~= SEGT_FIRST then error(SEGT_MALFORMED_SEGMENT_TABLE) ?
 					end
 					
-					if prevConditional ~= AUDIOQS.PROMPTSEG_CONDITIONAL_USE_PREVIOUS then
-						if AUDIOQS.SEGLIB_EvaluateConditional(id, prevPrompt, PROMPTSEG_CONDITIONAL) then
-							return n
+					if prevConditional ~= PROMPTSEG_CONDITIONAL_USE_PREVIOUS then
+						if EVAL_COND(id, pIndex, backSearchI, PROMPTSEG_CONDITIONAL, prompt) then
+							return sI
 						end
 						skippingFalseConditionalSet = true
 						break
 					end
 				end
 			end
-		elseif conditional == AUDIOQS.PROMPTSEG_CONDITIONAL_USE_STOP then 
-			if AUDIOQS.SEGLIB_EvaluateConditional(id, segmentsArray[SEGT_CONDITIONALS], SEGT_CONDITIONALS_STOP) then
-				return n
+		elseif conditional == PROMPTSEG_CONDITIONAL_USE_STOP then 
+			if EVAL_COND(id, pIndex, sI, SEGT_CONDITIONALS_STOP, prompt) then
+				return sI
 			end
 			skippingFalseConditionalSet = true
-		elseif conditional == AUDIOQS.PROMPTSEG_CONDITIONAL_CONTINUATION and skippingFalseConditionalSet == false then
-			return n
-		elseif conditional == AUDIOQS.PROMPTSEG_CONDITIONAL_REPEATER then
-			return max(SEGT_FIRST, n-1)
-		elseif conditional == AUDIOQS.PROMPTSEG_CONDITIONAL_RESTART then
-			return n
+		elseif conditional == PROMPTSEG_CONDITIONAL_CONTINUATION and skippingFalseConditionalSet == false then
+			return sI
+		elseif conditional == PROMPTSEG_CONDITIONAL_REPEATER then
+			return max(SEGT_FIRST, sI-1)
+		elseif conditional == PROMPTSEG_CONDITIONAL_RESTART then
+			return sI
 		else
-			if AUDIOQS.SEGLIB_EvaluateConditional(id, segmentsArray[n], PROMPTSEG_CONDITIONAL) then
-				return n
+			if EVAL_COND(id, pIndex, sI, PROMPTSEG_CONDITIONAL, prompt) then
+				return sI
 			end
 			skippingFalseConditionalSet = true
 		end
-		if segmentsArray[n][PROMPTSEG_LENGTH] == nil and type(segmentsArray[n+1]) ~= "table" then
+		if prompt[sI][PROMPTSEG_LENGTH] == nil and type(prompt[sI+1]) ~= "table" then
 			break
 		end
 	end
-	return AUDIOQS.PROMPT_STAGE_OFF
+	return PROMPT_STAGE_OFF
 end
 
--- TODO Prompt Registration funcs are a confusing design decision, you would think the way they were used in HealthMonitor would be apparent and implemented in Prompts, implied by their "RESTART" behaviour.
--- TODO Also I don't want to repeatedly register these for each segment check that is running to more quickly access data inside the GSI FunctionEval, because it's redundant and the only issue right now is event/spellIds needed to be known for SegmentLib.lua
--------------- RegisterPrompt()
-local function RegisterPrompt(promptsTableIndex)
-	if type(promptsTableIndex) ~= "number" then if AUDIOQS.DEBUG then print(AUDIOQS.audioQsSpecifier..AUDIOQS.debugSpecifier.."invalid access request to promptsTable in RegisterPrompt(promptsTableIndex = ", promptsTableIndex, ")") end return nil end
-	local prompt = promptsTable[promptsTableIndex]
-	if prompt == nil then if AUDIOQS.DEBUG then print(AUDIOQS.audioQsSpecifier..AUDIOQS.debugSpecifier.."invalid access request to promptsTable in RegisterPrompt(promptsTableIndex = ", promptsTableIndex, ")") end return nil end
+-------- AUDIOQS.SetPromptTimestamp()
+function AUDIOQS.SetPromptTimestamp(timestamp)
+	registered_prompt[PROMPT_TIMESTAMP] = timestamp
+end
 
-	registered[REG_PROMPT_INDEX] = promptsTableIndex
-	registered[REG_SEGMENT_KEY] = promptsTable[PROMPT_SEGMENT_KEY]
-	registered[REG_SEGMENT_INDEX] = promptsTable[PROMPT_SEGMENT_TABLE_INDEX]
-		
-	return unpack(promptsTable[promptsTableIndex])
+-------- AUDIOQS.GetPromptStage()
+function AUDIOQS.GetPromptStage()
+	return registered_prompt[PROMPT_CURR_STAGE]
 end
 
 -------- AUDIOQS.ChangeAudioChannel()
@@ -314,30 +379,30 @@ function AUDIOQS.ChangeAudioChannel(channel)
 	SV_Specializations.AUDIO_CHANNEL = AUDIO_CHANNEL
 end
 
--------- AUDIOQS.SetPromptTimestamp()
-function AUDIOQS.SetPromptTimestamp(timestamp)
-	promptsTable[registered[REG_PROMPT_INDEX]][PROMPT_TIMESTAMP] = timestamp
+local tickerStep = 0
+local function run_prompt_ticker()
+	tickerStep = tickerStep + 1 
+	if tickerStep < TICKER_SKIP_FRAMES then 
+		return else tickerStep = 0 
+	end
+	AUDIOQS.PerformanceStart("prompts", false)
+	local success, err = pcall(PromptTicker) 
+	if not success then 
+		AUDIOQS.HandleError(err, "[OnUpdate]", "PromptTicker()") 
+	end
+	AUDIOQS.PerformanceEnd("prompts")
 end
-
--------- AUDIOQS.GetPromptStage()
-function AUDIOQS.GetPromptStage()
-	return promptsTable[registered[REG_PROMPT_INDEX]][PROMPT_CURR_STAGE]
-end
-
 ----- Continues the running of PromptTicker if any prompts are in-progress.
 -------- AUDIOQS.CheckPrompts()
 function AUDIOQS.CheckPrompts()
-	for n=#promptsTable,1,-1 do
-		if promptsTable[n][PROMPT_CURR_STAGE] ~= AUDIOQS.PROMPT_STAGE_OFF then
-			if Frame_PromptTicker:GetScript("OnUpdate") == nil then
-				Frame_PromptTicker:SetScript("OnUpdate", function() tickerStep = tickerStep + 1 if tickerStep < TICKER_SKIP_FRAMES then return else tickerStep = 0 end local success, err = pcall(PromptTicker) if not success then AUDIOQS.HandleError(err, "[OnUpdate]", "PromptTicker()") end end)
-			end
-			return
+	if l_prompts_tracked then
+		if Frame_PromptTicker:GetScript("OnUpdate") == nil then
+			Frame_PromptTicker:SetScript("OnUpdate", run_prompt_ticker)
 		end
-	end
-	if Frame_PromptTicker:GetScript("OnUpdate") ~= nil then
+	elseif Frame_PromptTicker:GetScript("OnUpdate") ~= nil then
 		Frame_PromptTicker:SetScript("OnUpdate", nil)
 	end
+	check_prompt_ticker_state = false
 end
 
 -------- AUDIOQS.AttemptStartPrompt()
@@ -347,24 +412,32 @@ function AUDIOQS.AttemptStartPrompt(id, runCheckPrompts)
 		error({code=AUDIOQS.ERR_UNKNOWN_SPELL_AS_ARGUMENT, func="AUDIOQS.AttemptStartPrompt(id="..(id~=nil and id or "nil").." runCheckPrompts="..(runCheckPrompts~=nil and runCheckPrompts or "nil")..")"})
 	end
 
-	for n=1,#segmentPromptsArray,1 do -- For each set of segments pertaining to this id
-		local thisSegments = segments[id][n]
-
-		local thisSegmentsPrompt = promptsTable[segmentPromptsArray[n]]
-		if AUDIOQS.SEGLIB_EvaluateConditional(id, thisSegments[SEGT_CONDITIONALS], SEGT_CONDITIONALS_START) then
-			CheckStopSegments(id, thisSegments, thisSegmentsPrompt, false, true) -- TODO--Design decis. Always stop if the spell has been updated?
-			local startingSegment = GetNextTrueSegment(id, thisSegments, SEGT_FIRST)
-			
-			thisSegmentsPrompt[PROMPT_TIMESTAMP] = GetTime()
-			thisSegmentsPrompt[PROMPT_CURR_STAGE] = startingSegment
-			 
-			SetSegmentSoundHandle(thisSegments[startingSegment], PlaySoundGetHandle(id, thisSegments[startingSegment])) -- Play sound of this segment
+	for n=1,#segmentPromptsArray,1 do -- For each set of prompts pertaining to this id
+		local thisPrompt = prompts[id][n]
+		local thisPromptState = promptStates[segmentPromptsArray[n]]
+		
+		if thisPromptState[PROMPT_CURR_STAGE] == PROMPT_STAGE_OFF then
+			if EVAL_COND(id, n, SEGT_CONDITIONALS, SEGT_CONDITIONALS_START, thisPrompt) then
+				if not CheckStopSegments(id, n, thisPromptState, thisPrompt, false, true) then -- TODO--Design decis. Always stop if the spell has been updated?
+					check_prompt_ticker_state = true
+					l_insert_active_prompt(thisPromptState)
+				end
+				local startingSegment = GetNextTrueSegment(id, n, thisPrompt, SEGT_FIRST)
+				
+				thisPromptState[PROMPT_TIMESTAMP] = GetTime()
+				thisPromptState[PROMPT_CURR_STAGE] = startingSegment
+				
+				SetSegmentSoundHandle(
+						thisPrompt[startingSegment],
+						PlaySoundGetHandle(id, n, startingSegment, thisPrompt)
+					)
+			end
 		else
-			CheckStopSegments(id, thisSegments, thisSegmentsPrompt, false)
+			CheckStopSegments(id, n, thisPromptState, thisPrompt, false, false)
 		end
-		if runCheckPrompts ~= false then 
-			AUDIOQS.CheckPrompts()
-		end
+	end
+	if check_prompt_ticker_state ~= false then 
+		AUDIOQS.CheckPrompts()
 	end
 end
 
@@ -378,19 +451,28 @@ function AUDIOQS.UnitIsIncluded(unitId)
 	return false
 end
 
+function AUDIOQS.GetPromptsMeta()
+	return promptStates
+end
+
 -------- AUDIOQS.WipePrompts()
 function AUDIOQS.WipePrompts()
-	wipe(promptsTable or {})
-	wipe(segmentPromptIndex or {})
+	wipe(promptStates or {})
+	wipe(segmentPromptStateIndex or {})
 	wipe(spellsLookUp or {})
 	wipe(unitsIncluded or {})
 
 	AUDIOQS.CheckPrompts()
 end
 
+-------- AUDIOQS.RegisterConfigurationChange()
+function AUDIOQS.RegisterConfigurationChange(extNumber)
+	
+end
+
 -------- AUDIOQS.InitializePrompts()
 function AUDIOQS.InitializePrompts()	
-	if not segments[1] then -- First attempt to load a spec?
+	if not prompts[1] then -- First load?
 		-- Set saved audio channel
 		for i=1,#VALID_AUDIO_CHANNELS_LIST do
 			VALID_AUDIO_CHANNELS[VALID_AUDIO_CHANNELS_LIST[i]] = VALID_AUDIO_CHANNELS_LIST[i]
@@ -398,64 +480,84 @@ function AUDIOQS.InitializePrompts()
 		if SV_Specializations and SV_Specializations.AUDIO_CHANNEL then
 			AUDIO_CHANNEL = VALID_AUDIO_CHANNELS[string.upper(SV_Specializations.AUDIO_CHANNEL)] or AUDIO_CHANNEL
 		end
+		EVAL_LENGTH = AUDIOQS.SEGLIB_EvaluateLength
+		EVAL_SOUND = AUDIOQS.SEGLIB_EvaluateSound
+		EVAL_COND = AUDIOQS.SEGLIB_EvaluateConditional
 	end
 	
 	AUDIOQS.WipePrompts()
 
-	segments = AUDIOQS.GSI_GetSegmentsTable()
-	if segments == nil then
+	prompts = AUDIOQS.GSI_GetPromptsTable()
+	if prompts == nil then
 		AUDIOQS.HandleError({code=AUDIOQS.ERR_INVALID_ARGS}, nil, "AUDIOQS.InitializePrompts(specIdToLoad="..(specIdToLoad ~= nil and specIdToLoad or "nil"))
 		return nil
 	end
 
 	return GenerateTablesAndIndices()
 end
-
 --
 -- /Funcs --
 
 --- Event Funcs --
 --
--- Should register prompts instead of iteration over promptsTable. Regardless, CPU utilization still low.
+local GetTime = GetTime
 -------------- PromptTicker()
 PromptTicker = function()
 	local currTime = GetTime()
 	
-	for promptsTableIndex=1,#promptsTable,1 do
-		if promptsTable[promptsTableIndex][PROMPT_CURR_STAGE] > AUDIOQS.PROMPT_STAGE_OFF then
-			local promptTimestamp, promptStage, segmentKey, segmentsArrayIndex = RegisterPrompt(promptsTableIndex)
-			local thisSegments = segments[segmentKey][segmentsArrayIndex]
-			if not CheckStopSegments(segmentKey, thisSegments, promptsTable[promptsTableIndex], false) then
-				local promptLength = AUDIOQS.SEGLIB_EvaluateLength(segmentKey, thisSegments[promptStage], PROMPTSEG_LENGTH)
+	local thisPromptState = l_prompts_tracked
+	while(thisPromptState) do
+		local nextPromptState = thisPromptState[PROMPT_NEXT_PROMPT_TRACKED]
+		if thisPromptState[PROMPT_CURR_STAGE] > PROMPT_STAGE_OFF then
+			registered_prompt = thisPromptState
+			local promptTimestamp, promptStage, promptKey, promptIndex = 
+					thisPromptState[1], thisPromptState[2], thisPromptState[3], thisPromptState[4]
+			local thisPrompt = prompts[promptKey][promptIndex]
+			local extRef = thisPrompt[PROMPT_I_EXT_REF]
+
+			if not CheckStopSegments(
+					promptKey, promptIndex, thisPromptState, thisPrompt, false, false) then
+				local promptLength = EVAL_LENGTH(
+						promptKey, promptIndex, promptStage, PROMPTSEG_LENGTH, thisPrompt
+					)
 				if currTime > promptLength + promptTimestamp then
-					local nextPromptStage = GetNextTrueSegment(segmentKey, thisSegments, promptStage+1)
-					local stopSegments = nextPromptStage == AUDIOQS.PROMPT_STAGE_OFF
-					local nextSegment = thisSegments[nextPromptStage]
+					local nextPromptStage = GetNextTrueSegment(promptKey, promptIndex, thisPrompt, promptStage+1)
+					local stopSegments = nextPromptStage == PROMPT_STAGE_OFF
+					local nextSegment = thisPrompt[nextPromptStage]
 				
 					if not stopSegments then
 						local segmentSound = nextSegment[PROMPTSEG_SOUND]
-						if segmentSound == AUDIOQS.PROMPTSEG_SOUND_STOP then
-							StopAllSegmentsSounds(thisSegments)
+						if segmentSound == PROMPTSEG_SOUND_STOP then
+							StopAllSegmentsSounds(thisPrompt)
 						else  -- TODO: elseif segmentSound ~= nil ??
-							SetSegmentSoundHandle(nextSegment, PlaySoundGetHandle(segmentKey, nextSegment)) -- Play this segment sound
+							SetSegmentSoundHandle(
+									nextSegment, 
+									PlaySoundGetHandle(promptKey, promptIndex, nextPromptStage, thisPrompt)
+								) -- Play this segment sound
 						end
 						
-						promptsTable[promptsTableIndex][PROMPT_TIMESTAMP] = currTime
+						thisPromptState[PROMPT_TIMESTAMP] = currTime
 						
 						if nextSegment[PROMPTSEG_LENGTH] ~= nil then
-							promptsTable[promptsTableIndex][PROMPT_CURR_STAGE] = nextPromptStage
+							thisPromptState[PROMPT_CURR_STAGE] = nextPromptStage
 						else
 							stopSegments = true -- TODO: Won't this cancel a sound played above?
 						end
 					end
 					
 					if stopSegments then
-						CheckStopSegments(segmentKey, thisSegments, promptsTable[promptsTableIndex], true, true)
-						AUDIOQS.CheckPrompts()
+						CheckStopSegments(
+								promptKey, promptIndex, thisPromptState, thisPrompt, true, true
+							)
 					end
 				end
 			end
 		end
+		thisPromptState = nextPromptState
+	end
+	if checkPromptTickerState then
+		AUDIOQS.CheckPrompts()
+		checkPromptTickerState = false
 	end
 end
 --

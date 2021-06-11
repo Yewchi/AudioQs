@@ -5,6 +5,8 @@
 
 -- Needs further abstraction.
 
+local AUDIOQS = AUDIOQS_4Q5
+
 -- TODO Cooldown tracking is 1-part safe, extendible code, 2-parts garbage-can-fire and redundant checks.
 
 local AURA_ALWAYS_IS_VALUE = 1 -- using value #15: timeMod
@@ -51,7 +53,7 @@ end
 -------- AUDIOQS.ProcessCustomEventForPrompts()
 function AUDIOQS.ProcessCustomEventForPrompts(event, ...)
 	if AUDIOQS.GSI_EventIsIncluded(event) then
-		AUDIOQS.GSI_UpdateEventTable(event, ...)
+		-- AUDIOQS.GSI_UpdateEventTable(event, ...)
 		AUDIOQS.AttemptStartPrompt(event)
 	end
 end

@@ -8,6 +8,8 @@
 -- TODO Spells data could be generated automatically, however the segement data would need a way to indicate which unit the spell will be cast from/cast on. And a lot of spellIds in spellbooks do not indicate the same spell as a buff applied.
 -- TODO Spell Cooldowns should only be check from a registry of spells we know are on cooldown, based on the combat log
 
+local AUDIOQS = AUDIOQS_4Q5
+
 --- Flags --
 --
 AUDIOQS.SOUND_PATH = "path"
@@ -21,6 +23,8 @@ AUDIOQS.SOUND_FUNC_PREFIX = "func::"
 --
 local ON_COOLDOWN_SPELLID = 1
 local ON_COOLDOWN_CDEXPIRATION = 2
+
+local PROMPT_I_EXT_REF = AUDIOQS.PROMPT_I_EXT_REF
 --
 ------ /Table key references --
 
@@ -31,10 +35,10 @@ local FOURTY_NINE_DAYS = 2^22 -- 19/11/2020 Dispels use a charge counter to prov
 --
 ------- /Static vals --
 
-AUDIOQS.spells = nil
-AUDIOQS.events = nil
-AUDIOQS.segments = nil
-AUDIOQS.spellsSnapshot = nil
+AUDIOQS.spells = {}
+AUDIOQS.events = {}
+AUDIOQS.prompts = {}
+AUDIOQS.spellsSnapshot = {}
 
 AUDIOQS.GS = {} -- A table for custom segment stored values
 
@@ -75,23 +79,24 @@ local function AmmendEvents(eventsAmmending)
 	end
 end
 
-local function AmmendSegments(segmentsAmmending)
-	for segmentId,arr in pairs(segmentsAmmending) do
-		if AUDIOQS.segments[segmentId] == nil then
-			AUDIOQS.segments[segmentId] = {}
+local function AmmendPrompts(promptsAmmending, extNumber)
+	for promptId,arr in pairs(promptsAmmending) do
+		if AUDIOQS.prompts[promptId] == nil then
+			AUDIOQS.prompts[promptId] = {}
 		end
 		
-		local sizeSegmentIdArray = #(AUDIOQS.segments[segmentId])
+		local sizeSegmentIdArray = #(AUDIOQS.prompts[promptId])
 		for i,segmentsTbl in ipairs(arr) do
-			AUDIOQS.segments[segmentId][sizeSegmentIdArray + i] = segmentsTbl
+			AUDIOQS.prompts[promptId][sizeSegmentIdArray + i] = segmentsTbl
+			segmentsTbl[PROMPT_I_EXT_REF] = extNumber
 		end
 	end
 end
 
-local function AmmendTables(spellsAmmending, eventsAmmending, segmentsAmmending)
-	AmmendSpells(spellsAmmending)
-	AmmendEvents(eventsAmmending)
-	AmmendSegments(segmentsAmmending)
+local function AmmendTables(getSpells, getEvents, getPrompts, getExtRef)
+	AmmendSpells(getSpells())
+	AmmendEvents(getEvents())
+	AmmendPrompts(getPrompts(), getExtRef())
 end
 
 -------------- InitializeAndLoadExtension()
@@ -215,7 +220,7 @@ end
 
 -------- AUDIOQS.GSI_RemoveExtension()
 function AUDIOQS.GSI_RemoveExtension(specId, extName)
-	if SV_Specializations[specId][extName] == nil then 
+	if SV_Specializations[specId][extName] == nil then
 		return false
 	else
 		SV_Specializations[specId][extName] = nil
@@ -287,18 +292,19 @@ function AUDIOQS.GSI_UpdateAllSpellTables(init)
 end
 
 -------- AUDIOQS.GSI_UpdateEventTable(event)
-function AUDIOQS.GSI_UpdateEventTable(event, ...)
-	if AUDIOQS.events[event] == nil then
-		error({code=AUDIOQS.ERR_UNKNOWN_EVENT_AS_ARGUMENT, func="AUDIOQS.GSI_UpdateEventTable(event="..(event~=nil and event or "nil")..")"})
-	end
+-- ?? Still unused
+-- function AUDIOQS.GSI_UpdateEventTable(event, ...)
+	-- if AUDIOQS.events[event] == nil then
+		-- error({code=AUDIOQS.ERR_UNKNOWN_EVENT_AS_ARGUMENT, func="AUDIOQS.GSI_UpdateEventTable(event="..(event~=nil and event or "nil")..")"})
+	-- end
 	
-	local args = {...}
-	if ... ~= nil then
-		for n=1,#args,1 do
-			AUDIOQS.events[event][n] = args[n]
-		end
-	end
-end
+	-- local args = {...}
+	-- if ... ~= nil then
+		-- for n=1,#args,1 do
+			-- AUDIOQS.events[event][n] = args[n]
+		-- end
+	-- end
+-- end
 
 -------- AUDIOQS.GSI_GetSpell()
 function AUDIOQS.GSI_GetSpell(spellId)
@@ -310,9 +316,9 @@ function AUDIOQS.GSI_GetSpellsTable()
 	return AUDIOQS.spells
 end
 
--------- AUDIOQS.GSI_GetSegmentsTable()
-function AUDIOQS.GSI_GetSegmentsTable()
-	return AUDIOQS.segments
+-------- AUDIOQS.GSI_GetPromptsTable()
+function AUDIOQS.GSI_GetPromptsTable()
+	return AUDIOQS.prompts
 end
 
 -------- AUDIOQS.GSI_GetSpellsSnapshotTable()
@@ -367,18 +373,22 @@ function AUDIOQS.GSI_LoadSpecTables(specId, funcsForLoading)
 	end
 	
 	if SV_Specializations[specId] ~= nil and not AUDIOQS.TableEmpty(SV_Specializations[specId]) then -- switch spec, or first load of spec
-		if AUDIOQS.spells == nil then AUDIOQS.spells = {} else wipe(AUDIOQS.spells) end
-		if AUDIOQS.events == nil then AUDIOQS.events = {} else wipe(AUDIOQS.events) end
-		if AUDIOQS.segments == nil then AUDIOQS.segments = {} else wipe(AUDIOQS.segments) end
+		if AUDIOQS.spells[1] then wipe(AUDIOQS.spells) end
+		if AUDIOQS.events[1] then wipe(AUDIOQS.events) end
+		if AUDIOQS.prompts[1] then wipe(AUDIOQS.prompts) end
 		
 		-- Load Extensions
 		for extName,_ in pairs(SV_Specializations[specId]) do 
-			local thisExtFuncs = AUDIOQS.GetExtensionFuncs(extName)
-			if thisExtFuncs["Initialize"] then
-				thisExtFuncs["Initialize"]()
+			local thisExtFuncs = AUDIOQS.GetExtensionNameFuncs(extName)
+			-- Initialize
+			local initFunc = thisExtFuncs["Initialize"]
+			if not initFunc then
+				error({code=AUDIOQS.ERR_UNIMPLEMENTED_EXTENSION_REQUIREMENTS, func="AUDIOQS.GSI_LoadSpecTables(specId = "..(specId == nil and "nil" or specId)..", funcsForLoading = t_"..type(funcsForLoading)..")"})
 			end
+			initFunc()
+			-- Load to GSI
 if AUDIOQS.DEBUG then print(AUDIOQS.audioQsSpecifier..AUDIOQS.debugSpecifier.."  Loading EXT: "..extName) end
-			AmmendTables(thisExtFuncs["GetSpells"](), thisExtFuncs["GetEvents"](), thisExtFuncs["GetSegments"]())
+			AmmendTables(thisExtFuncs["GetSpells"], thisExtFuncs["GetEvents"], thisExtFuncs["GetPrompts"], thisExtFuncs["GetExtRef"])
 		end
 		
 		RemoveUntrackedSpells(AUDIOQS.spells)

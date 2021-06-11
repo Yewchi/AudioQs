@@ -1,12 +1,13 @@
 -- All code written and maintained by Yewchi 
 -- zyewchi@gmail.com
 
-local AUDIOQS = AUDIOQS
+local AUDIOQS = AUDIOQS_4Q5
 
 local extName = "KillingBlow"
 local extNameDetailed = "Killing Blow"
 local extShortNames = "kb"
 local extSpecLimit = AUDIOQS.ANY_SPEC_ALLOWED -- TODO ExtensionsInterface needs update here
+local ext_ref_num
 
 local gameState = AUDIOQS.GS
 gameState.KB_LockRefilter = 0
@@ -24,49 +25,48 @@ local CHAT_FRAME_COMBAT_LOG = ChatFrame2 -- Hard-coded as the combat log in wow 
 mostPreviousKillTimestamp = 0
 lastTenKilledGuid = {}
 
--- Functions predeclared
-local GetName
-local GetNameDetailed
-local GetShortNames
-local GetVersion
-local GetSpells
-local GetEvents
-local GetSegments
-local GetExtension
-local SpecAllowed
+local extSpells, extEvents, extSegments
 
-local extFuncs = {
-		["GetName"] = function() return GetName() end,
-		["GetNameDetailed"] = function() return GetNameDetailed() end,
-		["GetShortNames"] = function() return GetShortNames() end,
-		["GetVersion"] = function() return GetVersion() end,
-		["GetSpells"] = function() return GetSpells() end,
-		["GetEvents"] = function() return GetEvents() end,
-		["GetSegments"] = function() return GetSegments() end,
-		["GetExtension"] = function() return GetExtension() end,
-		["SpecAllowed"] = function(specId) return SpecAllowed(specId) end,
+local extFuncs = { -- For external use
+		["GetName"] = function() return extName end,
+		["GetNameDetailed"] = function() return extNameDetailed end,
+		["GetShortNames"] = function() return extShortNames end,
+		["GetExtRef"] = function() return ext_ref_num end,
+		["GetVersion"] = function() return extVersion end,
+		["GetSpells"] = function() return extSpells end,
+		["GetEvents"] = function() return extEvents end,
+		["GetPrompts"] = function() return extSegments end,
+		["GetExtension"] = function() 
+				return {spells=extSpells, events=extEvents, segments=extSegments, extNum=ext_ref_num}
+			end,
+		["SpecAllowed"] = function(specId) 
+				if extSpecLimit == AUDIOQS.ANY_SPEC_ALLOWED or extSpecLimit == specId then
+					return true
+				end 
+			end,
+
 		["Initialize"] = 
 			function()
 				-- Post-load stuff
 				AUDIOQS.KB_GENERIC_KILLED_SEARCH_KEY = Blizzard_CombatLog_Filters.filters[Blizzard_CombatLog_Filters.currentFilter].settings.fullText and UnitName("player")..".-slain" or "You.+killed" -- Bugged on ChatConfigCombatSettings "Verbose" changed
-				Blizzard_CombatLog_Filters.filters[Blizzard_CombatLog_Filters.currentFilter].filters[1].eventList.PARTY_KILL = true -- forces the current chatcombatlog filter to track kills, an unfortunate consequence of this whole thing being otherwise impossible. Bugged on switched main chatcombatlog filter changed
+				Blizzard_CombatLog_Filters.filters[Blizzard_CombatLog_Filters.currentFilter].filters[1].eventList.PARTY_KILL = true -- forces the current chatcombatlog filter to track kills, an unfortunate consequence of this whole thing being otherwise impossible. Bugged on switched main chatcombatlog filter changed if the switched-to filter doesn't include kills
 			end
 }
 
 --- Spell Tables and Prompts --
 --
 -- spells[spellId] = { "Spell Name", charges, cdDur, cdExpiration, unitId, spellType}
-local extSpells = { 
+extSpells = { 
 }
 
 -- events["EVENT_NAME"] = eventArgsArray (automatically generated)
-local extEvents = {
+extEvents = {
 		--["PLAYER_TARGET_CHANGED"] = {},
 		[AUDIOQS.COMPAT_UNIT_HEALTH_FREQ] = {}, -- WOW_SHADOWLANDS
 		["LOADING_SCREEN_DISABLED"] = {}
 }
 
-local extSegments = {
+extSegments = {
 	--[[["PLAYER_TARGET_CHANGED"] = { -- for deletion
 		{
 			{
@@ -110,8 +110,8 @@ local extSegments = {
 	[AUDIOQS.COMPAT_UNIT_HEALTH_FREQ] = { -- WOW_SHADOWLANDS
 		{
 			{ -- Start on UHF, stop if we didn't get a UHF in the time we were waiting for completion of the prompt (.'. does not miss kill after killing-blows without a following UHF)
-				"if AUDIOQS.GS.KB_LockRefilter > 0 then if AUDIOQS.GS.KB_LockRefilter < 5 then AUDIOQS.GS.KB_LockRefilter = 30 AUDIOQS.KB_Refilter() end return false end AUDIOQS.GS.KB_LockRefilter = 30 AUDIOQS.KB_Refilter() return true",
-				"return AUDIOQS.GS.KB_LockRefilter <= 0"
+				function() if AUDIOQS.GS.KB_LockRefilter > 0 then if AUDIOQS.GS.KB_LockRefilter < 5 then AUDIOQS.GS.KB_LockRefilter = 30 AUDIOQS.KB_Refilter() end return false end AUDIOQS.GS.KB_LockRefilter = 30 AUDIOQS.KB_Refilter() return true end,
+				function() return AUDIOQS.GS.KB_LockRefilter <= 0 end
 			},
 			{
 				0.15,
@@ -123,7 +123,7 @@ local extSegments = {
 				0.0,
 				KILLING_BLOW_SOUND_FILE,
 				AUDIOQS.STOP_SOUND_DISALLOWED,
-				"AUDIOQS.GS.KB_LockRefilter = AUDIOQS.GS.KB_LockRefilter - 1 local foundKill = AUDIOQS.KB_CheckLostTargetForPlayerKills(UnitGUID('target')) AUDIOQS.KB_Refilter() return foundKill"
+				function() AUDIOQS.GS.KB_LockRefilter = AUDIOQS.GS.KB_LockRefilter - 1 local foundKill = AUDIOQS.KB_CheckLostTargetForPlayerKills(UnitGUID('target')) AUDIOQS.KB_Refilter() return foundKill end
 			},
 			{
 				0.0,
@@ -136,11 +136,11 @@ local extSegments = {
 	["LOADING_SCREEN_DISABLED"] = { -- TODO Should be in an "essentials", hidden extension or in the AudioQs.lua main event handlers. Workaround for now.
 		{
 			{
-				"AUDIOQS.KB_LockRefilter = 0xFFFF AUDIOQS.KB_Refilter() return true",
+				function() AUDIOQS.KB_LockRefilter = 0xFFFF AUDIOQS.KB_Refilter() return true end,
 				false
 			},
 			{5.0, 	nil, nil, AUDIOQS.PROMPTSEG_CONDITIONAL_CONTINUATION},
-			{nil,	nil, nil, "local e = COMBATLOG.historyBuffer.elements for i=1,#e,1 do local m = e[i].message if m:find(AUDIOQS.KB_GENERIC_KILLED_SEARCH_KEY) then local thisKilledGuid = m:match('.-Hunit.-Hunit:(.-):') AUDIOQS.KB_RotationalInsert(thisKilledGuid) end end AUDIOQS.KB_LockRefilter = 0 return true"}
+			{nil,	nil, nil, function() local e = COMBATLOG.historyBuffer.elements for i=1,#e,1 do local m = e[i].message if m:find(AUDIOQS.KB_GENERIC_KILLED_SEARCH_KEY) then local thisKilledGuid = m:match('.-Hunit.-Hunit:(.-):') AUDIOQS.KB_RotationalInsert(thisKilledGuid) end end AUDIOQS.KB_LockRefilter = 0 return true end}
 		}
 	}
 }
@@ -252,4 +252,4 @@ end
 -- /Funcs --
 
 -- Register Extension:
-AUDIOQS.RegisterExtension(extName, extFuncs)
+ext_ref_num = AUDIOQS.RegisterExtension(extName, extFuncs)

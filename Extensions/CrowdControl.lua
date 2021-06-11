@@ -1,6 +1,9 @@
 -- All code written and maintained by Yewchi 
 -- zyewchi@gmail.com
 
+local AUDIOQS = AUDIOQS_4Q5
+local GameState = AUDIOQS.GS
+
 ---- Extension Flags --
 --
 local CC_SCHOOL_NATURE = 		0x08
@@ -71,62 +74,62 @@ local extName = "CrowdControl"
 local extNameDetailed = "Crowd Control"
 local extShortNames = "cc"
 local extSpecLimit = AUDIOQS.ANY_SPEC_ALLOWED -- TODO ExtensionsInterface needs update here
+local ext_ref_num
 
--- Functions predeclared
-local GetName
-local GetNameDetailed
-local GetShortNames
-local GetVersion
-local GetSpells
-local GetEvents
-local GetSegments
-local GetExtension
-local SpecAllowed
+local extSpells, extEvents, extSegments
 
-local CC_Initialize
-
-local extFuncs = {
-		["GetName"] = function() return GetName() end,
-		["GetNameDetailed"] = function() return GetNameDetailed() end,
-		["GetShortNames"] = function() return GetShortNames() end,
-		["GetVersion"] = function() return GetVersion() end,
-		["GetSpells"] = function() return GetSpells() end,
-		["GetEvents"] = function() return GetEvents() end,
-		["GetSegments"] = function() return GetSegments() end,
-		["GetExtension"] = function() return GetExtension() end,
-		["SpecAllowed"] = function(specId) return SpecAllowed(specId) end,
-		["Initialize"] = function() CC_Initialize() end
+local extFuncs = { -- For external use
+		["GetName"] = function() return extName end,
+		["GetNameDetailed"] = function() return extNameDetailed end,
+		["GetShortNames"] = function() return extShortNames end,
+		["GetExtRef"] = function() return ext_ref_num end,
+		["GetVersion"] = function() return extVersion end,
+		["GetSpells"] = function() return extSpells end,
+		["GetEvents"] = function() return extEvents end,
+		["GetPrompts"] = function() return extSegments end,
+		["GetExtension"] = function() 
+				return {spells=extSpells, events=extEvents, segments=extSegments, extNum=ext_ref_num}
+			end,
+		["SpecAllowed"] = function(specId) 
+				if extSpecLimit == AUDIOQS.ANY_SPEC_ALLOWED or extSpecLimit == specId then
+					return true
+				end 
+			end,
+		["Initialize"] = function()
+				GameState.CC_activeLoc = {}
+				GameState.CC_locToBeAnnounced = {}
+			end
 }
 
 --- Spell Tables and Prompts --
 --
 -- spells[spellId] = { "Spell Name", charges, cdDur, cdExpiration, unitId, spellType}
-local extSpells = { 
+extSpells = { 
 }
 
 -- events["EVENT_NAME"] = eventArgsArray (automatically generated)
-local extEvents = {
+extEvents = {
 		["LOSS_OF_CONTROL_ADDED"] = {},
 		["LOSS_OF_CONTROL_UPDATE"] = {}
 }
 
-local extSegments = {
+extSegments = {
 	["LOSS_OF_CONTROL_ADDED"] = {
 		{
 			{
-				"AUDIOQS.CrowdControl_CheckLocUpdate() if table.getn(AUDIOQS.GS.CC_locToBeAnnounced) > 0 then return true end",
+				function() AUDIOQS.CrowdControl_CheckLocUpdate() if table.getn(GameState.CC_locToBeAnnounced) > 0 then return true end end,
 				false
 			},
-			{nil,		AUDIOQS.SOUND_FUNC_PREFIX.."return AUDIOQS.CrowdControl_GetKeyLocFilename(table.remove(AUDIOQS.GS.CC_locToBeAnnounced))",		nil,	true }
+			{nil,		function() return AUDIOQS.CrowdControl_GetKeyLocFilename(table.remove(GameState.CC_locToBeAnnounced)) end,		nil,	true }
 		}
 	},
 	["LOSS_OF_CONTROL_UPDATE"] = {
 		{
 			{
-				"AUDIOQS.CrowdControl_CheckLocUpdate() if table.getn(AUDIOQS.GS.CC_locToBeAnnounced) > 0 then return true end",
+				function() AUDIOQS.CrowdControl_CheckLocUpdate() if table.getn(GameState.CC_locToBeAnnounced) > 0 then return true end end,
 				false
 			},
-			{1.0,		AUDIOQS.SOUND_FUNC_PREFIX.."return AUDIOQS.CrowdControl_GetKeyLocFilename(table.remove(AUDIOQS.GS.CC_locToBeAnnounced))",		nil,	true }
+			{1.0,		function() return AUDIOQS.CrowdControl_GetKeyLocFilename(table.remove(GameState.CC_locToBeAnnounced)) end,		nil,	true }
 		}
 	}
 }
@@ -135,18 +138,12 @@ local extSegments = {
 
 --- Funcs --
 --
------ Initialize()
-CC_Initialize = function()
-	AUDIOQS.GS.CC_activeLoc = {}
-	AUDIOQS.GS.CC_locToBeAnnounced = {}
-end
-
 -- Redundant in 90000 -- late note: Can't remember why, it's probably because modern wow has a variable LOC-data table size.
 -------------- CC_DeleteLoc()
 local function CC_DeleteLoc(key)
-	AUDIOQS.GS.CC_activeLoc[key].activeCheck = nil
-	table.insert(tablesForRecycling, AUDIOQS.GS.CC_activeLoc[key])
-	AUDIOQS.GS.CC_activeLoc[key] = nil
+	GameState.CC_activeLoc[key].activeCheck = nil
+	table.insert(tablesForRecycling, GameState.CC_activeLoc[key])
+	GameState.CC_activeLoc[key] = nil
 end
 
 -- Redundant in 90000
@@ -227,22 +224,22 @@ function AUDIOQS.CrowdControl_CheckLocUpdate()
 			thisLocTable.duration = 8
 		end
 		local key = string.format("%s-%s", thisLocTable.startTime, thisLocTable.spellID)
-		if not AUDIOQS.GS.CC_activeLoc[key] then
-			AUDIOQS.GS.CC_activeLoc[key] = thisLocTable
-			table.insert(AUDIOQS.GS.CC_locToBeAnnounced, key)
+		if not GameState.CC_activeLoc[key] then
+			GameState.CC_activeLoc[key] = thisLocTable
+			table.insert(GameState.CC_locToBeAnnounced, key)
 		end
-		AUDIOQS.GS.CC_activeLoc[key].activeCheck = CC_LOC_FOUND
+		GameState.CC_activeLoc[key].activeCheck = CC_LOC_FOUND
 		
 if AUDIOQS.VERBOSE then print(AUDIOQS.audioQsSpecifier..AUDIOQS.debugSpecifier.."LossOfControl!", thisLocTable.locType, thisLocTable.spellID, thisLocTable.startTime, thisLocTable.duration, thisLocTable.lockoutSchool) end
 		i = i + 1
 	end
 	
-	CC_ClearHistory(AUDIOQS.GS.CC_activeLoc)
+	CC_ClearHistory(GameState.CC_activeLoc)
 end
 
 -------- AUDIOQS.CrowdControl_GetKeyLocFilename()
 function AUDIOQS.CrowdControl_GetKeyLocFilename(key)
-	local thisLocData = AUDIOQS.GS.CC_activeLoc[key]
+	local thisLocData = GameState.CC_activeLoc[key]
 	
 	if key == nil or key == '' or thisLocData == nil then 
 if AUDIOQS.DEBUG then print(AUDIOQS.audioQsSpecifier..AUDIOQS.debugSpecifier.."GetKeyLocFilename called with missing arg or data. (key:", key, "activeLoc[key]:", thisLocData) end 
@@ -262,47 +259,8 @@ if AUDIOQS.DEBUG then print(AUDIOQS.audioQsSpecifier..AUDIOQS.debugSpecifier.." 
 		return spellIDToFilepath[thisLocSpellID] or locTypeToFilepath[thisLocType] or nil
 	end
 end
-
-GetName = function()
-	return extName
-end
-
-GetNameDetailed = function()
-	return extNameDetailed
-end
-
-GetShortNames = function()
-	return extShortNames
-end
-
-GetVersion = function()
-	return extVersion
-end
-
-GetSpells = function()
-	return extSpells
-end
-
-GetEvents = function()
-	return extEvents
-end
-
-GetSegments = function()
-	return extSegments
-end
-
-GetExtension = function()
-	return {spells=extSpells, events=extEvents, segments=extSegments}
-end
-
-SpecAllowed = function(specId)
-	if extSpecLimit == AUDIOQS.ANY_SPEC_ALLOWED or extSpecLimit == specId then
-		return true
-	end
-	return false
-end
 --
 -- /Funcs --
 
 -- Register Extension:
-AUDIOQS.RegisterExtension(extName, extFuncs)
+ext_ref_num = AUDIOQS.RegisterExtension(extName, extFuncs)

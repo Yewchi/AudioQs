@@ -4,37 +4,44 @@
 --~ This serves as both a regular Beast Mastery extension, as well as the main example of an implemented extension.
 --~ This file is intended for WoW programmers, and would be overwelming for most others. Please email me if you need specific prompts made, or help writing segment data: zyewchi@gmail.com 
 
+local AUDIOQS = AUDIOQS_4Q5
+local GameState = AUDIOQS.GS
+
 local extName = "BeastMastery"
 local extNameDetailed = "Beast Mastery"
 local extShortNames = "bm"
 local extSpecLimit = AUDIOQS.ANY_SPEC_ALLOWED -- Beast Mastery specId
+local ext_ref_num
+
+local extSpells, extEvents, extSegments
 
 -- Note that if the string funcs in a prompt need a static flag or bitmask to check against, that data is not available
 -- in the string func's local scope, which is, the global table, and itself (not this file). This is why a flag or static 
 -- value must be declared in the global Lua space (AUDIOQS.GS.BM_FRENZY_APPLIED = 0xFF). This raises the question of design: 
 -- the reason the prompting system has been designed in such a way is purely for extensibility. 
 
--- Functions predeclared
-local GetName
-local GetNameDetailed
-local GetShortNames
-local GetVersion
-local GetSpells
-local GetEvents
-local GetSegments
-local GetExtension
-local SpecAllowed
-
-local extFuncs = {
-		["GetName"] = function() return GetName() end,
-		["GetNameDetailed"] = function() return GetNameDetailed() end,
-		["GetShortNames"] = function() return GetShortNames() end,
-		["GetVersion"] = function() return GetVersion() end,
-		["GetSpells"] = function() return GetSpells() end,
-		["GetEvents"] = function() return GetEvents() end,
-		["GetSegments"] = function() return GetSegments() end,
-		["GetExtension"] = function() return GetExtension() end,
-		["SpecAllowed"] = function(specId) return SpecAllowed(specId) end,
+local extFuncs = { -- For external use
+		["GetName"] = function() return extName end,
+		["GetNameDetailed"] = function() return extNameDetailed end,
+		["GetShortNames"] = function() return extShortNames end,
+		["GetExtRef"] = function() return ext_ref_num end,
+		["GetVersion"] = function() return extVersion end,
+		["GetSpells"] = function() return extSpells end,
+		["GetEvents"] = function() return extEvents end,
+		["GetPrompts"] = function() return extSegments end,
+		["GetExtension"] = function() 
+				return {
+					spells=extSpells,
+					events=extEvents,
+					segments=extSegments,
+					extNum=ext_ref_num
+				} 
+			end,
+		["SpecAllowed"] = function(specId) 
+				if extSpecLimit == AUDIOQS.ANY_SPEC_ALLOWED or extSpecLimit == specId then
+					return true
+				end 
+			end,
 		["Initialize"] = function() end
 }
 
@@ -46,7 +53,7 @@ local extFuncs = {
 --- Spell Tables and Prompts --
 --
 -- spells[spellId] = { "Spell Name", charges, cdDur, cdExpiration, unitId, spellType}
-local extSpells = { 
+extSpells = { 
 		[217200] = 	{ "Barbed Shot", 			2, 	0, 	0, 	"player", 		AUDIOQS.SPELL_TYPE_ABILITY}, -- TODO If two prompts use the same spellId, spellName, unitId and spellType, they should be tracked as one spell as a single entry in the GSI data. Requires checking for similarities before adding.
 		[272790] = 	{ "Frenzy", 				0, 	0, 	0, 	"pet", 			AUDIOQS.SPELL_TYPE_AURA},
 		[53209] = 	{ "Chimaera Shot", 			0, 	0, 	0, 	"player", 		AUDIOQS.SPELL_TYPE_ABILITY},
@@ -65,25 +72,50 @@ local extSpells = {
 }
 
 -- events["EVENT_NAME"] = eventArgsArray (automatically generated)
-local extEvents = {
+extEvents = {
 }
 
-local checkLen = "local frenzyDuration = select("..AUDIOQS.UNIT_AURA_DURATION..", AUDIOQS.GetAuraInfo('pet', 272790)) if frenzyDuration == nil then return 0.0 end return frenzyDuration - 5.0" -- Only declared to maintain table width -- These evaluations are to be simplified into an evaluation language, in a later version.
-local extSegments = {
+local GetSpellCharges=GetSpellCharges
+local checkLen = function() local frenzyDuration = select(AUDIOQS.UNIT_AURA_DURATION, AUDIOQS.GetAuraInfo('pet', 272790)) if frenzyDuration == nil then return 0.0 end return frenzyDuration - 5.0 end
+extSegments = {
 --[[ [spellId][i] = { {startConditionals, stopConditionals}, {seg1}, {seg2}, ..., {segN} } ]]--
 	[272790] = { -- Frenzy
 		{
 			{
-				"return AUDIOQS.spells[272790][AUDIOQS.SPELL_EXPIRATION] > 0",	-- Start conditional
-				"return UnitIsDeadOrGhost('pet')"								-- Stop conditional
+				function() return AUDIOQS.spells[272790][AUDIOQS.SPELL_EXPIRATION] > 0 end,	-- Start conditional
+				function() return UnitIsDeadOrGhost('pet') end,								-- Stop conditional
 			},
 		--- {LNGTH,		SOUND_FILE,																		SndHndl,	CONDITIONAL }
 			{checkLen, 	nil,																			nil,		true}, -- pause until 5 seconds left on Frenzy buff.
-			{5.0, 		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Timers/pulse_1.ogg", 			nil,		"local frenzyStacks = select(AUDIOQS.UNIT_AURA_COUNT, AUDIOQS.GetAuraInfo(\"pet\", 272790)) if frenzyStacks == nil then return false end return frenzyStacks == 1"},
+			{5.0, 		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Timers/pulse_1.ogg", 			nil,
+					function()
+						local frenzyStacks = select(AUDIOQS.UNIT_AURA_COUNT, AUDIOQS.GetAuraInfo("pet", 272790))
+						if frenzyStacks == nil then
+							return false
+						end
+						return frenzyStacks == 1
+					end
+				},
 			{nil, 		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Timers/pulse_1_dropped.ogg", 	nil,		AUDIOQS.PROMPTSEG_CONDITIONAL_CONTINUATION}, -- If not refreshed, play on completion of previous segment. (Buff has dropped)
-			{5.0, 		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Timers/pulse_2.ogg", 			nil,		"local frenzyStacks = select(AUDIOQS.UNIT_AURA_COUNT, AUDIOQS.GetAuraInfo(\"pet\", 272790)) if frenzyStacks == nil then return false end return frenzyStacks == 2"},
+			{5.0, 		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Timers/pulse_2.ogg", 			nil,
+					function()
+						local frenzyStacks = select(AUDIOQS.UNIT_AURA_COUNT, AUDIOQS.GetAuraInfo("pet", 272790))
+						if frenzyStacks == nil then
+							return false
+						end
+						return frenzyStacks == 2
+					end
+				},
 			{nil, 		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Timers/pulse_2_dropped.ogg",	nil,		AUDIOQS.PROMPTSEG_CONDITIONAL_CONTINUATION},
-			{5.0, 		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Timers/pulse_3.ogg", 			nil,		"local frenzyStacks = select(AUDIOQS.UNIT_AURA_COUNT, AUDIOQS.GetAuraInfo(\"pet\", 272790)) if frenzyStacks == nil then return false end return frenzyStacks == 3"},
+			{5.0, 		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Timers/pulse_3.ogg", 			nil,
+					function()
+						local frenzyStacks = select(AUDIOQS.UNIT_AURA_COUNT, AUDIOQS.GetAuraInfo("pet", 272790))
+						if frenzyStacks == nil then
+							return false
+						end
+						return frenzyStacks == 3
+					end
+				},
 			{nil, 		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."Timers/pulse_3_dropped.ogg",	nil,		AUDIOQS.PROMPTSEG_CONDITIONAL_CONTINUATION} 
 		}
 	},
@@ -94,8 +126,8 @@ local extSegments = {
 				false
 			},
 			{0.25, 		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."barbed_primer.ogg",			nil,		true },
-			{nil, 		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."barbed_charge_1.ogg", 			nil,		"return GetSpellCharges(217200) == 1"},
-			{nil, 		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."barbed_charge_2.ogg",			nil,		"return GetSpellCharges(217200) == 2"}
+			{nil, 		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."barbed_charge_1.ogg", 			nil,		function() return GetSpellCharges(217200) == 1 end},
+			{nil, 		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."barbed_charge_2.ogg",			nil,		function() return GetSpellCharges(217200) == 2 end}
 		}
 	},
 	[53209] = {
@@ -143,42 +175,8 @@ local extSegments = {
 
 --- Funcs --
 --
-GetName = function()
-	return extName
-end
-
-GetNameDetailed = function()
-	return extNameDetailed
-end
-
-GetShortNames = function()
-	return extShortNames
-end
-
-GetSpells = function()
-	return extSpells
-end
-
-GetEvents = function()
-	return extEvents
-end
-
-GetSegments = function()
-	return extSegments
-end
-
-GetExtension = function()
-	return {spells=extSpells, events=extEvents, segments=extSegments}
-end
-
-SpecAllowed = function(specId)
-	if extSpecLimit == AUDIOQS.ANY_SPEC_ALLOWED or extSpecLimit == specId then
-		return true
-	end
-	return false
-end
 --
 -- /Funcs --
 
 -- Register Extension:
-AUDIOQS.RegisterExtension(extName, extFuncs)
+ext_ref_num = AUDIOQS.RegisterExtension(extName, extFuncs)
