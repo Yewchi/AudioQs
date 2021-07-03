@@ -89,8 +89,8 @@ end
 function AUDIOQS.GetRegisteredExtensionNames()
 	local nameArray = {}
 	local i = 1
-	for extName,_ in pairs(t_ext_funcs) do
-		nameArray[i] = extName
+	for i=1,#t_ext_funcs do
+		nameArray[i] = t_ext_funcs[i]["GetName"]()
 		i = i + 1
 	end
 	return nameArray

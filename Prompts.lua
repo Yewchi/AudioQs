@@ -39,8 +39,8 @@ local PROMPT_TIMESTAMP = 1
 local PROMPT_CURR_STAGE = 2
 local PROMPT_SEGMENT_KEY = 3
 local PROMPT_SEGMENT_TABLE_INDEX = 4
-local PROMPT_NEXT_PROMPT_TRACKED = 6
-local PROMPT_PREV_PROMPT_TRACKED = 7
+local PROMPT_NEXT_PROMPT_TRACKED = 5
+local PROMPT_PREV_PROMPT_TRACKED = 6
 
 local PROMPTSEG_LENGTH = 1
 local PROMPTSEG_SOUND = 2
@@ -123,8 +123,7 @@ local l_prompts_tracked
 local function l_insert_active_prompt(promptState)
 	if promptState[PROMPT_NEXT_PROMPT_TRACKED] or promptState[PROMPT_PREV_PROMPT_TRACKED] then
 		-- Assert clean, not-inserted but now-active promptState
-		print("Tried to insert inserted")
-		return false
+		error({code=AUDIOQS.ERR_UNKNOWN, func="l_insert_active_prompt() attempted to re-insert."})
 	end
 	if l_prompts_tracked == nil then
 		l_prompts_tracked = promptState
@@ -242,10 +241,10 @@ local function PlaySoundGetHandle(id, pIndex, sIndex, prompt)
 	end
 	
 	if type(eval) == "number" then
-if AUDIOQS.VERBOSE then print(AUDIOQS.audioQsSpecifier..AUDIOQS.debugSpecifier.."Playing \""..eval.."\"") end
+if AUDIOQS.VERBOSE then print(AUDIOQS.audioQsSpecifier..AUDIOQS.debugSpecifier.."Playing \""..eval.."\"".." entrypoint: "..AUDIOQS.EntryPoint) end
 		return select(2, PlaySound(eval, AUDIO_CHANNEL))
 	elseif type(eval) == "string" then
-if AUDIOQS.VERBOSE then print(AUDIOQS.audioQsSpecifier..AUDIOQS.debugSpecifier.."Playing \""..eval.."\"") end
+if AUDIOQS.VERBOSE then print(AUDIOQS.audioQsSpecifier..AUDIOQS.debugSpecifier.."Playing \""..eval.."\"".." entrypoint: "..AUDIOQS.EntryPoint) end
 		return select(2, PlaySoundFile(eval, AUDIO_CHANNEL))
 	end
 	error({code=AUDIOQS.ERR_INVALID_SOUND_DATA, func=string.format("PlaySoundGetHandle(id=%s, pIndex=%s, sIndex=%s, prompt=%s)", AUDIOQS.Printable(id), AUDIOQS.Printable(pIndex), AUDIOQS.Printable(sIndex), AUDIOQS.Printable(prompt))})
@@ -270,7 +269,7 @@ local function SetSegmentSoundHandle(segment, handle)
 end
 -------------- CheckStopSegments()
 local function CheckStopSegments(id, pIndex, promptState, prompt, allowContinuationOfPlay, forceStop)
-	if promptState[PROMPT_CURR_STAGE] < SEGT_FIRST then
+	if promptState[PROMPT_CURR_STAGE] < SEGT_FIRST then -- Is it currently off?
 		return false
 	end
 	if EVAL_COND(id, pIndex, SEGT_CONDITIONALS, SEGT_CONDITIONALS_STOP, prompt) or forceStop == true then
@@ -461,18 +460,15 @@ function AUDIOQS.WipePrompts()
 	wipe(segmentPromptStateIndex or {})
 	wipe(spellsLookUp or {})
 	wipe(unitsIncluded or {})
+	
+	l_prompts_tracked = nil
 
 	AUDIOQS.CheckPrompts()
 end
 
--------- AUDIOQS.RegisterConfigurationChange()
-function AUDIOQS.RegisterConfigurationChange(extNumber)
-	
-end
-
 -------- AUDIOQS.InitializePrompts()
 function AUDIOQS.InitializePrompts()	
-	if not prompts[1] then -- First load?
+	if not prompts or not prompts[1] then -- First load?
 		-- Set saved audio channel
 		for i=1,#VALID_AUDIO_CHANNELS_LIST do
 			VALID_AUDIO_CHANNELS[VALID_AUDIO_CHANNELS_LIST[i]] = VALID_AUDIO_CHANNELS_LIST[i]
@@ -503,6 +499,7 @@ end
 local GetTime = GetTime
 -------------- PromptTicker()
 PromptTicker = function()
+	AUDIOQS.EntryPoint = "PromptTicker"
 	local currTime = GetTime()
 	
 	local thisPromptState = l_prompts_tracked

@@ -12,6 +12,8 @@ local mFloor = math.floor
 local AUDIOQS = AUDIOQS_4Q5
 local GameState = AUDIOQS.GS
 
+local extensionSpecifier = AUDIOQS.extensionColour.."<HealthMonitor>|r: "
+
 AUDIOQS.DISPEL_FILE_MODIFIER = "_dispel"
 AUDIOQS.NO_FILE_MODIFIER = ""
 
@@ -48,8 +50,14 @@ local extSpecLimit = AUDIOQS.ANY_SPEC_ALLOWED
 
 local MUTE_CMD_TO_ROLE = {
 		["tank"] = "TANK",
+		["tanks"] = "TANK",
 		["healer"] = "HEALER",
-		["dps"] = "DPS",
+		["healers"] = "HEALER",
+		["heal"] = "HEALER",
+		["heals"] = "HEALER",
+		["dps"] = "DAMAGER",
+		["damage"] = "DAMAGER",
+		["damager"] = "DAMAGER"
 	}
 local MUTE_CMD_TO_UID = {
 		["self"] = "player",
@@ -100,27 +108,50 @@ local extFuncs = { -- For external use
 								args[i] = string.lower(args[i])
 							end
 							-- if-else segment must return if nothing is changed.
-							if not args[2] or args[2] == "-h" or string.match(args[2], ".+help.+") then
+							if not args[2] or args[2] == "-h" or string.match(args[2], ".*help.*") then
 								-- Print -h
-								print(AUDIOQS.audioQsSpecifier..AUDIOQS.infoSpecifier.."What would you like to change with Health Monitor?\n"..
+								print(AUDIOQS.audioQsSpecifier..extensionSpecifier.."What would you like to change with Health Monitor?\n"..
 										"Number: \"/aq hm mute 5\" -- mute 'party4'. '1' is the player.\n"..
 										"Modify: \"/aq hm mute dps\" \"/aq hm unmute tank\"\n"..
 										"Exclusive: \"/aq hm self\" \"/aq hm all\"")
 								return
 							elseif args[2] == "off" or args[2] == "mute" then
 								local muteRoleString = MUTE_CMD_TO_ROLE[args[3]] or MUTE_CMD_TO_UID[args[3]]
-								if muteRoleString then
-									current_muted_table[muteRoleString] = true
+								if args[3] == "all" then
+									for _,muteString in pairs(MUTE_CMD_TO_UID) do
+										current_muted_table[muteString] = true
+									end
+									print(AUDIOQS.audioQsSpecifier..extensionSpecifier.."All call-outs off.")
+								else
+									if muteRoleString then
+										current_muted_table[muteRoleString] = true
+										print(AUDIOQS.audioQsSpecifier..extensionSpecifier.."Muting '"..muteRoleString.."'.")
+									else
+										print(AUDIOQS.audioQsSpecifier..extensionSpecifier.."The id '"..args[3].."' isn't recognized.")
+										return
+									end
 								end
-							elseif args[2] == "on" or args[2] == "unmute" then
-								local unmuteRoleString = MUTE_CMD_TO_ROLE[args[3]] or MUTE_CMD_TO_UID[args[3]]
-								if unmuteRoleString then
-									current_muted_table[unmuteRoleString] = nil
+							elseif args[2] == "on" or args[2] == "unmute" or args[2] == "all" then
+								if args[2] == "all" or args[3] == "all" then
+									for _,unmuteString in pairs(MUTE_CMD_TO_UID) do
+										current_muted_table[unmuteString] = nil
+									end
+									print(AUDIOQS.audioQsSpecifier..extensionSpecifier.."All call-outs on.")
+								else
+									local unmuteRoleString = MUTE_CMD_TO_ROLE[args[3]] or MUTE_CMD_TO_UID[args[3]]
+									if unmuteRoleString then
+										current_muted_table[unmuteRoleString] = nil
+										print(AUDIOQS.audioQsSpecifier..extensionSpecifier.."Un-muting '"..unmuteRoleString.."'.")
+									else
+										print(AUDIOQS.audioQsSpecifier..extensionSpecifier.."The id '"..args[3].."' isn't unrecognized.")
+										return
+									end
 								end
 							elseif args[2] == "self" then
 								for _,muteString in pairs(MUTE_CMD_TO_UID) do
 									current_muted_table[muteString] = true
 								end
+								print(AUDIOQS.audioQsSpecifier..extensionSpecifier.."Self-mode on.")
 								current_muted_table["player"] = nil
 							else
 								return -- Don't reset the functional strings for exploding more/less code into the prompt segments, because we haven't changed anything
@@ -637,7 +668,7 @@ function AUDIOQS.HealthMonitor_CheckMode(event)
     if (instanceType == "pvp" or instanceType == "arena") then 
 		if not AUDIOQS.HealthMonitor_ModeIs(AUDIOQS.GS.INSTANCE_PVP) then
 			if AUDIOQS.GS.HM_mode ~= nil then 
-				print(AUDIOQS.audioQsSpecifier..AUDIOQS.extensionColour.."<HealthMonitor>".."|r: "..(AUDIOQS.HealthMonitor_ModeIs(AUDIOQS.GS.INSTANCE_PARTY) and "Party" or "Raid").." health call-out stopped.")
+				print(AUDIOQS.audioQsSpecifier..extensionSpecifier..(AUDIOQS.HealthMonitor_ModeIs(AUDIOQS.GS.INSTANCE_PARTY) and "Party" or "Raid").." health call-out stopped.")
 			end
 			AUDIOQS.HealthMonitor_CheckModePvP()
 		end

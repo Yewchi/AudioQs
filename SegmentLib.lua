@@ -99,9 +99,9 @@ function AUDIOQS.SEGLIB_ReloadExtDefaults(extRef)
 	local prompts = AUDIOQS.GSI_GetPromptsTable()
 	while(thisDefaultSaved) do
 		local thisPrompt = prompts[thisDefaultSaved[1]] [thisDefaultSaved[2]]
-		if thisPrompt == nil then
-			print(thisDefaultSaved[1], thisDefaultSaved[2], thisDefaultSaved[3], thisDefaultSaved[4], thisDefaultSaved[5], thisDefaultSaved[6])
-		end
+		-- if thisPrompt == nil then
+			-- print(thisDefaultSaved[1], thisDefaultSaved[2], thisDefaultSaved[3], thisDefaultSaved[4], thisDefaultSaved[5], thisDefaultSaved[6])
+		-- end
 		if thisPrompt[PROMPT_I_EXT_REF] == extRef then
 			thisPrompt[thisDefaultSaved[3]] [thisDefaultSaved[4]] = thisDefaultSaved[DEFAULT_I_STRING]
 			prevDefaultSaved, thisDefaultSaved = delete_segval_string(prevDefaultSaved, thisDefaultSaved)
@@ -261,7 +261,7 @@ function AUDIOQS.SEGLIB_EvaluateConditional(id, pIndex, sIndex, sValueIndex, pro
 		error({code=AUDIOQS.ERR_INVALID_ARGS, func=string.format("AUDIOQS.GSI_EvaluateConditional(id=%s, pIndex=%s, sIndex=%s, sValueIndex=%s, prompt=%s)", AUDIOQS.Printable(id), AUDIOQS.Printable(pIndex), AUDIOQS.Printable(sIndex), AUDIOQS.Printable(sValueIndex), AUDIOQS.Printable(prompt))})
 	end
 	
-	if type(prompt) == "number" then print("eval cond", id, pIndex, sIndex, sValueIndex, prompt) end
+	-- if type(prompt) == "number" then print("eval cond", id, pIndex, sIndex, sValueIndex, prompt) end
 
 	local segment = prompt[sIndex]
 	local conditional = segment[sValueIndex]

@@ -28,7 +28,6 @@ extFuncs = { -- For external use
 					return true
 				end 
 			end,
-
 		["Initialize"] = function() end
 }
 

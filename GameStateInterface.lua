@@ -46,7 +46,7 @@ local type = type
 local pairs = pairs
 local loadstring = loadstring
 
-local Frame_SpellCooldownTicker = CreateFrame("Frame", "AQ:SPELL_COOLDOWNS")
+local Frame_SpellCooldownTicker = CreateFrame("FRAME", "AQ:SPELL_COOLDOWNS")
 local spellsOnCooldown = {}
 local spellsOnCooldownLastGcdAllowable = {}  -- If a spell cooldown goes up from a gcdExpiration to gcdExpiration + currGcd, it is off cooldown (or 1 in a billion chance it is recurrently having some other game mechanic timer added to it, while under the GCD)
 
@@ -100,6 +100,7 @@ local function AmmendTables(getSpells, getEvents, getPrompts, getExtRef)
 end
 
 -------------- InitializeAndLoadExtension()
+-- Saves the extension as a loaded extension for the current specialization
 local function InitializeAndLoadExtension(specId, funcsForLoading, fullReset)
 	if funcsForLoading == nil then return false end
 	
@@ -118,7 +119,8 @@ local function InitializeAndLoadExtension(specId, funcsForLoading, fullReset)
 end
 
 local function RemoveUntrackedSpells(spellsTbl)
-	for i,arr in ipairs(spellsOnCooldown) do 
+	for i=1,#spellsOnCooldown do
+		local arr = spellsOnCooldown[i]
 		if spellsTbl[arr[ON_COOLDOWN_SPELLID]] == nil then
 			table.remove(spellsOnCooldown, i)
 		end
@@ -139,7 +141,7 @@ local function RemoveSpellOnCooldown(spellId) -- TODO Needs checks or needs safe
 end
 
 local function RemoveAllTrackedSpells()
-	wipe(spellsOnCooldown or {})
+	wipe(spellsOnCooldown or createTable())
 	wipe(spellsOnCooldownLastGcdAllowable or {})
 	Frame_SpellCooldownTicker:SetScript("OnUpdate", nil)
 end
@@ -156,6 +158,7 @@ end
 
 local function SpellCooldownBlasterCannon(_, elapsed)
 	Frame_SpellCooldownTicker.limiter = Frame_SpellCooldownTicker.limiter - elapsed
+	AUDIOQS.EntryPoint = "SCBC"
 	if Frame_SpellCooldownTicker.limiter > 0 then return end
 	Frame_SpellCooldownTicker.limiter = BAD_SPELL_LIMITER_TIME
 	local currTime = GetTime()
@@ -168,7 +171,7 @@ local function SpellCooldownBlasterCannon(_, elapsed)
 		local thisCdExpiration = cdStart + cdDur
 		local previousCdExpiration = thisSpellOnCooldown[ON_COOLDOWN_CDEXPIRATION]
 
-		if spellsOnCooldownLastGcdAllowable[thisSpellId] ~= nil or 
+		if spellsOnCooldownLastGcdAllowable[thisSpellId] ~= nil or
 				(spellsOnCooldownLastGcdAllowable[thisSpellId] == nil and gcdExpiration ~= 0 and gcdExpiration == thisCdExpiration) then
 			if spellsOnCooldownLastGcdAllowable[thisSpellId] == nil then
 				--if thisSpellId == 19574 then  print("SpellCooldownBlasterCannon previousCdExpiration:", previousCdExpiration, "; gcdExpiration:", gcdExpiration) end
@@ -373,22 +376,27 @@ function AUDIOQS.GSI_LoadSpecTables(specId, funcsForLoading)
 	end
 	
 	if SV_Specializations[specId] ~= nil and not AUDIOQS.TableEmpty(SV_Specializations[specId]) then -- switch spec, or first load of spec
-		if AUDIOQS.spells[1] then wipe(AUDIOQS.spells) end
-		if AUDIOQS.events[1] then wipe(AUDIOQS.events) end
-		if AUDIOQS.prompts[1] then wipe(AUDIOQS.prompts) end
+		if not AUDIOQS.TableEmpty(AUDIOQS.spells) then wipe(AUDIOQS.spells) end
+		if not AUDIOQS.TableEmpty(AUDIOQS.events) then wipe(AUDIOQS.events) end
+		if not AUDIOQS.TableEmpty(AUDIOQS.prompts) then AUDIOQS.NilSetTable(AUDIOQS.prompts) end
 		
 		-- Load Extensions
 		for extName,_ in pairs(SV_Specializations[specId]) do 
 			local thisExtFuncs = AUDIOQS.GetExtensionNameFuncs(extName)
-			-- Initialize
-			local initFunc = thisExtFuncs["Initialize"]
-			if not initFunc then
-				error({code=AUDIOQS.ERR_UNIMPLEMENTED_EXTENSION_REQUIREMENTS, func="AUDIOQS.GSI_LoadSpecTables(specId = "..(specId == nil and "nil" or specId)..", funcsForLoading = t_"..type(funcsForLoading)..")"})
-			end
-			initFunc()
-			-- Load to GSI
+			if thisExtFuncs then
+				-- Initialize
+				local initFunc = thisExtFuncs["Initialize"]
+				if not initFunc then
+					error({code=AUDIOQS.ERR_UNIMPLEMENTED_EXTENSION_REQUIREMENTS, func="AUDIOQS.GSI_LoadSpecTables(specId = "..(specId == nil and "nil" or specId)..", funcsForLoading = t_"..type(funcsForLoading)..")"})
+				end
+				initFunc()
+				-- Load to GSI
 if AUDIOQS.DEBUG then print(AUDIOQS.audioQsSpecifier..AUDIOQS.debugSpecifier.."  Loading EXT: "..extName) end
-			AmmendTables(thisExtFuncs["GetSpells"], thisExtFuncs["GetEvents"], thisExtFuncs["GetPrompts"], thisExtFuncs["GetExtRef"])
+				AmmendTables(
+						thisExtFuncs["GetSpells"], thisExtFuncs["GetEvents"],
+						thisExtFuncs["GetPrompts"], thisExtFuncs["GetExtRef"]
+					)
+			end
 		end
 		
 		RemoveUntrackedSpells(AUDIOQS.spells)

@@ -8,7 +8,7 @@ AUDIOQS_4Q5 = {}
 local AUDIOQS = AUDIOQS_4Q5
 
 AUDIOQS.DEBUG = false
-AUDIOQS.VERBOSE = AUDIOQS.DEBUG and false
+AUDIOQS.VERBOSE = AUDIOQS.DEBUG and true
 
 AUDIOQS.BUILD_VERSION = select(4, GetBuildInfo())
 AUDIOQS.WOW_CLASSIC = AUDIOQS.BUILD_VERSION < 30000 -- Can this be more broadly determined?
@@ -203,6 +203,7 @@ Frame_LoadOrSpecChange:SetScript("OnEvent", function(_, event, ...) UpdateSpecia
 
 Frame_CombatLog:SetScript("OnEvent",
 	function(_, _, ...)
+		AUDIOQS.EntryPoint = "CLEU"
 		local success, err = pcall(AUDIOQS.ProcessCombatLogForPrompts)
 		if not success then AUDIOQS.HandleError(err, "CombatLogOnEvent", "AUDIOQS.ProcessCombatLogForPrompts()") end
 	end
@@ -210,6 +211,7 @@ Frame_CombatLog:SetScript("OnEvent",
 
 Frame_SpellUpdateCooldown:SetScript("OnEvent",
 	function(_, _, ...)
+		AUDIOQS.EntryPoint = "SUC"
 		local success, err = pcall(AUDIOQS.ProcessSpellCooldownsForPrompts)
 		if not success then AUDIOQS.HandleError(err, "SpellUpdateCooldownOnEvent()", "AUDIOQS.ProcessSpellCooldownsForPrompts()") end
 	end
@@ -218,6 +220,7 @@ Frame_SpellUpdateCooldown:SetScript("OnEvent",
 -- Optimize for already completed checks, no further spell prompts possible, etc.
 Frame_UnitAura:SetScript("OnEvent",
 	function(_, _, ...)
+		AUDIOQS.EntryPoint = "UA"
 		local unitId = ...
 		
 		if not AUDIOQS.UnitIsIncluded(unitId) then
@@ -241,6 +244,7 @@ Frame_UnitAura:SetScript("OnEvent",
 
 Frame_CustomEvents:SetScript("OnEvent",
 	function(_, event, ...)
+		AUDIOQS.EntryPoint = event
 		if not FreshEventForFrame(event) then return end
 		AUDIOQS.PerformanceStart("event", false)
 		local success, err = pcall(AUDIOQS.ProcessCustomEventForPrompts, event, ...)

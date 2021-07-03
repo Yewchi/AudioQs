@@ -138,7 +138,18 @@ local AUDIOQS_SLASH_CMDS = {
 			local funcs = AUDIOQS.GetExtensionNameFuncs(args[2])
 			
 			if funcs == nil then
-				print(AUDIOQS.audioQsSpecifier..AUDIOQS.infoSpecifier.."\""..args[2].."\" is not a known Extension.\nAvailable Extensions are:\n"..AUDIOQS.PrintableTable(AUDIOQS.GetRegisteredExtensionNames()))
+				print(AUDIOQS.audioQsSpecifier..AUDIOQS.infoSpecifier.."\""..args[2].."\" is not a known extension.\nAvailable extensions are:\n")
+				local validExtNames = AUDIOQS.GetRegisteredExtensionNames()
+				local validExtNamesConcat = {"|cFFC8C8FF"}
+				local numExtensions = #validExtNames
+				local i = 2
+				for n=1,numExtensions-1 do
+					validExtNamesConcat[i] = validExtNames[n]
+					validExtNamesConcat[i+1] = "|r, |cFFC8C8FF"
+					i = i + 2
+				end
+				validExtNamesConcat[i] = validExtNames[numExtensions]
+				print(table.concat(validExtNamesConcat))
 				return
 			elseif SV_Specializations ~= nil and SV_Specializations[mySpec] ~= nil and SV_Specializations[mySpec][funcs["GetName"]()] ~= nil then
 				print(AUDIOQS.audioQsSpecifier..AUDIOQS.infoSpecifier.."Extension \""..funcs["GetName"]().."\" is already installed.") -- TODO Placeholder, informative, but messy output.
@@ -520,4 +531,45 @@ end
 -------- AUDIOQS.IsEqualToGcd() -- Returns if the cooldown is equal to the GCD cd, or 1.5 (some abilities trigger a GCD which is not affected by haste)
 function AUDIOQS.IsEqualToGcd(cd)
 	return cd == AUDIOQS.GetGcdDur() or cd == 1.5
+end
+
+-------- AUDIOQS.NilSetTable(t)
+ -- For wiping non-array tables that reference other tables
+function AUDIOQS.NilSetTable(t)
+	for k,_ in pairs(t) do
+		t[k] = nil
+	end
+end
+
+local MAX_WIPE_DEPTH = 5
+-------- AUDIOQS.WipeTable()
+ -- This will disturb sub-table references. Should only be used for total destruction, such as re-initialization
+function AUDIOQS.WipeTable(t, d)
+	d = d and d+1 or 1
+	for k,v in pairs(t) do
+		if type(v) == "table" then
+			if d <= MAX_WIPE_DEPTH then
+				AUDIOQS.WipeTable(v, d)
+			else
+				for clearKey,_ in pairs(v) do
+					v[clearKey] = nil
+				end
+			end
+		end
+		--print("wiping", k)
+		t[k] = nil
+	end
+	AUDIOQS.RecycleTable(t)
+end
+
+recyclable_tables = {}
+-------- AUDIOQS.RecycleTable()
+function AUDIOQS.RecycleTable(t)
+	wipe(t)
+	table.insert(recyclable_tables, t)
+end
+
+-------- AUDIOQS.CreateTable()
+function AUDIOQS.CreateTable()
+	return table.remove(recyclable_tables) or {}
 end
