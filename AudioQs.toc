@@ -1,8 +1,8 @@
-## Interface: 90005
+## Interface: 90100
 ## Title: AudioQs
 ## Notes: Custom audio prompts and blind assist.
 ## Author: Yewchi
-## Version: 1.3.3c
+## Version: 1.4a
 ## SavedVariables: SV_Specializations
 AudioQs.lua
 Specialization.lua
@@ -15,6 +15,7 @@ Extensions\Extras.lua
 Extensions\CrowdControl.lua
 Extensions\ManaMonitor.lua
 Extensions\HealthMonitor.lua
+Extensions\PetMonitor.lua
 Extensions\GPS.lua
 Extensions\KillingBlow.lua
 Extensions\BeastMastery.lua
@@ -25,6 +26,3 @@ Extensions\HolyPriest.lua
 Extensions\RestorationShaman.lua
 Extensions\FireMage.lua
 Extensions\Covenants.lua
-Extensions\ClassicDruid.lua
-Extensions\ClassicPriest.lua
-Extensions\ClassicPaladin.lua

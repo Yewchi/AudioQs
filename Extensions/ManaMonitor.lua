@@ -1,10 +1,14 @@
 -- All code written and maintained by Yewchi 
 -- zyewchi@gmail.com
 
+local AUDIOQS = AUDIOQS_4Q5
+local GameState = AUDIOQS.GS
+
 local extName = "ManaMonitor"
 local extNameDetailed = "Mana Monitor"
 local extShortNames = "mana"
 local extSpecLimit = AUDIOQS.ANY_SPEC_ALLOWED
+local ext_ref_num
 
 -- Extension Variables --
 --
@@ -21,51 +25,49 @@ local previousSegmentCallout = 0
 --
 -- /Extension Variables
 
--- Functions predeclared
-local GetName
-local GetNameDetailed
-local GetShortNames
-local GetVersion
-local GetSpells
-local GetEvents
-local GetSegments
-local GetExtension
-local SpecAllowed
+local extSpells, extEvents, extSegments
 
-local extFuncs = {
-		["GetName"] = function() return GetName() end,
-		["GetNameDetailed"] = function() return GetNameDetailed() end,
-		["GetShortNames"] = function() return GetShortNames() end,
-		["GetVersion"] = function() return GetVersion() end,
-		["GetSpells"] = function() return GetSpells() end,
-		["GetEvents"] = function() return GetEvents() end,
-		["GetSegments"] = function() return GetSegments() end,
-		["GetExtension"] = function() return GetExtension() end,
-		["SpecAllowed"] = function(specId) return SpecAllowed(specId) end,
+local extFuncs = { -- For external use
+		["GetName"] = function() return extName end,
+		["GetNameDetailed"] = function() return extNameDetailed end,
+		["GetShortNames"] = function() return extShortNames end,
+		["GetExtRef"] = function() return ext_ref_num end,
+		["GetVersion"] = function() return extVersion end,
+		["GetSpells"] = function() return extSpells end,
+		["GetEvents"] = function() return extEvents end,
+		["GetPrompts"] = function() return extSegments end,
+		["GetExtension"] = function() 
+				return {spells=extSpells, events=extEvents, segments=extSegments, extNum=ext_ref_num}
+			end,
+		["SpecAllowed"] = function(specId) 
+				if extSpecLimit == AUDIOQS.ANY_SPEC_ALLOWED or extSpecLimit == specId then
+					return true
+				end 
+			end,
 		["Initialize"] = function() AUDIOQS.ManaMonitor_UpdateManaSegment() end
 }
 
 --- Spell Tables and Prompts --
 --
-local extSpells = { 
+extSpells = { 
 }
 
-local extEvents = {
+extEvents = {
 	["UNIT_POWER_UPDATE"] = {
 	},
 }
 
 local allowPrompts -- for simplicity within func strings
-local extSegments = {
+extSegments = {
 	["UNIT_POWER_UPDATE"] = { 
 		{
 			{
-				"allowPrompts, AUDIOQS.GS.MANA_MONITOR_ANNOUNCING_SEG = AUDIOQS.ManaMonitor_UpdateManaSegment() if allowPrompts and AUDIOQS.GS.MANA_MONITOR_ANNOUNCING_SEG then AUDIOQS.GS.MANA_MONITOR_PREV_PROMPT_TIMESTAMP = GetTime() return true end",
+				function() allowPrompts, GameState.MANA_MONITOR_ANNOUNCING_SEG = AUDIOQS.ManaMonitor_UpdateManaSegment() if allowPrompts and GameState.MANA_MONITOR_ANNOUNCING_SEG then GameState.MANA_MONITOR_PREV_PROMPT_TIMESTAMP = GetTime() return true end end,
 				false
 			},
 			{
 				0.0,
-				AUDIOQS.SOUND_FUNC_PREFIX.."local seg = AUDIOQS.GS.MANA_MONITOR_ANNOUNCING_SEG if seg ~= nil then return string.format('%smana_%s.ogg', AUDIOQS.SOUNDS_ROOT, AUDIOQS.GS.MANA_MONITOR_ANNOUNCING_SEG) end",
+				function() local seg = GameState.MANA_MONITOR_ANNOUNCING_SEG if seg ~= nil then return string.format('%smana_%s.ogg', AUDIOQS.SOUNDS_ROOT, GameState.MANA_MONITOR_ANNOUNCING_SEG) end end,
 				nil,
 				true
 			}
@@ -155,4 +157,4 @@ end
 -- /Funcs --
 
 -- Register Extension:
-AUDIOQS.RegisterExtension(extName, extFuncs)
+ext_ref_num = AUDIOQS.RegisterExtension(extName, extFuncs)

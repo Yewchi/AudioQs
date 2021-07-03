@@ -1,41 +1,47 @@
---#ifdef WOW_CLASSIC
-if AUDIOQS.WOW_CLASSIC then
 -- All code written and maintained by Yewchi 
 -- zyewchi@gmail.com
+
+local AUDIOQS = AUDIOQS_4Q5
+--#ifdef WOW_CLASSIC
+if AUDIOQS.WOW_CLASSIC then
 
 local extName = "ClassicPaladin"
 local extNameDetailed = "ClassicPaladin"
 local extShortNames = "clcpaladin"
 local extSpecLimit = 2 -- TODO ExtensionsInterface needs update here
+local ext_ref_num
 
--- Functions predeclared
-local GetName
-local GetNameDetailed
-local GetShortNames
-local GetVersion
-local GetSpells
-local GetEvents
-local GetSegments
-local GetExtension
-local SpecAllowed
+local extSpells, extEvents, extSegments
 
-local extFuncs = {
-		["GetName"] = function() return GetName() end,
-		["GetNameDetailed"] = function() return GetNameDetailed() end,
-		["GetShortNames"] = function() return GetShortNames() end,
-		["GetVersion"] = function() return GetVersion() end,
-		["GetSpells"] = function() return GetSpells() end,
-		["GetEvents"] = function() return GetEvents() end,
-		["GetSegments"] = function() return GetSegments() end,
-		["GetExtension"] = function() return GetExtension() end,
-		["SpecAllowed"] = function(specId) return SpecAllowed(specId) end,
+local extFuncs = { -- For external use
+		["GetName"] = function() return extName end,
+		["GetNameDetailed"] = function() return extNameDetailed end,
+		["GetShortNames"] = function() return extShortNames end,
+		["GetExtRef"] = function() return ext_ref_num end,
+		["GetVersion"] = function() return extVersion end,
+		["GetSpells"] = function() return extSpells end,
+		["GetEvents"] = function() return extEvents end,
+		["GetPrompts"] = function() return extSegments end,
+		["GetExtension"] = function() 
+				return {
+					spells=extSpells,
+					events=extEvents,
+					segments=extSegments,
+					extNum=ext_ref_num
+				} 
+			end,
+		["SpecAllowed"] = function(specId) 
+				if extSpecLimit == AUDIOQS.ANY_SPEC_ALLOWED or extSpecLimit == specId then
+					return true
+				end 
+			end,
 		["Initialize"] = function() end
 }
 
 --- Spell Tables and Prompts --
 --
 -- spells[spellId] = { "Spell Name", charges, cdDur, cdExpiration, unitId, spellType}
-local extSpells = {	
+extSpells = {	
 	[642] = { 	"Divine Shield", 			0, 	0, 	0, 	"player", 	AUDIOQS.SPELL_TYPE_ABILITY},
 	[853] = { 	"Hammer of Justice", 		0, 	0, 	0, 	"player", 	AUDIOQS.SPELL_TYPE_ABILITY},
 	[20473] = { "Holy Shock", 				0, 	0, 	0, 	"player", 	AUDIOQS.SPELL_TYPE_ABILITY},
@@ -48,12 +54,12 @@ local extSpells = {
 }
 
 -- events["EVENT_NAME"] = eventArgsArray (automatically generated)
-local extEvents = {
+extEvents = {
 	["LOADING_SCREEN_ENABLED"] = {},
 	["LOADING_SCREEN_DISABLED"] = {},
 }
 
-local extSegments = {
+extSegments = {
 	[642] = {
 		AUDIOQS.SEGLIB_CREATE_GENERIC_SPELL_COOLDOWN_SEGMENT("Cooldowns/divine_shield.ogg")
 	},

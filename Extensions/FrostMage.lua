@@ -3,35 +3,35 @@
 -- All code written and maintained by Yewchi 
 -- zyewchi@gmail.com
 
+local AUDIOQS = AUDIOQS_4Q5
+
 local extName = "FrostMage"
 local extNameDetailed = "Frost Mage"
 local extShortNames = "im"
 local extSpecLimit = AUDIOQS.ANY_SPEC_ALLOWED -- TODO ExtensionsInterface needs update here
+local ext_ref_num
 
--- Functions predeclared
-local GetName
-local GetNameDetailed
-local GetShortNames
-local GetVersion
-local GetSpells
-local GetEvents
-local GetSegments
-local GetExtension
-local SpecAllowed
+local extSpells, extEvents, extSegments
 
-local extFuncs = {
-		["GetName"] = function() return GetName() end,
-		["GetNameDetailed"] = function() return GetNameDetailed() end,
-		["GetShortNames"] = function() return GetShortNames() end,
-		["GetVersion"] = function() return GetVersion() end,
-		["GetSpells"] = function() return GetSpells() end,
-		["GetEvents"] = function() return GetEvents() end,
-		["GetSegments"] = function() return GetSegments() end,
-		["GetExtension"] = function() return GetExtension() end,
-		["SpecAllowed"] = function(specId) return SpecAllowed(specId) end,
+local extFuncs = { -- For external use
+		["GetName"] = function() return extName end,
+		["GetNameDetailed"] = function() return extNameDetailed end,
+		["GetShortNames"] = function() return extShortNames end,
+		["GetExtRef"] = function() return ext_ref_num end,
+		["GetVersion"] = function() return extVersion end,
+		["GetSpells"] = function() return extSpells end,
+		["GetEvents"] = function() return extEvents end,
+		["GetPrompts"] = function() return extSegments end,
+		["GetExtension"] = function() 
+				return {spells=extSpells, events=extEvents, segments=extSegments, extNum=ext_ref_num}
+			end,
+		["SpecAllowed"] = function(specId) 
+				if extSpecLimit == AUDIOQS.ANY_SPEC_ALLOWED or extSpecLimit == specId then
+					return true
+				end 
+			end,
 		["Initialize"] = function() end
 }
-
 --- Spell Tables and Prompts --
 --
 -- spells[spellId] = { "Spell Name", charges, cdDur, cdExpiration, unitId, spellType}
@@ -63,7 +63,6 @@ local extSpells = {
 		[212653] = 	{ "Shimmer",				0, 	0, 	0, 	"player", 	AUDIOQS.SPELL_TYPE_ABILITY},
 		--[31687] =	{ "Summon Water Elemental",	0,	0,	0,	"player",	AUDIOQS.SPELL_TYPE_ABILITY},
 		[80353] = 	{ "Time Warp",				0, 	0, 	0, 	"player", 	AUDIOQS.SPELL_TYPE_ABILITY},
-
 }
 
 local extEvents = {
@@ -72,6 +71,7 @@ local extEvents = {
 	["PLAYER_SPECIALIZATION_CHANGED"] = {}
 }
 
+local GetSpellCharges=GetSpellCharges
 local extSegments = {
 	[65792] = {
 		{
@@ -80,9 +80,9 @@ local extSegments = {
 				false
 			},
 			{0.25, 		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."frost_primer.ogg",				nil,		true },
-			{nil, 		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."fost_charge_1.ogg", 			nil,		"return GetSpellCharges(65792) == 1"},
-			{nil, 		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."frost_charge_2.ogg",			nil,		"return GetSpellCharges(65792) == 2"},
-			{nil, 		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."frost_charge_3.ogg",			nil,		"return GetSpellCharges(65792) == 3"}
+			{nil, 		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."fost_charge_1.ogg", 			nil,		function() return GetSpellCharges(65792) == 1 end},
+			{nil, 		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."frost_charge_2.ogg",			nil,		function() return GetSpellCharges(65792) == 2 end},
+			{nil, 		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."frost_charge_3.ogg",			nil,		function() return GetSpellCharges(65792) == 3 end}
 		}
 	},
 	[212653] = {
@@ -92,8 +92,8 @@ local extSegments = {
 				false
 			},
 			{0.25, 		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."shimmer_primer.ogg",			nil,		true },
-			{nil, 		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."shimmer_charge_1.ogg", 		nil,		"return GetSpellCharges(212653) == 1"},
-			{nil, 		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."shimmer_charge_2.ogg",			nil,		"return GetSpellCharges(212653) == 2"}
+			{nil, 		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."shimmer_charge_1.ogg", 		nil,		function() return GetSpellCharges(212653) == 1 end},
+			{nil, 		AUDIOQS.SOUND_PATH_PREFIX..AUDIOQS.SOUNDS_ROOT.."shimmer_charge_2.ogg",			nil,		function() return GetSpellCharges(212653) == 2 end}
 		}
 	},
 	[108978] = {
@@ -166,17 +166,17 @@ local extSegments = {
 	["LOADING_SCREEN_DISABLED"] = { -- TODO Should be in an "essentials", hidden extension or in the AudioQs.lua main event handlers. Workaround for now.
 		{
 			{
-				"AUDIOQS.ChargeCooldownsAllowed = false return true",
+				function() AUDIOQS.ChargeCooldownsAllowed = false return true end,
 				false
 			},
 			{0.25, 	nil, nil, true},
-			{nil,	nil, nil, "AUDIOQS.ChargeCooldownsAllowed = true return true"}
+			{nil,	nil, nil, function() AUDIOQS.ChargeCooldownsAllowed = true return true end}
 		}
 	},
 	["LOADING_SCREEN_ENABLED"] = { -- TODO Likewise ^^
 		{
 			{
-				"AUDIOQS.ChargeCooldownsAllowed = false return false",
+				function() AUDIOQS.ChargeCooldownsAllowed = false return false end,
 				false
 			},
 			{}
@@ -185,11 +185,11 @@ local extSegments = {
 	["PLAYER_SPECIALIZATION_CHANGED"] = {
 		{
 			{
-				"AUDIOQS.ChargeCooldownsAllowed = false return false",
+				function() AUDIOQS.ChargeCooldownsAllowed = false return false end,
 				false
 			},
 			{0.25, 	nil, nil, true},
-			{nil,	nil, nil, "AUDIOQS.ChargeCooldownsAllowed = true return true"}
+			{nil,	nil, nil, function() AUDIOQS.ChargeCooldownsAllowed = true return true end}
 		}
 	}
 }
@@ -198,46 +198,8 @@ local extSegments = {
 
 --- Funcs --
 --
-GetName = function()
-	return extName
-end
-
-GetNameDetailed = function()
-	return extNameDetailed
-end
-
-GetShortNames = function()
-	return extShortNames
-end
-
-GetVersion = function()
-	return extVersion
-end
-
-GetSpells = function()
-	return extSpells
-end
-
-GetEvents = function()
-	return extEvents
-end
-
-GetSegments = function()
-	return extSegments
-end
-
-GetExtension = function()
-	return {spells=extSpells, events=extEvents, segments=extSegments}
-end
-
-SpecAllowed = function(specId)
-	if extSpecLimit == AUDIOQS.ANY_SPEC_ALLOWED or extSpecLimit == specId then
-		return true
-	end
-	return false
-end
 --
 -- /Funcs --
 
 -- Register Extension:
-AUDIOQS.RegisterExtension(extName, extFuncs)
+ext_ref_num = AUDIOQS.RegisterExtension(extName, extFuncs)

@@ -1,39 +1,41 @@
 -- All code written and maintained by Yewchi 
 -- zyewchi@gmail.com
 
+local AUDIOQS = AUDIOQS_4Q5
+
 local extName = "RestorationShaman"
 local extNameDetailed = "Restoration Shaman"
 local extShortNames = "rs|restorationsham|restosham|restoshaman"
 local extSpecLimit = AUDIOQS.ANY_SPEC_ALLOWED
+local ext_ref_num
 
--- Functions predeclared
-local GetName
-local GetNameDetailed
-local GetShortNames
-local GetVersion
-local GetSpells
-local GetEvents
-local GetSegments
-local GetExtension
-local SpecAllowed
+local extSpells, extEvents, extSegments
 
-local extFuncs = {
-		["GetName"] = function() return GetName() end,
-		["GetNameDetailed"] = function() return GetNameDetailed() end,
-		["GetShortNames"] = function() return GetShortNames() end,
-		["GetVersion"] = function() return GetVersion() end,
-		["GetSpells"] = function() return GetSpells() end,
-		["GetEvents"] = function() return GetEvents() end,
-		["GetSegments"] = function() return GetSegments() end,
-		["GetExtension"] = function() return GetExtension() end,
-		["SpecAllowed"] = function(specId) return SpecAllowed(specId) end,
+local extFuncs = { -- For external use
+		["GetName"] = function() return extName end,
+		["GetNameDetailed"] = function() return extNameDetailed end,
+		["GetShortNames"] = function() return extShortNames end,
+		["GetExtRef"] = function() return ext_ref_num end,
+		["GetVersion"] = function() return extVersion end,
+		["GetSpells"] = function() return extSpells end,
+		["GetEvents"] = function() return extEvents end,
+		["GetPrompts"] = function() return extSegments end,
+		["GetExtension"] = function() 
+				return {spells=extSpells, events=extEvents, segments=extSegments, extNum=ext_ref_num}
+			end,
+		["SpecAllowed"] = function(specId) 
+				if extSpecLimit == AUDIOQS.ANY_SPEC_ALLOWED or extSpecLimit == specId then
+					return true
+				end 
+			end,
+
 		["Initialize"] = function() end
 }
 
 --- Spell Tables and Prompts --
 --
 -- spells[spellId] = { "Spell Name", charges, cdDur, cdExpiration, unitId, spellType}
-local extSpells = { 
+extSpells = { 
 		[114052] = 	{ "Ascendance", 				0, 	0, 	0, 	"player", 	AUDIOQS.SPELL_TYPE_ABILITY},
 		[108271] = 	{ "Astral Shift", 				0, 	0, 	0, 	"player", 	AUDIOQS.SPELL_TYPE_ABILITY},
 		[192058] = 	{ "Capacitor Totem", 			0, 	0, 	0, 	"player", 	AUDIOQS.SPELL_TYPE_ABILITY},
@@ -63,14 +65,13 @@ local extSpells = {
 }
 
 -- events["EVENT_NAME"] = eventArgsArray (automatically generated)
-local extEvents = {
-	["LOADING_SCREEN_ENABLED"] = {
-	},
-	["LOADING_SCREEN_DISABLED"] = {
-	}
+extEvents = {
+	["LOADING_SCREEN_ENABLED"] = {},
+	["LOADING_SCREEN_DISABLED"] = {},
+	["PLAYER_SPECIALIZATION_CHANGED"] = {}
 }
 
-local extSegments = {
+extSegments = {
 	[114052] = {
 		AUDIOQS.SEGLIB_CREATE_GENERIC_SPELL_COOLDOWN_SEGMENT("Cooldowns/Shaman/ascendance.ogg")
 	},
@@ -163,20 +164,30 @@ local extSegments = {
 	["LOADING_SCREEN_DISABLED"] = { -- TODO Should be in an "essentials", hidden extension or in the AudioQs.lua main event handlers. Workaround for now.
 		{
 			{
-				"AUDIOQS.ChargeCooldownsAllowed = false return true",
+				function() AUDIOQS.ChargeCooldownsAllowed = false return true end,
 				false
 			},
 			{0.25, 	nil, nil, true},
-			{nil,	nil, nil, "AUDIOQS.ChargeCooldownsAllowed = true return true"}
+			{nil,	nil, nil, function() AUDIOQS.ChargeCooldownsAllowed = true return true end}
 		}
 	},
 	["LOADING_SCREEN_ENABLED"] = { -- TODO Likewise ^^
 		{
 			{
-				"AUDIOQS.ChargeCooldownsAllowed = false return false",
+				function() AUDIOQS.ChargeCooldownsAllowed = false return false end,
 				false
 			},
 			{}
+		}
+	},
+	["PLAYER_SPECIALIZATION_CHANGED"] = {
+		{
+			{
+				function() AUDIOQS.ChargeCooldownsAllowed = false return false end,
+				false
+			},
+			{0.25, 	nil, nil, true},
+			{nil,	nil, nil, function() AUDIOQS.ChargeCooldownsAllowed = true return true end}
 		}
 	}
 }
@@ -185,46 +196,8 @@ local extSegments = {
 
 --- Funcs --
 --
-GetName = function()
-	return extName
-end
-
-GetNameDetailed = function()
-	return extNameDetailed
-end
-
-GetShortNames = function()
-	return extShortNames
-end
-
-GetVersion = function()
-	return extVersion
-end
-
-GetSpells = function()
-	return extSpells
-end
-
-GetEvents = function()
-	return extEvents
-end
-
-GetSegments = function()
-	return extSegments
-end
-
-GetExtension = function()
-	return {spells=extSpells, events=extEvents, segments=extSegments}
-end
-
-SpecAllowed = function(specId)
-	if extSpecLimit == AUDIOQS.ANY_SPEC_ALLOWED or extSpecLimit == specId then
-		return true
-	end
-	return false
-end
 --
 -- /Funcs --
 
 -- Register Extension:
-AUDIOQS.RegisterExtension(extName, extFuncs)
+ext_ref_num = AUDIOQS.RegisterExtension(extName, extFuncs)

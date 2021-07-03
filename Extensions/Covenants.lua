@@ -1,83 +1,56 @@
 -- All code written and maintained by Yewchi 
 -- zyewchi@gmail.com
 
+local AUDIOQS = AUDIOQS_4Q5
+
 local extName = "Covenants"
 local extNameDetailed = "Covenants"
 local extShortNames = "cov"
 local extSpecLimit = AUDIOQS.ANY_SPEC_ALLOWED -- TODO ExtensionsInterface needs update here
+local ext_ref_num
 
--- Functions predeclared
-local GetName
-local GetNameDetailed
-local GetShortNames
-local GetVersion
-local GetSpells
-local GetEvents
-local GetSegments
-local GetExtension
-local SpecAllowed
+local extSpells, extEvents, extSegments
 
-local extFuncs = {
-		["GetName"] = function() return GetName() end,
-		["GetNameDetailed"] = function() return GetNameDetailed() end,
-		["GetShortNames"] = function() return GetShortNames() end,
-		["GetVersion"] = function() return GetVersion() end,
-		["GetSpells"] = function() return GetSpells() end,
-		["GetEvents"] = function() return GetEvents() end,
-		["GetSegments"] = function() return GetSegments() end,
-		["GetExtension"] = function() return GetExtension() end,
-		["SpecAllowed"] = function(specId) return SpecAllowed(specId) end,
+local extFuncs = { -- For external use
+		["GetName"] = function() return extName end,
+		["GetNameDetailed"] = function() return extNameDetailed end,
+		["GetShortNames"] = function() return extShortNames end,
+		["GetExtRef"] = function() return ext_ref_num end,
+		["GetVersion"] = function() return extVersion end,
+		["GetSpells"] = function() return extSpells end,
+		["GetEvents"] = function() return extEvents end,
+		["GetPrompts"] = function() return extSegments end,
+		["GetExtension"] = function() 
+				return {
+					spells=extSpells,
+					events=extEvents,
+					segments=extSegments,
+					extNum=ext_ref_num
+				} 
+			end,
+		["SpecAllowed"] = function(specId) 
+				if extSpecLimit == AUDIOQS.ANY_SPEC_ALLOWED or extSpecLimit == specId then
+					return true
+				end 
+			end,
 		["Initialize"] = function() AUDIOQS.COVENANT_ReloadCovenantAbilities() end
 }
-
 --- Spell Tables and Prompts --
 --
 -- spells[spellId] = { "Spell Name", charges, cdDur, cdExpiration, unitId, spellType}
-local extSpells = { 
+extSpells = { 
 }
 
 -- events["EVENT_NAME"] = eventArgsArray (automatically generated)
-local extEvents = {
-	["LOADING_SCREEN_ENABLED"] = {},
-	["LOADING_SCREEN_DISABLED"] = {},
-	["PLAYER_SPECIALIZATION_CHANGED"] = {},
+extEvents = {
 	["COVENANT_CHOSEN"] = {},
 }
 
-local extSegments = {
-	["LOADING_SCREEN_DISABLED"] = { -- TODO Should be in an "essentials", hidden extension or in the AudioQs.lua main event handlers. Workaround for now.
-		{
-			{
-				"AUDIOQS.ChargeCooldownsAllowed = false return true",
-				false
-			},
-			{0.25, 	nil, nil, true},
-			{nil,	nil, nil, "AUDIOQS.ChargeCooldownsAllowed = true return true"}
-		}
-	},
-	["LOADING_SCREEN_ENABLED"] = { -- TODO Likewise ^^
-		{
-			{
-				"AUDIOQS.ChargeCooldownsAllowed = false return false",
-				false
-			},
-			{}
-		}
-	},
-	["PLAYER_SPECIALIZATION_CHANGED"] = {
-		{
-			{
-				"AUDIOQS.ChargeCooldownsAllowed = false return false",
-				false
-			},
-			{0.25, 	nil, nil, true},
-			{nil,	nil, nil, "AUDIOQS.ChargeCooldownsAllowed = true return true"}
-		}
-	},
+extSegments = {
 	["COVENANT_CHOSEN"] = {
 		{
 			{
-				"AUDIOQS.COVENANT_ReloadCovenantAbilities() return false",
+				function() AUDIOQS.COVENANT_ReloadCovenantAbilities() return false end,
 				false
 			},
 			{}
@@ -211,46 +184,8 @@ end
 
 --- Funcs --
 --
-GetName = function()
-	return extName
-end
-
-GetNameDetailed = function()
-	return extNameDetailed
-end
-
-GetShortNames = function()
-	return extShortNames
-end
-
-GetVersion = function()
-	return extVersion
-end
-
-GetSpells = function()
-	return extSpells
-end
-
-GetEvents = function()
-	return extEvents
-end
-
-GetSegments = function()
-	return extSegments
-end
-
-GetExtension = function()
-	return {spells=extSpells, events=extEvents, segments=extSegments}
-end
-
-SpecAllowed = function(specId)
-	if extSpecLimit == AUDIOQS.ANY_SPEC_ALLOWED or extSpecLimit == specId then
-		return true
-	end
-	return false
-end
 --
 -- /Funcs --
 
 -- Register Extension:
-AUDIOQS.RegisterExtension(extName, extFuncs)
+ext_ref_num = AUDIOQS.RegisterExtension(extName, extFuncs)

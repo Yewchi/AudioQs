@@ -2,7 +2,10 @@
 -- Thanks to Slyckety and others for helping with test. Couldn't do this without the help!
 -- zyewchi@gmail.com
 
-AUDIOQS = {}
+-- Dev note: I gelled out a much better naming convention in many hours coding Dota scripts, AudioQs is not refactored, but is moving that way. Should be: local_file_var, LOCAL_CONSTANT, LIB_GLOBAL_CONSTANT, LIB/TYPE_I_CONSTANT_INDEX, codeBlockScopeVar, t_local_file_tbl, local_file_do_stuff(), LIB_GlobalDoStuff()
+
+AUDIOQS_4Q5 = {}
+local AUDIOQS = AUDIOQS_4Q5
 
 AUDIOQS.DEBUG = false
 AUDIOQS.VERBOSE = AUDIOQS.DEBUG and true
@@ -53,7 +56,6 @@ AUDIOQS.UNIT_AURA_DEBUFF_TYPE = 4
 AUDIOQS.UNIT_AURA_DURATION = 5
 AUDIOQS.UNIT_AURA_EXPIRATION = 6
 AUDIOQS.UNIT_AURA_UNIT_ID = 7
-AUDIOQS.UNIT_AURA_SPELL_ID = 10
 AUDIOQS.UNIT_AURA_TIME_MOD = 15 -- always = 1. For prelim confirmation of a valid aura
 
 AUDIOQS.SPEC_INFO_NUM = 1
@@ -124,6 +126,7 @@ end
 
 --- Event Funcs --
 --
+---- TODO, juvinile frame naming throughout, copy STATRACK name format.
 local Frame_SpellUpdateCooldown = CreateFrame("Frame", "Spell Update Charges")
 local Frame_CombatLog = CreateFrame("Frame", "Combat Log")
 local Frame_UnitAura = CreateFrame("Frame", "Unit Aura")
@@ -239,10 +242,10 @@ Frame_UnitAura:SetScript("OnEvent",
 Frame_CustomEvents:SetScript("OnEvent",
 	function(_, event, ...)
 		if not FreshEventForFrame(event) then return end
-
-		--print("Event starting ProcessCustomEventForPrompts() is "..event)
+		AUDIOQS.PerformanceStart("event", false)
 		local success, err = pcall(AUDIOQS.ProcessCustomEventForPrompts, event, ...)
 		if not success then AUDIOQS.HandleError(err, "CustomEventsOnEvent()", "AUDIOQS.ProcessCustomEventForPrompts()") end
+		AUDIOQS.PerformanceEnd("event")
 	end
 )
 
