@@ -93,16 +93,16 @@ local function replace_delimiters(funcString, delimiterInfo) -- Called once-per-
 	-- approx. 1/40th of a mili-second for 1 delim
 end
 
-function AUDIOQS.SEGLIB_ReloadExtDefaults(extRef)
+function AUDIOQS.SEGLIB_ReloadExtDefaults(extRef, reloadAll)
 	local prevDefaultSaved
 	local thisDefaultSaved = l_saved_prompt_defaults
 	local prompts = AUDIOQS.GSI_GetPromptsTable()
 	while(thisDefaultSaved) do
-		local thisPrompt = prompts[thisDefaultSaved[1]] [thisDefaultSaved[2]]
+		local thisPrompt = prompts[thisDefaultSaved[1]][thisDefaultSaved[2]]
 		-- if thisPrompt == nil then
 			-- print(thisDefaultSaved[1], thisDefaultSaved[2], thisDefaultSaved[3], thisDefaultSaved[4], thisDefaultSaved[5], thisDefaultSaved[6])
 		-- end
-		if thisPrompt[PROMPT_I_EXT_REF] == extRef then
+		if thisPrompt[PROMPT_I_EXT_REF] == extRef or reloadAll then
 			thisPrompt[thisDefaultSaved[3]] [thisDefaultSaved[4]] = thisDefaultSaved[DEFAULT_I_STRING]
 			prevDefaultSaved, thisDefaultSaved = delete_segval_string(prevDefaultSaved, thisDefaultSaved)
 		else

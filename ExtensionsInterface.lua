@@ -81,6 +81,20 @@ if AUDIOQS.DEBUG then print(AUDIOQS.audioQsSpecifier..AUDIOQS.debugSpecifier.."i
 	return t_ext_funcs[t_ext_name_to_ref[extNameSearch:lower()]]
 end
 
+function AUDIOQS.GetAvailableExtensionsString()
+	local extNames = AUDIOQS.GetRegisteredExtensionNames()
+	local validExtNamesConcat = {}
+	local numExtensions = #extNames
+	local i = 1
+	for n=1,numExtensions do
+		validExtNamesConcat[i] = string.format("%s%s|r, ", AUDIOQS.extensionColour, extNames[n])
+		i = i + 1
+	end
+	
+	validExtNamesConcat[i] = extNames[numExtensions]
+	return table.concat(validExtNamesConcat)
+end
+
 function AUDIOQS.EXT_GetDelimInfoForReference(extRefNum)
 	local extFuncs = t_ext_funcs[extRefNum]
 	return extFuncs and extFuncs["GetDelimFuncInfo"]

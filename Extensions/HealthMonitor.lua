@@ -69,6 +69,8 @@ local MUTE_CMD_TO_UID = {
 		["5"] = "party4",
 	}
 	
+local CONFIG__track_focus = false
+	
 local current_muted_table = {}
 
 local extSpells, extEvents, extSegments
@@ -100,6 +102,8 @@ local extFuncs = { -- For external use
 			end,
 		["GetDelimInfo"] = function() return t_delims_info end,
 		["Initialize"] = function()
+				CONFIG__track_focus = SV_Specializations["HealthMonitorTrackFocus"]
+				
 				AUDIOQS.GS.HM_initialized = false
 				AUDIOQS.HealthMonitor_CheckMode("INIT")
 				if not AUDIOQS.Util_SlashCmdExists("hm") then
@@ -113,7 +117,8 @@ local extFuncs = { -- For external use
 								print(AUDIOQS.audioQsSpecifier..extensionSpecifier.."What would you like to change with Health Monitor?\n"..
 										"Number: \"/aq hm mute 5\" -- mute 'party4'. '1' is the player.\n"..
 										"Modify: \"/aq hm mute dps\" \"/aq hm unmute tank\"\n"..
-										"Exclusive: \"/aq hm self\" \"/aq hm all\"")
+										"Exclusive: \"/aq hm self\" \"/aq hm all\"\n"..
+										"Track Focus: \"/aq hm focus on\" \"/aq hm focus off\"")
 								return
 							elseif args[2] == "off" or args[2] == "mute" then
 								local muteRoleString = MUTE_CMD_TO_ROLE[args[3]] or MUTE_CMD_TO_UID[args[3]]
@@ -153,6 +158,16 @@ local extFuncs = { -- For external use
 								end
 								print(AUDIOQS.audioQsSpecifier..extensionSpecifier.."Self-mode on.")
 								current_muted_table["player"] = nil
+							elseif args[2] == "focus" then
+								if args[3] == "on" or args[3] == "unmute" then
+									CONFIG__track_focus = true
+									SV_Specializations["HealthMonitorTrackFocus"] = true
+									print(AUDIOQS.audioQsSpecifier..extensionSpecifier.."Focus call-out on.")
+								elseif args[3] == "off" or args[3] == "mute" then
+									CONFIG__track_focus = false
+									SV_Specializations["HealthMonitorTrackFocus"] = false
+									print(AUDIOQS.audioQsSpecifier..extensionSpecifier.."Focus call-out off.")
+								end
 							else
 								return -- Don't reset the functional strings for exploding more/less code into the prompt segments, because we haven't changed anything
 							end
@@ -216,6 +231,30 @@ local function cancel_prompt_if_muted(delimParameters)
 		return "if is_player_role_muted('"..unitId.."') then return false end"
 	end
 	return AUDIOQS.DELIM_NO_CONCAT
+end
+
+local function battleground_or_generic_focus(delimParameters)
+	local startPrompt = unpack(delimParameters)
+	if startPrompt then
+		return CONFIG__track_focus
+			and "true"
+			or "AUDIOQS.HealthMonitor_ModeIs(AUDIOQS.GS.INSTANCE_BG)"
+	else
+		return CONFIG__track_focus
+			and AUDIOQS.DELIM_NO_CONCAT
+			or "not AUDIOQS.HealthMonitor_ModeIs(AUDIOQS.GS.INSTANCE_BG) or "
+	end
+end
+
+local function battleground_or_generic_focus_file(delimParameters)
+	return CONFIG__track_focus
+			and "return not AUDIOQS.HealthMonitor_ModeIs(AUDIOQS.GS.INSTANCE_BG) and '"
+			..AUDIOQS.SOUNDS_ROOT.."Joanna/focus.ogg' or (AUDIOQS.HealthMonitor_Dispellable('focus') and '"
+			..AUDIOQS.SOUNDS_ROOT.."Numerical/2"..AUDIOQS.DISPEL_FILE_MODIFIER
+			..".ogg' or 'Interface/AddOns/AudioQs/Sounds/Numerical/DBM-Core/Corsica/2.ogg')"
+			or "return AUDIOQS.HealthMonitor_Dispellable('focus') and '"
+			..AUDIOQS.SOUNDS_ROOT.."Numerical/2"..AUDIOQS.DISPEL_FILE_MODIFIER
+			..".ogg' or 'Interface/AddOns/AudioQs/Sounds/Numerical/DBM-Core/Corsica/2.ogg'"
 end
 
 -- Regrets about not using good functional abstractions are for later. Because Sanic /s (I'm reasonably dissappointed with the state of things)
@@ -364,25 +403,28 @@ table.insert(extSegments["UNIT_HEALTH"], {
 	})
 -- BattleGround --
 t_delims_funcs["%%17"] = cancel_prompt_if_muted; t_delims_parameters["%%17"] = {'focus', true};
-t_delims_funcs["%%18"] = cancel_prompt_if_muted; t_delims_parameters["%%18"] = {'focus', false};
+t_delims_funcs["%%18"] = battleground_or_generic_focus; t_delims_parameters["%%18"] = {true};
+t_delims_funcs["%%19"] = cancel_prompt_if_muted; t_delims_parameters["%%19"] = {'focus', false};
+t_delims_funcs["%%20"] = battleground_or_generic_focus; t_delims_parameters["%%20"] = {false};
+t_delims_funcs["%%21"] = battleground_or_generic_focus_file; t_delims_parameters["%%20"] = {}
 table.insert(extSegments["UNIT_HEALTH"], {
 		{
-			"local AUDIOQS = AUDIOQS_4Q5 %%17 if AUDIOQS.GS.HM_playersCalling['focus'] ~= true and AUDIOQS.HealthMonitor_ModeIs(AUDIOQS.GS.INSTANCE_BG) and AUDIOQS.GS.HM_healthSnapshot['focus'] < 1 then AUDIOQS.GS.HM_playersCalling['focus'] = true return true end", -- Evaluated and stored as an adjustedHp (Inside HealthMonitor_UpdateHealthSnapshot()), therefore, it is < 1.0 and > 1.0. If any changes are made to the requirements e.g. "I only want to monitor those below 80% hp", then the adjusted hp can be evaluated as ((curr))/0.8
-			"local AUDIOQS = AUDIOQS_4Q5 %%18 if AUDIOQS.GS.HM_playersCalling['focus'] ~= false and (not AUDIOQS.HealthMonitor_ModeIs(AUDIOQS.GS.INSTANCE_BG) or AUDIOQS.GS.HM_healthSnapshot['focus'] >= 1) then AUDIOQS.GS.HM_playersCalling['focus'] = false return true end"
+			"local AUDIOQS = AUDIOQS_4Q5 %%17 if AUDIOQS.GS.HM_playersCalling['focus'] ~= true and %%18 and AUDIOQS.GS.HM_healthSnapshot['focus'] < 1 then AUDIOQS.GS.HM_playersCalling['focus'] = true return true end", -- Evaluated and stored as an adjustedHp (Inside HealthMonitor_UpdateHealthSnapshot()), therefore, it is < 1.0 and > 1.0. If any changes are made to the requirements e.g. "I only want to monitor those below 80% hp", then the adjusted hp can be evaluated as ((curr))/0.8
+			"local AUDIOQS = AUDIOQS_4Q5 %%19 if AUDIOQS.GS.HM_playersCalling['focus'] ~= false and (%%20AUDIOQS.GS.HM_healthSnapshot['focus'] >= 1) then AUDIOQS.GS.HM_playersCalling['focus'] = false return true end"
 		},
 		{
 			function() return GameState.HM_delaySnapshot['focus'] end,
-			AUDIOQS.SOUND_FUNC_PREFIX.."return (AUDIOQS_4Q5.HealthMonitor_Dispellable('focus') and '"..AUDIOQS.SOUNDS_ROOT.."Numerical/2"..AUDIOQS.DISPEL_FILE_MODIFIER..".ogg' or 'Interface/AddOns/AudioQs/Sounds/Numerical/DBM-Core/Corsica/2.ogg')",
+			AUDIOQS.SOUND_FUNC_PREFIX.."local AUDIOQS = AUDIOQS_4Q5 %%21",
 			nil,
 			AUDIOQS.PROMPTSEG_CONDITIONAL_REPEATER
-		} 
+		}
 	})
-t_delims_funcs["%%19"] = cancel_prompt_if_muted; t_delims_parameters["%%19"] = {'target', true};
-t_delims_funcs["%%20"] = cancel_prompt_if_muted; t_delims_parameters["%%20"] = {'target', false};
+t_delims_funcs["%%22"] = cancel_prompt_if_muted; t_delims_parameters["%%22"] = {'target', true};
+t_delims_funcs["%%23"] = cancel_prompt_if_muted; t_delims_parameters["%%23"] = {'target', false};
 table.insert(extSegments["UNIT_HEALTH"], {
 		{
-			"local AUDIOQS = AUDIOQS_4Q5 %%19 if AUDIOQS.GS.HM_playersCalling['target'] ~= true and AUDIOQS.HealthMonitor_ModeIs(AUDIOQS.GS.INSTANCE_BG) and AUDIOQS.GS.HM_healthSnapshot['target'] < 1 then AUDIOQS.GS.HM_playersCalling['target'] = true return true end", -- Evaluated and stored as an adjustedHp (Inside HealthMonitor_UpdateHealthSnapshot()), therefore, it is < 1.0 and > 1.0. If any changes are made to the requirements e.g. "I only want to monitor those below 80% hp", then the adjusted hp can be evaluated as ((curr))/0.8
-			"local AUDIOQS = AUDIOQS_4Q5 %%20 if AUDIOQS.GS.HM_playersCalling['target'] ~= false and (not AUDIOQS.HealthMonitor_ModeIs(AUDIOQS.GS.INSTANCE_BG) or AUDIOQS.GS.HM_healthSnapshot['target'] >= 1) then AUDIOQS.GS.HM_playersCalling['target'] = false return true end"
+			"local AUDIOQS = AUDIOQS_4Q5 %%22 if AUDIOQS.GS.HM_playersCalling['target'] ~= true and AUDIOQS.HealthMonitor_ModeIs(AUDIOQS.GS.INSTANCE_BG) and AUDIOQS.GS.HM_healthSnapshot['target'] < 1 then AUDIOQS.GS.HM_playersCalling['target'] = true return true end", -- Evaluated and stored as an adjustedHp (Inside HealthMonitor_UpdateHealthSnapshot()), therefore, it is < 1.0 and > 1.0. If any changes are made to the requirements e.g. "I only want to monitor those below 80% hp", then the adjusted hp can be evaluated as ((curr))/0.8
+			"local AUDIOQS = AUDIOQS_4Q5 %%23 if AUDIOQS.GS.HM_playersCalling['target'] ~= false and (not AUDIOQS.HealthMonitor_ModeIs(AUDIOQS.GS.INSTANCE_BG) or AUDIOQS.GS.HM_healthSnapshot['target'] >= 1) then AUDIOQS.GS.HM_playersCalling['target'] = false return true end"
 		},
 		{
 			function() return GameState.HM_delaySnapshot['target'] end,
@@ -505,7 +547,7 @@ extSegments["PLAYER_DEAD"] = {
 	}
 if not AUDIOQS.WOW_CLASSIC then
 	AUDIOQS.AmmendTable(
-			extSegments, 
+			extSegments,
 			{
 				["PLAYER_SPECIALIZATION_CHANGED"] = {
 					{
@@ -522,9 +564,9 @@ end
 -- -- << Set those
 
 -- --- Set these >> (At will -- For detailed custom code)
-local function SetGenericHpVals(unitId)
+local function SetGenericHpVals(unitId, setToOff)
 	if unitId == nil then return end
-	if UnitExists(unitId) and --[[UnitIsPlayer(unitId) and]] not UnitIsDeadOrGhost(unitId) then
+	if UnitExists(unitId) and not setToOff and --[[UnitIsPlayer(unitId) and]] not UnitIsDeadOrGhost(unitId) then
 		local adjustedHp = ((UnitHealth(unitId)/UnitHealthMax(unitId))-0.1)/0.80
 		AUDIOQS.GS.HM_healthSnapshot[unitId] = adjustedHp
 		AUDIOQS.GS.HM_delaySnapshot[unitId] = (0.4 + 2.0*math.max(0, adjustedHp)^1.6)
@@ -611,13 +653,23 @@ function AUDIOQS.HealthMonitor_UpdateHealthSnapshot()
 				SetGenericHpVals(thisUnit)
 			end
 		end
-	elseif AUDIOQS.HealthMonitor_ModeIs(AUDIOQS.GS.INSTANCE_PARTY) or AUDIOQS.HealthMonitor_ModeIs(AUDIOQS.GS.INSTANCE_ARENA) then
-		for n=1,5,1 do -- TODO Iterate over partyUnitIds[n]
-			local thisUnit = AUDIOQS.GS.HM_unitIds[n]
-			SetGenericHpVals(thisUnit)
+	else
+		if AUDIOQS.HealthMonitor_ModeIs(AUDIOQS.GS.INSTANCE_PARTY)
+				or AUDIOQS.HealthMonitor_ModeIs(AUDIOQS.GS.INSTANCE_ARENA) then
+			for n=1,5,1 do -- TODO Iterate over partyUnitIds[n]
+				local thisUnit = AUDIOQS.GS.HM_unitIds[n]
+				SetGenericHpVals(thisUnit)
+			end
+		elseif AUDIOQS.HealthMonitor_ModeIs(AUDIOQS.GS.INSTANCE_RAID) then
+			AUDIOQS.HealthMonitor_CheckLowestForRaid()
 		end
-	elseif AUDIOQS.HealthMonitor_ModeIs(AUDIOQS.GS.INSTANCE_RAID) then
-		AUDIOQS.HealthMonitor_CheckLowestForRaid()
+		if CONFIG__track_focus then
+			if UnitIsUnit('focus', 'player') or UnitIsUnit('focus', 'party1') or UnitIsUnit('focus', 'party2') or UnitIsUnit('focus', 'party3') or UnitIsUnit('focus', 'party4') then
+				SetGenericHpVals('focus', true)
+			else
+				SetGenericHpVals('focus')
+			end
+		end
 	end
 end
 

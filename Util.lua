@@ -84,6 +84,12 @@ AUDIOQS.ERR_MSGS = {
 }
 AUDIOQS.extensionColour = "|cffFFA020"
 AUDIOQS.STOP_ERROR_MAX_REPORTS = AUDIOQS.audioQsSpecifier.." Max errors exceeded. Stopping error reports."
+AUDIOQS.CMD_USAGE = AUDIOQS.audioQsSpecifier.."Usage::\nLoad extension: \"/aq load [extension name]\"\n"..
+		"Unload extension: \"/aq unload [extension name]\"\n"..
+		"Mute: \"/aq [on||off]\"\n"..
+		"Change audio channel: \"/aq channel [master||sound||music||ambience||dialog||talkinghead]\"\n"..
+		"Default settings: \"/aq default\"\n"..
+		"-- Print extension usage with \"/aq [extension short name] help\""
 --
 ------ /Default msgs --
 
@@ -130,7 +136,8 @@ local AUDIOQS_SLASH_CMDS = {
 	----- INSTALL -----
 	["load"] = function(args)
 			if args[2] == nil then
-				print(AUDIOQS.audioQsSpecifier..AUDIOQS.infoSpecifier.."Please specify the extension you would like to load. '/aq load extension'")
+				print(AUDIOQS.audioQsSpecifier..AUDIOQS.infoSpecifier.."Please specify the extension you would like to load. '/aq load extension'.\nAvailable extensions are:")
+				print(AUDIOQS.GetAvailableExtensionsString())
 				return
 			end
 			local mySpecInfo = {AUDIOQS.GetSpecId()}
@@ -138,18 +145,8 @@ local AUDIOQS_SLASH_CMDS = {
 			local funcs = AUDIOQS.GetExtensionNameFuncs(args[2])
 			
 			if funcs == nil then
-				print(AUDIOQS.audioQsSpecifier..AUDIOQS.infoSpecifier.."\""..args[2].."\" is not a known extension.\nAvailable extensions are:\n")
-				local validExtNames = AUDIOQS.GetRegisteredExtensionNames()
-				local validExtNamesConcat = {"|cFFC8C8FF"}
-				local numExtensions = #validExtNames
-				local i = 2
-				for n=1,numExtensions-1 do
-					validExtNamesConcat[i] = validExtNames[n]
-					validExtNamesConcat[i+1] = "|r, |cFFC8C8FF"
-					i = i + 2
-				end
-				validExtNamesConcat[i] = validExtNames[numExtensions]
-				print(table.concat(validExtNamesConcat))
+				print(AUDIOQS.audioQsSpecifier..AUDIOQS.infoSpecifier.."\""..args[2].."\" is not a known extension.\nAvailable extensions are:")
+				print(AUDIOQS.GetAvailableExtensionsString())
 				return
 			elseif SV_Specializations ~= nil and SV_Specializations[mySpec] ~= nil and SV_Specializations[mySpec][funcs["GetName"]()] ~= nil then
 				print(AUDIOQS.audioQsSpecifier..AUDIOQS.infoSpecifier.."Extension \""..funcs["GetName"]().."\" is already installed.") -- TODO Placeholder, informative, but messy output.
@@ -179,7 +176,13 @@ local AUDIOQS_SLASH_CMDS = {
 			local extName = args[2]
 			local funcs = AUDIOQS.GetExtensionNameFuncs(extName)
 			if funcs == nil or SV_Specializations == nil or SV_Specializations[mySpec] == nil or SV_Specializations[mySpec][funcs["GetName"]()] == nil then
-				print(AUDIOQS.audioQsSpecifier..AUDIOQS.infoSpecifier.."Extension \""..extName.."\" is not loaded.\nLoaded extensions are:\n"..AUDIOQS.PrintableTable(SV_Specializations == nil and "nil" or SV_Specializations[mySpec]))
+				local loadedExtStrs = {}
+				local n=1
+				for key,_ in pairs(SV_Specializations[mySpec]) do
+					loadedExtStrs[n] = string.format("%s%s|r, ", AUDIOQS.extensionColour, key)
+					n = n + 1
+				end
+				print(AUDIOQS.audioQsSpecifier..AUDIOQS.infoSpecifier.."Extension \""..extName.."\" is not loaded.\nLoaded extensions are:\n"..(#loadedExtStrs == 0 and "No extensions loaded." or table.concat(loadedExtStrs)))
 				--AUDIOQS.GSI_RemoveExtension(mySpec, funcs["GetName"]())
 			else
 				if AUDIOQS.GSI_RemoveExtension(mySpec, funcs["GetName"]()) then
@@ -213,7 +216,7 @@ local AUDIOQS_SLASH_CMDS = {
 		end,
 	["channel"] = function(args)
 			if args[2] == nil then
-				print(AUDIOQS.audioQsSpecifier..AUDIOQS.infoSpecifier.."Please specify the channel for AudioQs to use. '/aq channel master|effects|ambience|music|dialog|talking head'")
+				print(AUDIOQS.audioQsSpecifier..AUDIOQS.infoSpecifier.."Please specify the channel for AudioQs to use. '/aq channel master||effects||ambience||music||dialog||talkinghead'")
 				return
 			end
 			AUDIOQS.ChangeAudioChannel(args[2])
@@ -222,6 +225,10 @@ local AUDIOQS_SLASH_CMDS = {
 			AUDIOQS.GSI_ResetAudioQs()
 			ReloadUI()
 			SV_Specializations["nextLoadMessage"] = AUDIOQS.audioQsSpecifier..AUDIOQS.infoSpecifier.."AudioQs set to default."
+			return
+		end,
+	["help"] = function(args)
+			print(AUDIOQS.CMD_USAGE)
 			return
 		end
 }
@@ -246,19 +253,24 @@ do -- Command Synonyms
 	----- RESET -----
 	AUDIOQS_SLASH_CMDS["default"] = AUDIOQS_SLASH_CMDS["reset"]
 	AUDIOQS_SLASH_CMDS["setdefault"] = AUDIOQS_SLASH_CMDS["reset"]
+	----- PRINT USAGE -----
+	AUDIOQS_SLASH_CMDS["-h"] = AUDIOQS_SLASH_CMDS["help"]
+	AUDIOQS_SLASH_CMDS["-help"] = AUDIOQS_SLASH_CMDS["help"]
+	AUDIOQS_SLASH_CMDS["?"] = AUDIOQS_SLASH_CMDS["help"]
+	AUDIOQS_SLASH_CMDS["/?"] = AUDIOQS_SLASH_CMDS["help"]
 end
 
 -- SLASH COMMANDS --
 SlashCmdList["AQ"] = function(msg)
 	local args = AUDIOQS.SplitString(msg, "%s")
-	if args ~= nil then 
+	if not AUDIOQS.TableEmpty(args) then 
  		local cmdFunc = AUDIOQS_SLASH_CMDS[string.lower(args[1])]
 		if cmdFunc then
 			cmdFunc(args)
+			return
 		end
-	else
-		print(AUDIOQS.audioQsSpecifier..AUDIOQS.infoSpecifier.."Invalid command.")
 	end
+	print(AUDIOQS.audioQsSpecifier..AUDIOQS.infoSpecifier.."Invalid command. Enter \"/aq help\" to print usage.")
 end
 
 function AUDIOQS.Util_SlashCmdExists(cmdString)

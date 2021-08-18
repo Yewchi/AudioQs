@@ -377,7 +377,11 @@ function AUDIOQS.GSI_LoadSpecTables(specId, funcsForLoading)
 	if SV_Specializations[specId] ~= nil and not AUDIOQS.TableEmpty(SV_Specializations[specId]) then -- switch spec, or first load of spec
 		if not AUDIOQS.TableEmpty(AUDIOQS.spells) then wipe(AUDIOQS.spells) end
 		if not AUDIOQS.TableEmpty(AUDIOQS.events) then wipe(AUDIOQS.events) end
-		if not AUDIOQS.TableEmpty(AUDIOQS.prompts) then AUDIOQS.NilSetTable(AUDIOQS.prompts) end
+		if not AUDIOQS.TableEmpty(AUDIOQS.prompts) then
+			-- Clear out the functions from the extensions for our new spec, restoring the original extension table data, our prompts table will be rebuilt; and prompt keys and prompt indices will likely change.
+			AUDIOQS.SEGLIB_ReloadExtDefaults(extRef, true)
+			AUDIOQS.NilSetTable(AUDIOQS.prompts)
+		end
 		
 		-- Load Extensions
 		for extName,_ in pairs(SV_Specializations[specId]) do 

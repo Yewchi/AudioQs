@@ -204,7 +204,6 @@ local function cancel_prompt_if_muted(isStartFunc)
 	return not isStartFunc and false or AUDIOQS.DELIM_NO_CONCAT -- Stop func has no stop cond when unmuted
 end
 
-local allowPrompts -- for simplicity within func strings
 t_delims_funcs["%%1"] = cancel_prompt_if_muted; t_delims_parameters["%%1"] = {true}
 t_delims_funcs["%%2"] = cancel_prompt_if_muted; t_delims_parameters["%%2"] = {false}
 extSegments = {
@@ -234,15 +233,6 @@ extSegments = {
 
 --- Funcs --
 --
-local function PetSegmentCalloutInfo(thresholdIndex)
-	local sameAsPrevious = (desiredSegmentCallout == previousSegmentCallout)
-	local promptAllowed = GetTime() > (AUDIOQS.GS.MANA_MONITOR_PREV_PROMPT_TIMESTAMP + (sameAsPrevious and AUDIOQS.GS.PET_MONITOR_MIN_DELAY or 0))
-	
-	previousThresholdIndex = thresholdIndex
-	
-	return promptAllowed
-end
-
 ------ Returns a flag if a prompt is intended.
 -------- AUDIOQS.PetMonitor_UpdateHealthSegment()
 function AUDIOQS.PetMonitor_UpdateHealthSegment(fromSegment)
