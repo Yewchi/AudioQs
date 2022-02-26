@@ -90,17 +90,17 @@ extSegments = {
 	["LOADING_SCREEN_DISABLED"] = { -- TODO Should be in an "essentials", hidden extension or in the AudioQs.lua main event handlers. Workaround for now.
 		{
 			{
-				"AUDIOQS.ChargeCooldownsAllowed = false return true",
+				function() AUDIOQS.ChargeCooldownsAllowed = false return true end,
 				false
 			},
 			{0.25, 	nil, nil, true},
-			{nil,	nil, nil, "AUDIOQS.ChargeCooldownsAllowed = true return true"}
+			{nil,	nil, nil, function() AUDIOQS.ChargeCooldownsAllowed = true return true end}
 		}
 	},
 	["LOADING_SCREEN_ENABLED"] = { -- TODO Likewise ^^
 		{
 			{
-				"AUDIOQS.ChargeCooldownsAllowed = false return false",
+				function() AUDIOQS.ChargeCooldownsAllowed = false return false end,
 				false
 			},
 			{}

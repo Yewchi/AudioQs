@@ -2,7 +2,7 @@
 ## Title: AudioQs
 ## Notes: Custom audio prompts and blind assist.
 ## Author: Yewchi
-## Version: 1.4b
+## Version: 1.4d
 ## SavedVariables: SV_Specializations
 AudioQs.lua
 Specialization.lua

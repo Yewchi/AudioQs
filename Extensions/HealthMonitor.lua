@@ -13,6 +13,7 @@ local AUDIOQS = AUDIOQS_4Q5
 local GameState = AUDIOQS.GS
 
 local extensionSpecifier = AUDIOQS.extensionColour.."<HealthMonitor>|r: "
+local CHECK_ROLE_ASSIGNMENT = AUDIOQS.BUILD_VERSION >= 30300
 
 AUDIOQS.DISPEL_FILE_MODIFIER = "_dispel"
 AUDIOQS.NO_FILE_MODIFIER = ""
@@ -72,6 +73,13 @@ local MUTE_CMD_TO_UID = {
 local CONFIG__track_focus = false
 	
 local current_muted_table = {}
+local current_muted_groups_table = {}
+local CHECK_GROUP_MUTES = false
+
+appp = current_muted_table
+
+local MIN_GROUP_INDEX = 1
+local MAX_GROUP_INDEX = 8
 
 local extSpells, extEvents, extSegments
 
@@ -115,18 +123,40 @@ local extFuncs = { -- For external use
 							if not args[2] or args[2] == "-h" or string.match(args[2], ".*help.*") then
 								-- Print -h
 								print(AUDIOQS.audioQsSpecifier..extensionSpecifier.."What would you like to change with Health Monitor?\n"..
-										"Number: \"/aq hm mute 5\" -- mute 'party4'. '1' is the player.\n"..
-										"Modify: \"/aq hm mute dps\" \"/aq hm unmute tank\"\n"..
-										"Exclusive: \"/aq hm self\" \"/aq hm all\"\n"..
+										"Mute party#: \"/aq hm mute 5\" -- mute 'party4'. '1' is the player.\n"..
+										"Mute type: \"/aq hm mute dps\" \"/aq hm unmute tank\"\n"..
+										"Mute raid group: \"/aq hm mute group1\" \"/aq hm unmute g1\"\n"..
+										"Exclusive: \"/aq hm self\" -- or unmute all: \"/aq hm all\"\n"..
 										"Track Focus: \"/aq hm focus on\" \"/aq hm focus off\"")
 								return
 							elseif args[2] == "off" or args[2] == "mute" then
 								local muteRoleString = MUTE_CMD_TO_ROLE[args[3]] or MUTE_CMD_TO_UID[args[3]]
 								if args[3] == "all" then
+									-- This is problematic, a "hm off / hm on" is probably needed instead, with "mute all party" "mute raid" "mute party" "mute raidgroups" "mute roles"
+									-- (this is so that a user can quickly, say, mute all raidgroups then unmute group1; or turn alerts off with hm off then hm on regaining their config)
+									-- The logical problem, as in logic -- not programmatically, is becoming vast.
+									-- e.g. raid callouts will still occur as is, after muting all.
+									-- N.B. if undertaking this: the only prompt that doesn't need a valid mode is 'focus' callout. xxxModexxx(mode) if ALL_OFF then return false end ... end
+									-- Scope == Demand, so I won't be doing this unless specifically requested.
 									for _,muteString in pairs(MUTE_CMD_TO_UID) do
 										current_muted_table[muteString] = true
 									end
+									for iGroup=MIN_GROUP_INDEX,MAX_GROUP_INDEX do
+										current_muted_groups_table[iGroup] = true
+									end
+									CHECK_GROUP_MUTES = true
 									print(AUDIOQS.audioQsSpecifier..extensionSpecifier.."All call-outs off.")
+								elseif args[3]:find("^g") then
+									local group = args[3]:match("^g(%d)$") or args[3]:match("group(%d)$")
+									group = group and tonumber(group)
+									if group and group >= MIN_GROUP_INDEX and group <= MAX_GROUP_INDEX then
+										current_muted_groups_table[group] = true
+										CHECK_GROUP_MUTES = true
+										print(AUDIOQS.audioQsSpecifier..extensionSpecifier.."Muting "..args[3].." for raids.")
+									else
+										print(AUDIOQS.audioQsSpecifier..extensionSpecifier.."Group name must be as 'g1', 'g2', etc.")
+										return
+									end
 								else
 									if muteRoleString then
 										current_muted_table[muteRoleString] = true
@@ -141,7 +171,36 @@ local extFuncs = { -- For external use
 									for _,unmuteString in pairs(MUTE_CMD_TO_UID) do
 										current_muted_table[unmuteString] = nil
 									end
+									for _,unmuteString in pairs(MUTE_CMD_TO_ROLE) do
+										current_muted_table[unmuteString] = nil
+									end
+									for iGroup=MIN_GROUP_INDEX,MAX_GROUP_INDEX do
+										current_muted_groups_table[iGroup] = nil
+									end
+									CHECK_GROUP_MUTES = false
 									print(AUDIOQS.audioQsSpecifier..extensionSpecifier.."All call-outs on.")
+								elseif args[3]:find("^g") then
+									local group = args[3]:match("^g(%d)$") or args[3]:match("group(%d)$")
+									group = group and tonumber(group)
+									if group and group >= MIN_GROUP_INDEX and group <= MAX_GROUP_INDEX then
+										current_muted_groups_table[group] = false
+										print(AUDIOQS.audioQsSpecifier..extensionSpecifier.."Unmuting "..args[3].." for raids.")
+										local iGroup = MIN_GROUP_INDEX
+										while(true) do
+											if current_muted_groups_table[iGroup] then
+												CHECK_GROUP_MUTES = true
+											end
+											if iGroup < MAX_GROUP_INDEX then
+												iGroup = iGroup + 1
+											else
+												CHECK_GROUP_MUTES = false
+												break
+											end
+										end
+									else
+										print(AUDIOQS.audioQsSpecifier..extensionSpecifier.."Group name must be as 'group1', 'group2', etc.")
+										return
+									end
 								else
 									local unmuteRoleString = MUTE_CMD_TO_ROLE[args[3]] or MUTE_CMD_TO_UID[args[3]]
 									if unmuteRoleString then
@@ -211,9 +270,8 @@ if AUDIOQS.WOW_SPECS_IMPLEMENTED then
 		)
 end
 
-local function is_player_role_muted(unitId)
-	--access pre-determined role array from background process and return (tanks taunt more often, take more melee hits, are warriors, druids or paladins. warlocks, mages, hunters are dps. healers have high HPS, are the source of hots, cast high-mana heals (can we get get a read on details or recount? (in principle by-value-only, never-by-ref. I wouldn't allow myself even a local-global. not because I think I would mess anything up, but because it is very well-banned behaviour, similar to Lua disallowing c-like data manipulation)))
-	return false
+function AUDIOQS.HealthMonitor_IsPlayerRoleMuted(unitId)
+	return current_muted_table[UnitGroupRolesAssigned(unitId)]
 end
 
 local function any_roles_muted()
@@ -227,8 +285,13 @@ local function cancel_prompt_if_muted(delimParameters)
 		GameState.HM_playersCalling[unitId] = true -- hacky way to force stop checks after mute
 		return not startPrompt
 	end
-	if any_roles_muted() then
-		return "if is_player_role_muted('"..unitId.."') then return false end"
+	if CHECK_ROLE_ASSIGNMENT and any_roles_muted() then
+		local unitIdType = type(unitId)
+		if unitIdType == "string" then
+			return "if AUDIOQS.HealthMonitor_IsPlayerRoleMuted('"..unitId.."') then return false end"
+		elseif unitIdType == "number" then
+			return "local raidIndex = AUDIOQS_4Q5.GS.HM_alertPriority["..unitId.."][1] if raidIndex and AUDIOQS.HealthMonitor_IsPlayerRoleMuted('raid'..raidIndex) then return not "..tostring(startPrompt).." end"
+		end
 	end
 	return AUDIOQS.DELIM_NO_CONCAT
 end
@@ -275,7 +338,7 @@ t_delims_funcs["%%2"] = cancel_prompt_if_muted; t_delims_parameters["%%2"] = {"p
 table.insert(extSegments["UNIT_HEALTH"], {
 		{
 			"local AUDIOQS = AUDIOQS_4Q5 %%1 if (AUDIOQS.GS.HM_playersCalling['player'] ~= true and AUDIOQS.HealthMonitor_AnyModesTrue(AUDIOQS.GS.INSTANCE_PARTY, AUDIOQS.GS.INSTANCE_PVP, AUDIOQS.GS.INSTANCE_SCENARIO) and AUDIOQS.GS.HM_healthSnapshot['player'] < 1) then AUDIOQS.GS.HM_playersCalling['player'] = true return true end", -- Evaluated and stored as an adjustedHp (Inside HealthMonitor_UpdateHealthSnapshot()), therefore, it is < 1.0 and > 1.0. If any changes are made to the requirements e.g. "I only want to monitor those below 80% hp", then the adjusted hp can be evaluated as ((curr))/0.8
-			"local AUDIOQS = AUDIOQS_4Q5 %%2 if AUDIOQS.GS.HM_playersCalling['player'] ~= false and (not AUDIOQS.HealthMonitor_AnyModesTrue(AUDIOQS.GS.INSTANCE_PARTY, AUDIOQS.GS.INSTANCE_PVP, AUDIOQS.GS.INSTANCE_SCENARIO) or AUDIOQS.GS.HM_healthSnapshot['player'] >= 1) then AUDIOQS.GS.HM_playersCalling['player'] = false return true end"
+			"local AUDIOQS = AUDIOQS_4Q5 %%2 if not AUDIOQS.GS.HM_playersCalling['player'] or not AUDIOQS.HealthMonitor_AnyModesTrue(AUDIOQS.GS.INSTANCE_PARTY, AUDIOQS.GS.INSTANCE_PVP, AUDIOQS.GS.INSTANCE_SCENARIO) or AUDIOQS.GS.HM_healthSnapshot['player'] >= 1 then AUDIOQS.GS.HM_playersCalling['player'] = false return true end"
 		},
 		{
 			function() return GameState.HM_delaySnapshot['player'] end,
@@ -289,7 +352,7 @@ t_delims_funcs["%%4"] = cancel_prompt_if_muted; t_delims_parameters["%%4"] = {"p
 table.insert(extSegments["UNIT_HEALTH"], {
 		{
 			"local AUDIOQS = AUDIOQS_4Q5 %%3 if AUDIOQS.GS.HM_playersCalling['party1'] ~= true and AUDIOQS.HealthMonitor_AnyModesTrue(AUDIOQS.GS.INSTANCE_PARTY, AUDIOQS.GS.INSTANCE_ARENA, AUDIOQS.GS.INSTANCE_SCENARIO) and AUDIOQS.GS.HM_healthSnapshot['party1'] < 1 then AUDIOQS.GS.HM_playersCalling['party1'] = true return true end",
-			"local AUDIOQS = AUDIOQS_4Q5 %%4 if AUDIOQS.GS.HM_playersCalling['party1'] ~= false and (not AUDIOQS.HealthMonitor_AnyModesTrue(AUDIOQS.GS.INSTANCE_PARTY, AUDIOQS.GS.INSTANCE_ARENA, AUDIOQS.GS.INSTANCE_SCENARIO) or AUDIOQS.GS.HM_healthSnapshot['party1'] >= 1) then AUDIOQS.GS.HM_playersCalling['party1'] = false return true end"
+			"local AUDIOQS = AUDIOQS_4Q5 %%4 if not AUDIOQS.GS.HM_playersCalling['party1'] or (not AUDIOQS.HealthMonitor_AnyModesTrue(AUDIOQS.GS.INSTANCE_PARTY, AUDIOQS.GS.INSTANCE_ARENA, AUDIOQS.GS.INSTANCE_SCENARIO) or AUDIOQS.GS.HM_healthSnapshot['party1'] >= 1) then AUDIOQS.GS.HM_playersCalling['party1'] = false return true end"
 		},
 		{
 			function() return GameState.HM_delaySnapshot['party1'] end,
@@ -303,7 +366,7 @@ t_delims_funcs["%%6"] = cancel_prompt_if_muted; t_delims_parameters["%%6"] = {"p
 table.insert(extSegments["UNIT_HEALTH"], {
 		{
 			"local AUDIOQS = AUDIOQS_4Q5 %%5 if AUDIOQS.GS.HM_playersCalling['party2'] ~= true and AUDIOQS.HealthMonitor_AnyModesTrue(AUDIOQS.GS.INSTANCE_PARTY, AUDIOQS.GS.INSTANCE_ARENA, AUDIOQS.GS.INSTANCE_SCENARIO) and AUDIOQS.GS.HM_healthSnapshot['party2'] < 1 then AUDIOQS.GS.HM_playersCalling['party2'] = true return true end",
-			"local AUDIOQS = AUDIOQS_4Q5 %%6 if AUDIOQS.GS.HM_playersCalling['party2'] ~= false and (not AUDIOQS.HealthMonitor_AnyModesTrue(AUDIOQS.GS.INSTANCE_PARTY, AUDIOQS.GS.INSTANCE_ARENA, AUDIOQS.GS.INSTANCE_SCENARIO) or AUDIOQS.GS.HM_healthSnapshot['party2'] >= 1) then AUDIOQS.GS.HM_playersCalling['party2'] = false return true end"
+			"local AUDIOQS = AUDIOQS_4Q5 %%6 if not AUDIOQS.GS.HM_playersCalling['party2'] or (not AUDIOQS.HealthMonitor_AnyModesTrue(AUDIOQS.GS.INSTANCE_PARTY, AUDIOQS.GS.INSTANCE_ARENA, AUDIOQS.GS.INSTANCE_SCENARIO) or AUDIOQS.GS.HM_healthSnapshot['party2'] >= 1) then AUDIOQS.GS.HM_playersCalling['party2'] = false return true end"
 		},
 		{
 			function() return AUDIOQS.GS.HM_delaySnapshot['party2'] end,
@@ -317,7 +380,7 @@ t_delims_funcs["%%8"] = cancel_prompt_if_muted; t_delims_parameters["%%8"] = {"p
 table.insert(extSegments["UNIT_HEALTH"], {
 		{
 			"local AUDIOQS = AUDIOQS_4Q5 %%7 if AUDIOQS.GS.HM_playersCalling['party3'] ~= true and AUDIOQS.HealthMonitor_AnyModesTrue(AUDIOQS.GS.INSTANCE_PARTY, AUDIOQS.GS.INSTANCE_ARENA, AUDIOQS.GS.INSTANCE_SCENARIO) and AUDIOQS.GS.HM_healthSnapshot['party3'] < 1 then AUDIOQS.GS.HM_playersCalling['party3'] = true return true end",
-			"local AUDIOQS = AUDIOQS_4Q5 %%8 if AUDIOQS.GS.HM_playersCalling['party3'] ~= false and (not AUDIOQS.HealthMonitor_AnyModesTrue(AUDIOQS.GS.INSTANCE_PARTY, AUDIOQS.GS.INSTANCE_ARENA, AUDIOQS.GS.INSTANCE_SCENARIO) or AUDIOQS.GS.HM_healthSnapshot['party3'] >= 1) then AUDIOQS.GS.HM_playersCalling['party3'] = false return true end"
+			"local AUDIOQS = AUDIOQS_4Q5 %%8 if not AUDIOQS.GS.HM_playersCalling['party3'] or (not AUDIOQS.HealthMonitor_AnyModesTrue(AUDIOQS.GS.INSTANCE_PARTY, AUDIOQS.GS.INSTANCE_ARENA, AUDIOQS.GS.INSTANCE_SCENARIO) or AUDIOQS.GS.HM_healthSnapshot['party3'] >= 1) then AUDIOQS.GS.HM_playersCalling['party3'] = false return true end"
 		},
 		{
 			function() return AUDIOQS.GS.HM_delaySnapshot['party3'] end,
@@ -331,7 +394,7 @@ t_delims_funcs["%%10"] = cancel_prompt_if_muted; t_delims_parameters["%%10"] = {
 table.insert(extSegments["UNIT_HEALTH"], {
 		{
 			"local AUDIOQS = AUDIOQS_4Q5 %%9 if AUDIOQS.GS.HM_playersCalling['party4'] ~= true and AUDIOQS.HealthMonitor_AnyModesTrue(AUDIOQS.GS.INSTANCE_PARTY, AUDIOQS.GS.INSTANCE_ARENA, AUDIOQS.GS.INSTANCE_SCENARIO) and AUDIOQS.GS.HM_healthSnapshot['party4'] < 1 then AUDIOQS.GS.HM_playersCalling['party4'] = true return true end",
-			"local AUDIOQS = AUDIOQS_4Q5 %%10 if AUDIOQS.GS.HM_playersCalling['party4'] ~= false and (not AUDIOQS.HealthMonitor_AnyModesTrue(AUDIOQS.GS.INSTANCE_PARTY, AUDIOQS.GS.INSTANCE_ARENA, AUDIOQS.GS.INSTANCE_SCENARIO) or AUDIOQS.GS.HM_healthSnapshot['party4'] >= 1) then AUDIOQS.GS.HM_playersCalling['party4'] = false return true end"
+			"local AUDIOQS = AUDIOQS_4Q5 %%10 if not AUDIOQS.GS.HM_playersCalling['party4'] or (not AUDIOQS.HealthMonitor_AnyModesTrue(AUDIOQS.GS.INSTANCE_PARTY, AUDIOQS.GS.INSTANCE_ARENA, AUDIOQS.GS.INSTANCE_SCENARIO) or AUDIOQS.GS.HM_healthSnapshot['party4'] >= 1) then AUDIOQS.GS.HM_playersCalling['party4'] = false return true end"
 		},
 		{
 			function() return AUDIOQS.GS.HM_delaySnapshot['party4'] end,
@@ -346,7 +409,7 @@ t_delims_funcs["%%12"] = cancel_prompt_if_muted; t_delims_parameters["%%12"] = {
 table.insert(extSegments["UNIT_HEALTH"], {
 		{
 			"local AUDIOQS = AUDIOQS_4Q5 %%11 if AUDIOQS.GS.HM_raidSegsStarted1 ~= true and AUDIOQS.HealthMonitor_ModeIs(AUDIOQS.GS.INSTANCE_RAID) then AUDIOQS.GS.HM_raidSegsStarted1 = true return true end",
-			"local AUDIOQS = AUDIOQS_4Q5 %%12 if AUDIOQS.GS.HM_raidSegsStarted1 == true and not AUDIOQS.HealthMonitor_ModeIs(AUDIOQS.GS.INSTANCE_RAID) then AUDIOQS.GS.HM_raidSegsStarted1 = false return true end"
+			"local AUDIOQS = AUDIOQS_4Q5 %%12 if not AUDIOQS.GS.HM_raidSegsStarted1 or not AUDIOQS.HealthMonitor_ModeIs(AUDIOQS.GS.INSTANCE_RAID) then AUDIOQS.GS.HM_raidSegsStarted1 = false return true end"
 		},
 		{
 			function() if AUDIOQS.GS.HM_alertPriority[1][1] ~= nil and AUDIOQS.GS.HM_settingAlertsPriorityFlag ~= nil then return AUDIOQS.GS.HM_alertPriority[1][3] else return 0xFFFF end end, -- Return delay answer, or 18 hours.
@@ -361,12 +424,12 @@ table.insert(extSegments["UNIT_HEALTH"], {
 			AUDIOQS.PROMPTSEG_CONDITIONAL_RESTART
 		}
 	})
-t_delims_funcs["%%13"] = cancel_prompt_if_muted; t_delims_parameters["%%13"] = {1, true}; -- Input roles if present
-t_delims_funcs["%%14"] = cancel_prompt_if_muted; t_delims_parameters["%%14"] = {1, false};
+t_delims_funcs["%%13"] = cancel_prompt_if_muted; t_delims_parameters["%%13"] = {2, true}; -- Input roles if present
+t_delims_funcs["%%14"] = cancel_prompt_if_muted; t_delims_parameters["%%14"] = {2, false};
 table.insert(extSegments["UNIT_HEALTH"], {
 		{
 			"local AUDIOQS = AUDIOQS_4Q5 %%13 if AUDIOQS.GS.HM_raidSegsStarted2 ~= true and AUDIOQS.HealthMonitor_ModeIs(AUDIOQS.GS.INSTANCE_RAID) then AUDIOQS.GS.HM_raidSegsStarted2 = true return true end",
-			"local AUDIOQS = AUDIOQS_4Q5 %%14 if AUDIOQS.GS.HM_raidSegsStarted2 == true and not AUDIOQS.HealthMonitor_ModeIs(AUDIOQS.GS.INSTANCE_RAID) then AUDIOQS.GS.HM_raidSegsStarted2 = false return true end"
+			"local AUDIOQS = AUDIOQS_4Q5 %%14 if not AUDIOQS.GS.HM_raidSegsStarted2 or not AUDIOQS.HealthMonitor_ModeIs(AUDIOQS.GS.INSTANCE_RAID) then AUDIOQS.GS.HM_raidSegsStarted2 = false return true end"
 		},
 		{
 			function() if GameState.HM_alertPriority[2][1] ~= nil and GameState.HM_settingAlertsPriorityFlag ~= nil then return GameState.HM_alertPriority[2][3] else return 0xFFFF end end, -- Return delay answer, or 18 hours.
@@ -381,12 +444,12 @@ table.insert(extSegments["UNIT_HEALTH"], {
 			AUDIOQS.PROMPTSEG_CONDITIONAL_RESTART
 		}
 	})
-t_delims_funcs["%%15"] = cancel_prompt_if_muted; t_delims_parameters["%%15"] = {1, true}; -- Input roles if present
-t_delims_funcs["%%16"] = cancel_prompt_if_muted; t_delims_parameters["%%16"] = {1, false};
+t_delims_funcs["%%15"] = cancel_prompt_if_muted; t_delims_parameters["%%15"] = {3, true}; -- Input roles if present
+t_delims_funcs["%%16"] = cancel_prompt_if_muted; t_delims_parameters["%%16"] = {3, false};
 table.insert(extSegments["UNIT_HEALTH"], {
 		{
 			"local AUDIOQS = AUDIOQS_4Q5 %%15 if AUDIOQS.GS.HM_raidSegsStarted3 ~= true and AUDIOQS.HealthMonitor_ModeIs(AUDIOQS.GS.INSTANCE_RAID) then AUDIOQS.GS.HM_raidSegsStarted3 = true return true end",
-			"local AUDIOQS = AUDIOQS_4Q5 %%16 if AUDIOQS.GS.HM_raidSegsStarted3 == true and not AUDIOQS.HealthMonitor_ModeIs(AUDIOQS.GS.INSTANCE_RAID) then AUDIOQS.GS.HM_raidSegsStarted3 = false return true end"
+			"local AUDIOQS = AUDIOQS_4Q5 %%16 if not AUDIOQS.GS.HM_raidSegsStarted3 or not AUDIOQS.HealthMonitor_ModeIs(AUDIOQS.GS.INSTANCE_RAID) then AUDIOQS.GS.HM_raidSegsStarted3 = false return true end"
 		},
 		{
 			function() if GameState.HM_alertPriority[3][1] ~= nil and GameState.HM_settingAlertsPriorityFlag ~= nil then return GameState.HM_alertPriority[3][3] else return 0xFFFF end end, -- Return delay answer, or 18 hours.
@@ -410,7 +473,7 @@ t_delims_funcs["%%21"] = battleground_or_generic_focus_file; t_delims_parameters
 table.insert(extSegments["UNIT_HEALTH"], {
 		{
 			"local AUDIOQS = AUDIOQS_4Q5 %%17 if AUDIOQS.GS.HM_playersCalling['focus'] ~= true and %%18 and AUDIOQS.GS.HM_healthSnapshot['focus'] < 1 then AUDIOQS.GS.HM_playersCalling['focus'] = true return true end", -- Evaluated and stored as an adjustedHp (Inside HealthMonitor_UpdateHealthSnapshot()), therefore, it is < 1.0 and > 1.0. If any changes are made to the requirements e.g. "I only want to monitor those below 80% hp", then the adjusted hp can be evaluated as ((curr))/0.8
-			"local AUDIOQS = AUDIOQS_4Q5 %%19 if AUDIOQS.GS.HM_playersCalling['focus'] ~= false and (%%20AUDIOQS.GS.HM_healthSnapshot['focus'] >= 1) then AUDIOQS.GS.HM_playersCalling['focus'] = false return true end"
+			"local AUDIOQS = AUDIOQS_4Q5 %%19 if not AUDIOQS.GS.HM_playersCalling['focus'] or %%20AUDIOQS.GS.HM_healthSnapshot['focus'] >= 1 then AUDIOQS.GS.HM_playersCalling['focus'] = false return true end"
 		},
 		{
 			function() return GameState.HM_delaySnapshot['focus'] end,
@@ -424,7 +487,7 @@ t_delims_funcs["%%23"] = cancel_prompt_if_muted; t_delims_parameters["%%23"] = {
 table.insert(extSegments["UNIT_HEALTH"], {
 		{
 			"local AUDIOQS = AUDIOQS_4Q5 %%22 if AUDIOQS.GS.HM_playersCalling['target'] ~= true and AUDIOQS.HealthMonitor_ModeIs(AUDIOQS.GS.INSTANCE_BG) and AUDIOQS.GS.HM_healthSnapshot['target'] < 1 then AUDIOQS.GS.HM_playersCalling['target'] = true return true end", -- Evaluated and stored as an adjustedHp (Inside HealthMonitor_UpdateHealthSnapshot()), therefore, it is < 1.0 and > 1.0. If any changes are made to the requirements e.g. "I only want to monitor those below 80% hp", then the adjusted hp can be evaluated as ((curr))/0.8
-			"local AUDIOQS = AUDIOQS_4Q5 %%23 if AUDIOQS.GS.HM_playersCalling['target'] ~= false and (not AUDIOQS.HealthMonitor_ModeIs(AUDIOQS.GS.INSTANCE_BG) or AUDIOQS.GS.HM_healthSnapshot['target'] >= 1) then AUDIOQS.GS.HM_playersCalling['target'] = false return true end"
+			"local AUDIOQS = AUDIOQS_4Q5 %%23 if not AUDIOQS.GS.HM_playersCalling['target'] or not AUDIOQS.HealthMonitor_ModeIs(AUDIOQS.GS.INSTANCE_BG or AUDIOQS.GS.HM_healthSnapshot['target'] >= 1 then AUDIOQS.GS.HM_playersCalling['target'] = false return true end"
 		},
 		{
 			function() return GameState.HM_delaySnapshot['target'] end,
@@ -790,22 +853,33 @@ function AUDIOQS.HealthMonitor_CheckMode(event)
     end
 end
 
+local GetRaidRosterInfo = GetRaidRosterInfo
+local function raid_index_group_muted(raidIndex)
+	local _, _, group = GetRaidRosterInfo(raidIndex)
+	return current_muted_groups_table[group]
+end
+
 function AUDIOQS.HealthMonitor_CheckLowestForRaid() -- Raid mode
 	AUDIOQS.GS.HM_settingAlertsPriorityFlag = true
+	local alertPriorityTable = AUDIOQS.GS.HM_alertPriority
+	
 	for n=1,AUDIOQS.GS.HM_ALERT_MAX_ALERTS,1 do -- TODO Read Lua scope / Garbage collection tute. May not need this.
-		local thisAlertPriority = AUDIOQS.GS.HM_alertPriority[n]
+		local thisAlertPriority = alertPriorityTable[n]
 		thisAlertPriority[1] = nil
 		thisAlertPriority[2] = 100
 		thisAlertPriority[3] = 0xFFFF
 		thisAlertPriority[4] = AUDIOQS.NO_FILE_MODIFIER
 	end
 	
+	local doNotCheckGroups = not CHECK_GROUP_MUTES
+	
 	for i = 1, 40, 1 do
 		local unitId = AUDIOQS.GS.HM_unitIds[i]
 		
 		if not UnitIsDeadOrGhost(unitId) and 
 				AUDIOQS.GS.HM_raidUnitsIncluded[i] and
-				UnitExists(unitId) then
+				UnitExists(unitId)
+				and (doNotCheckGroups or not raid_index_group_muted(i)) then
 			local unitIncHeals = math.max(0, UnitGetIncomingHeals(unitId))
 			local unitHpPercentage = 
 			(UnitHealth(unitId) + unitIncHeals) / UnitHealthMax(unitId)
@@ -818,32 +892,33 @@ function AUDIOQS.HealthMonitor_CheckLowestForRaid() -- Raid mode
 				local prevDelay = nil
 				local adjustedHp = unitHpPercentage
 				
-				if unitId == "player" or UnitGroupRolesAssigned(unitId) == "TANK" then
+				-- dev note: CHECK_ROLE_ASSIGNMENT was an incorrect 'less-than' build vers 30300, the patch of the addition of *shudders* LFG
+				if unitId == "player" or CHECK_ROLE_ASSIGNMENT and UnitGroupRolesAssigned(unitId) == "TANK" then
 					adjustedHp = math.max(0, 0.5*math.log(0.3*adjustedHp) + 1.4)
 				end
 				
-				while n <= AUDIOQS.GS.HM_ALERT_MAX_ALERTS do
+				while n <= AUDIOQS.GS.HM_ALERT_MAX_ALERTS do -- i.e. typically (n=1;n<=3;n++)
+					local thisUnitAlertPriorityTable = alertPriorityTable[n]
 					if inserted == true then
-						local nextNum = AUDIOQS.GS.HM_alertPriority[n][1]
-						local nextHp = AUDIOQS.GS.HM_alertPriority[n][2]
-						local nextDelay = AUDIOQS.GS.HM_alertPriority[n][3]
+						local nextNum = thisUnitAlertPriorityTable[1]
+						local nextHp = thisUnitAlertPriorityTable[2]
+						local nextDelay = thisUnitAlertPriorityTable[3]
 						
-						AUDIOQS.GS.HM_alertPriority[n][1] = prevNum
-						AUDIOQS.GS.HM_alertPriority[n][2] = prevHp
-						AUDIOQS.GS.HM_alertPriority[n][3] = prevDelay
+						thisUnitAlertPriorityTable[1] = prevNum
+						thisUnitAlertPriorityTable[2] = prevHp
+						thisUnitAlertPriorityTable[3] = prevDelay
 						
 						prevNum = nextNum
 						prevHp = nextHp
 						prevDelay = nextDelay
-					elseif adjustedHp < 
-					AUDIOQS.GS.HM_alertPriority[n][2] then
-						prevNum = AUDIOQS.GS.HM_alertPriority[n][1]
-						prevHp = AUDIOQS.GS.HM_alertPriority[n][2]
-						prevDelay = AUDIOQS.GS.HM_alertPriority[n][3]
+					elseif adjustedHp < thisUnitAlertPriorityTable[2] then
+						prevNum = thisUnitAlertPriorityTable[1]
+						prevHp = thisUnitAlertPriorityTable[2]
+						prevDelay = thisUnitAlertPriorityTable[3]
 
-						AUDIOQS.GS.HM_alertPriority[n][1] = i
-						AUDIOQS.GS.HM_alertPriority[n][2] = adjustedHp
-						AUDIOQS.GS.HM_alertPriority[n][3] = 3.0 / (1 + math.exp(-4*(math.pow(adjustedHp, 2)-0.4)))
+						thisUnitAlertPriorityTable[1] = i
+						thisUnitAlertPriorityTable[2] = adjustedHp
+						thisUnitAlertPriorityTable[3] = 3.0 / (1 + math.exp(-4*(math.pow(adjustedHp, 2)-0.4)))
 						
 						inserted = true
 					end
