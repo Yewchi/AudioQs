@@ -87,6 +87,7 @@ local function save_threshold_settings(thresholdsTbl)
 			previousNum = thresholdsTbl[i]
 			table.remove(thresholdsTbl, i)
 		else
+			previousNum = thresholdsTbl[i]
 			i=i+1
 		end
 	end

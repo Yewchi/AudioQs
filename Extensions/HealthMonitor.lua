@@ -91,6 +91,8 @@ local t_delims_parameters = t_delims_info[AUDIOQS.DELIM_I_PARAMS]
 
 local ext_ref_num
 
+local Frame_NoUHCheck -- Used to make a regular check that there hasn't been a missing UNIT_HEALTH update (due to probably replenishment?)
+
 local extFuncs = { -- For external use
 		["GetName"] = function() return extName end,
 		["GetNameDetailed"] = function() return extNameDetailed end,
@@ -106,7 +108,7 @@ local extFuncs = { -- For external use
 		["SpecAllowed"] = function(specId) 
 				if extSpecLimit == AUDIOQS.ANY_SPEC_ALLOWED or extSpecLimit == specId then
 					return true
-				end 
+				end
 			end,
 		["GetDelimInfo"] = function() return t_delims_info end,
 		["Initialize"] = function()
@@ -114,6 +116,17 @@ local extFuncs = { -- For external use
 				
 				AUDIOQS.GS.HM_initialized = false
 				AUDIOQS.HealthMonitor_CheckMode("INIT")
+				Frame_NoUHCheck = CreateFrame("FRAME", "AQ:HM_NO_UH_CHECK")
+				Frame_NoUHCheck.limiter = 0.5
+				Frame_NoUHCheck:SetScript("OnUpdate", function(_, elapsed)
+						Frame_NoUHCheck.limiter = Frame_NoUHCheck.limiter - elapsed
+						if Frame_NoUHCheck.limiter <= 0 then
+							Frame_NoUHCheck.limiter = IsInRaid() and 0.3 or 0.125
+							AUDIOQS.HealthMonitor_UpdateHealthSnapshot()
+						end
+					end
+				)
+				-- config
 				if not AUDIOQS.Util_SlashCmdExists("hm") then
 					AUDIOQS.Util_RegisterSlashCmd("hm", function(args)
 							for i=1,#args do

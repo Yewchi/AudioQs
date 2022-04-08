@@ -1,5 +1,5 @@
 -- All code written and maintained by Yewchi 
--- Thanks to Slyckety and others for helping with test. Couldn't do this without the help!
+-- Thanks to Slyckety and many others for helping with test. Couldn't do this without the help!
 -- zyewchi@gmail.com
 
 -- Dev note: I gelled out a much better naming convention in many hours coding Dota scripts, AudioQs is not refactored, but is moving that way. Should be: local_file_var, LOCAL_CONSTANT, LIB_GLOBAL_CONSTANT, LIB/TYPE_I_CONSTANT_INDEX, codeBlockScopeVar, t_local_file_tbl, local_file_do_stuff(), LIB_GlobalDoStuff()
